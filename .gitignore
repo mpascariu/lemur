@@ -37,3 +37,6 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Excel Data
+data-raw/WPP2019LT/*.xlsx

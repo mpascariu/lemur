@@ -2,8 +2,8 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^sources$
-dev_history.R
 ^dev$
+dev_history.R
 $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
