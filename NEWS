@@ -1,3 +1,9 @@
+version 0.0.3
+- Add GBD data;
+
+version 0.0.2
+- Add WPP data;
+
 version 0.0.1
 - Start with a {golem} skeleton;
 - Added a `NEWS` file to track changes to the package.

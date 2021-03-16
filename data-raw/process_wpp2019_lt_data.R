@@ -1,7 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
 # License: GNU General Public License v3.0
-# Last update: Sun Mar 14 19:15:54 2021
+# Last update: Tue Mar 16 23:15:51 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -73,6 +73,37 @@ foo <- function(x) {
 LTs <- LT %>% 
   mutate(across(col_names[10:21], ~foo(.)))
 
+LTs
+
+# ------------------------------------------
+# Standardize country names
+standard_region_names <- tibble(region = unique(LTs$region)) %>% 
+  mutate(
+    region_name = rangeBuilder::standardizeCountry(unique(region), fuzzyDist = 1, nthreads = 1),
+    region_name = ifelse(region == "Bolivia (Plurinational State of)", "BOLIVIA", region_name),
+    region_name = ifelse(region == "Micronesia (Fed. States of)", "MICRONESIA", region_name),
+    region_name = ifelse(region == "China, Taiwan Province of China", "TAIWAN", region_name),
+    region_name = ifelse(region == "Dem. People's Republic of Korea", "NORTH KOREA", region_name),
+    region_name = ifelse(region == "State of Palestine", "PALESTINE", region_name),
+    region_name = ifelse(region %in% c("Cabo Verde",
+                                       "Czechia",
+                                       "Eswatini",
+                                       "North Macedonia"),
+                         toupper(region), region_name)
+  ) %>% 
+  filter(!(region_name %in% c("AFRICA",
+                              "ASIA",
+                              "EUROPE",
+                              "")))
+# ------------------------------------------
+
+
+LTS <- left_join(LTs, standard_region_names, by = "region") %>% 
+  select(-region) %>% 
+  rename(region = region_name) %>% 
+  select(region, everything()) %>% 
+  filter(!is.na(region))
+
 # # export a sample in excel to check if all is alright
 # openxlsx::write.xlsx(LTs[1:1e4, ], "data-raw/LT_sample.xlsx")
 
@@ -80,7 +111,7 @@ LTs <- LT %>%
 meta <- tibble(`Column Name` = col_names,
                Description = colnames(LT_both))
 
-data_wpp2019_lt <- list(data = LTs,
+data_wpp2019_lt <- list(data = LTS,
                         meta = meta)
 
 # include data in the package
