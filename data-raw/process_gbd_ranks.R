@@ -15,23 +15,6 @@ data_gbd2019$data %>%
   print(n = Inf)
 
 
-
-IHME-GBD_DATA-Totals2019.zip
-
-gbd_2019 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-5d0ba446-1.zip")
-gbd_totals <- read_csv(file = "data-raw/GBD2019/IHME-GBD_DATA-Totals2019.zip")
-
-# # Check the ages sum up to the totals
-# gbd_totals %>% 
-#   filter(location_name == "France") %>% 
-#   group_by(year, sex_name) %>% 
-#   summarise(val = sum(val))
-# 
-# gbd_2019 %>% 
-#   filter(location_name == "France") %>% 
-#   group_by(year, sex_name) %>% 
-#   summarise(val = sum(val))
-
 # ------------------------------------------
 
 D <- data_gbd2019$data %>% 
@@ -40,13 +23,13 @@ D <- data_gbd2019$data %>%
   summarise(deaths = sum(deaths)) %>% 
   mutate(perc = deaths/ sum(deaths) * 100)
 
-rank1 <- D %>% 
-    select(-perc) %>% 
-    pivot_wider(
-      names_from = region,
-      values_from = deaths) %>% 
-    arrange(desc(FRANCE)) %>% 
-    print(n = Inf)
+# rank1 <- D %>% 
+#     select(-perc) %>% 
+#     pivot_wider(
+#       names_from = region,
+#       values_from = deaths) %>% 
+#     arrange(desc(FRANCE)) %>% 
+#     print(n = Inf)
 
 rank2 <- D %>% 
     select(-deaths) %>% 
@@ -59,8 +42,52 @@ rank2 <- D %>%
 openxlsx::write.xlsx(rank2, file = "data-raw/Rank_COD_2015-19.xlsx")
 
 
+# ------------------------------------------
+# Let's have a look at the neoplasms and cardio data in more detail
+
+gbd_5c <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-Neoplasm+Cardio_5_Countries.zip")
+
+gbd_5c %>% 
+  select(cause_id, cause_name) %>% 
+  unique() %>% 
+  arrange(cause_id) %>% 
+  print(n = Inf)
+
+gbd_5C <- gbd_5c %>% 
+  mutate(
+    cause_id2 = ifelse(cause_id < 491, "Cancer", "Cardio"),
+    location_name = ifelse(location_name == "United Republic of Tanzania", "Tanzania", location_name)
+    )
+
+rank3 <- gbd_5C %>% 
+  filter(cause_id2 == "Cancer",
+         cause_name != "Neoplasms") %>% 
+  group_by(location_name, cause_name) %>% 
+  summarise(deaths = sum(val)) %>% 
+  mutate(perc = deaths/ sum(deaths) * 100) %>% 
+  select(-deaths) %>% 
+  pivot_wider(
+    names_from = location_name,
+    values_from = perc) %>% 
+  arrange(desc(France)) %>%
+  print(n = Inf)
 
 
+rank4 <- gbd_5C %>% 
+  filter(cause_id2 == "Cardio",
+         cause_name != "Cardiovascular diseases") %>% 
+  group_by(location_name, cause_name) %>% 
+  summarise(deaths = sum(val)) %>% 
+  mutate(perc = deaths/ sum(deaths) * 100) %>% 
+  select(-deaths) %>% 
+  pivot_wider(
+    names_from = location_name,
+    values_from = perc) %>% 
+  arrange(desc(France)) %>%
+  print(n = Inf)
 
-  
-  
+
+openxlsx::write.xlsx(rank3, file = "data-raw/Rank_Neo_2015-19.xlsx")
+openxlsx::write.xlsx(rank4, file = "data-raw/Rank_Cardio_2015-19.xlsx")
+
+
