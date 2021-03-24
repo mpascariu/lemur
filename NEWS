@@ -1,3 +1,10 @@
+version 0.0.6
+- Create function for performing decomposition of age-specific mortality 
+contributions in life expectancy: decompose_ex_by_age().
+
+version 0.0.5
+-  Add GBD life tables consistent with the COD data over the 204 regions. Also, include hierarchical maps of the data.
+
 version 0.0.3
 - Add GBD data;
 

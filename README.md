@@ -7,6 +7,9 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![issues](https://img.shields.io/github/issues-raw/mpascariu/MortalityCauses.svg)](https://github.com/mpascariu/MortalityCauses/issues)
+[![license](https://img.shields.io/badge/License-GNU%20GPLv3-blue.svg)](https://github.com/mpascariu/MortalityCauses/blob/master/LICENSE)
+
 <!-- badges: end -->
 
 The goal of MortalityCauses is to …

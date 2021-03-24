@@ -10,6 +10,8 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
+#' @import dplyr
+#' @importFrom magrittr %>%
 #' @name MortalityCauses
 #' @docType package
 "_PACKAGE"
