@@ -1,11 +1,9 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# License: GNU General Public License v3.0
-# Last update: Tue Mar 16 22:42:19 2021
+# Author: Marius D. Pascariu
+# Last update: Wed Mar 24 15:10:56 2021
 # --------------------------------------------------- #
 
-#' Abridged life table, for both sexes combined, by region, 
-#' subregion and country, 2015-2020
+#' Abridged life table for 2015-2020 -- World Population Prospects 2019
 #' 
 #' @source 
 #' United Nations, Department of Economic and Social Affairs, 
@@ -18,7 +16,20 @@
 "data_wpp2019_lt"
 
 
-#' Global Burden of Disease Study 2019 (GBD 2019) Results
+#' Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019 
+#' 
+#' @source 
+#' United Nations, Department of Economic and Social Affairs, 
+#' Population Division (2019). World Population Prospects 2019,
+#' \href{http://ghdx.healthdata.org/record/ihme-data/gbd-2019-life-tables-1950-2019}{
+#'  Online Edition. Rev. 1.}
+#' 
+#' @examples 
+#' data_gbd2019_lt
+"data_gbd2019_lt"
+
+
+#' Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019
 #' 
 #' @source 
 #' Global Burden of Disease Collaborative Network.
@@ -27,4 +38,5 @@
 #' Available from http://ghdx.healthdata.org/gbd-results-tool.
 #' 
 #' @examples 
-"data_gbd2019"
+#' data_gbd2019_cod
+"data_gbd2019_cod"

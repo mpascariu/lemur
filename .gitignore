@@ -40,4 +40,5 @@ vignettes/*.pdf
 
 # Excel Data
 data-raw/WPP2019LT/*.xlsx
-data-raw/GBD2019/*.zip
+data-raw/GBD2019LT/*.zip
+data-raw/GBD2019COD/*.zip

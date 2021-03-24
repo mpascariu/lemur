@@ -1,12 +1,12 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# License: GNU General Public License v3.0
-# Last update: Tue Mar 16 22:42:43 2021
+# Author: Marius D. Pascariu
+# Last update: Wed Mar 24 12:55:19 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
 library(stringr)
 library(readr)
+library(janitor)
 
 # The data have been obtained form GBD tool:
 # Global Burden of Disease Collaborative Network.
@@ -14,30 +14,91 @@ library(readr)
 # Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
 # Available from http://ghdx.healthdata.org/gbd-results-tool.
 
-# read csv files
-gbd_2015 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-50cef937-1.zip")
-gbd_2016 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-a3938721-1.zip")
-gbd_2017 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-3aed18e9-1.zip")
-gbd_2018 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-3df82620-1.zip")
-gbd_2019 <- read_csv(file = "data-raw/GBD2019/IHME-GBD_2019_DATA-5d0ba446-1.zip")
+# ------------------------------------------
+# Read GBD COD files
+
+wd        <- getwd()
+path      <- paste0(getwd(),"/data-raw/GBD2019COD/")
+
+files          <- list.files(path)
+files_zip      <- grep(".zip", files, value = TRUE)
+files_level2   <- grep("Level2", files, value = TRUE)
+files_cardio   <- grep("-Cardio", files, value = TRUE)
+files_neopl    <- grep("Neoplasms", files, value = TRUE)
+path_files_zip <- paste0(path, files_zip)
+
+# Level2 data
+gbd_level2 <- paste0(path, files_level2) %>%
+  # read in all the files individually, using
+  # the function read_csv() from the readr package
+  map(read_csv) %>% 
+  # reduce with rbind into one dataframe
+  reduce(rbind)  
+
+# Cardio
+gbd_cardio <- paste0(path, files_cardio) %>%
+  map(read_csv) %>% 
+  reduce(rbind)  
+
+# Neoplasms
+gbd_neopl <- paste0(path, files_neopl) %>%
+  map(read_csv) %>% 
+  reduce(rbind)  
+
+# We could have done the read at once for all the files using 
+# path_files_zip, but we want to keep separate data objects to 
+# for later checks and validations.
+
+# Bind everything here 
+gbd_cod <- bind_rows(
+  gbd_level2,
+  gbd_cardio,
+  gbd_neopl
+  )
+
+# ------------------------------------------
+# Read GDB Locations Hierarchy Mapping
+
+path_map <- paste0(getwd(),"/data-raw/GBD_2019_Data_Tools_Guide/")
+file_map <- "IHME_GBD_2019_A1_HIERARCHIES_Y2020M10D15.XLSX"
+path_file_map <- paste0(path_map, file_map)
+
+cod_map <- read_excel(
+  path = path_file_map, 
+  sheet = "Cause Hierarchy") %>% 
+  clean_names() %>% 
+  filter(app_selection != "not_used")
+  # The app_selection and app_selection2 columns have been added by me based on 
+  # my selections
 
 
-gbd <- bind_rows(
-  # bind the 5 datasets
-  gbd_2015,
-  gbd_2016,
-  gbd_2017,
-  gbd_2018,
-  gbd_2019) %>% 
+cod_map2 <- cod_map %>% 
+  select(
+    cause_id, 
+    app_selection, 
+    app_selection2)
+  
+  
+# ------------------------------------------.
+# GBD COD data wrangling
+
+
+gbd <- left_join(gbd_cod, cod_map2, by = "cause_id") %>% 
+  filter(
+    app_selection != "not_used",
+    age_name != "All Ages",
+    ) %>% 
   select(
     # drop few columns
     location_name,
     sex_name,
     age_name,
-    cause_id,
-    cause_name,
     year,
-    val) %>% 
+    app_selection,
+    app_selection2,
+    val,
+    upper,
+    lower) %>% 
   mutate(
     # create a numerical age column
     x = str_extract(age_name, "^.{2}"),
@@ -49,28 +110,70 @@ gbd <- bind_rows(
   ) %>% 
   rename(
     # rename few columns to follow the life table data
+    cause_name = app_selection,
+    cause_name2 = app_selection2,
     region = location_name,
     sex = sex_name
   ) %>% 
   # group-by everything except 'val' and 'year' columns
   # so that we can aggregate data across years
-  group_by_at(setdiff(names(.), c("val", "year"))) %>% 
-  summarise(deaths = sum(val)) %>%
-  # add period column in the second positon 
+  group_by_at(setdiff(names(.), c( "year", "val", "upper", "lower"))) %>% 
+  summarise(
+    deaths = sum(val),
+    upper = sum(upper),
+    lower = sum(lower)
+    ) %>%
+  # add period column in the second position 
   add_column(period = "2015-2019", .after = 1) %>% 
   # remove group_by to avoid future trouble
   ungroup()
 
-gbd
 
+# ------------------------------------------
+# CHECK !!!
+
+# 1. The values shown in Level2 data for Neoplasms and Cardio is the same 
+# with the ones in the dedicated files
+gbd_level2 %>% 
+  group_by(cause_name) %>% 
+  summarise(val = sum(val)) %>% 
+  arrange(desc(val))
+
+gbd_neopl %>% 
+  group_by(cause_name) %>% 
+  summarise(val = sum(val)) %>% 
+  arrange(desc(val))
+
+gbd_cardio %>% 
+  group_by(cause_name) %>% 
+  summarise(val = sum(val)) %>% 
+  arrange(desc(val))
+
+# 2. The death counts in the processed file are the same with the 
+# counts in the Level2 files
+
+gbd_level2 %>% 
+  filter(age_name != "All Ages") %>% 
+  select(val) %>% 
+  sum()
+
+sum(gbd$deaths)
+# Since all is good and we did not miss anything out in our 
+# COD selection/mapping we can move on and further process the data.
+
+# ------------------------------------------
 
 # Compute figures for both sexes
 gbd_both <- gbd %>% 
   # group-by everything except 'deaths' and 'sex' columns
-  group_by_at(setdiff(names(.), c("deaths", "sex"))) %>% 
+  group_by_at(setdiff(names(.), c("sex", "deaths", "upper", "lower"))) %>% 
   # aggregate data across sexes
-  summarise(deaths = sum(deaths)) %>%
-  # add sex column in the 3rd positon 
+  summarise(
+    deaths = sum(deaths),
+    upper = sum(upper),
+    lower = sum(lower)
+  ) %>%
+  # add sex column in the 3rd position 
   add_column(sex = "Both", .after = 2) %>% 
   # remove group_by to avoid future trouble
   ungroup()
@@ -80,59 +183,38 @@ gbd_both <- gbd %>%
 GBD <- bind_rows(gbd, gbd_both) %>% 
   # compute percentages of each disease for given region-period-sex and across ages
   group_by(region, period, sex) %>% 
-  mutate(perc = deaths / sum(deaths)) %>% 
-  ungroup()
+  mutate(
+    perc_deaths = deaths / sum(deaths),
+    perc_upper = upper / sum(upper),
+    perc_lower = lower / sum(lower),
+    ) %>% 
+  ungroup() %>% 
+  arrange(cause_name, region, period, sex, x)
 
-# CHECK: Pick a country and see what we did
+# ------------------------------------------
+# CHECK POINT: 
+
+# 3. Pick a country and see if the processing makes sense
 GBD %>% 
   filter(region == "Romania") %>% 
-  select(perc) %>% 
-  sum()  # this should be equal to 3. 100% for each sex. 
+  select(deaths:perc_lower) %>% 
+  # the distributions should be equal to 3. 100% for each sex. 
+  colSums()              
 
+# 4. COMPARISON with GBD Global data 2015-2019
+gbd_global <- read_csv(file = path_files_zip[6])
 
-
-
-# ------------------------------------------
-# Standardize country names
-standard_country_names <- tibble(region = unique(GBD$region)) %>% 
-  mutate(
-    region_name = rangeBuilder::standardizeCountry(unique(region), fuzzyDist = 1, nthreads = 1),
-    region_name = ifelse(region == "Bolivia (Plurinational State of)", "BOLIVIA", region_name),
-    region_name = ifelse(region == "Micronesia (Federated States of)", "MICRONESIA", region_name),
-    region_name = ifelse(region == "Taiwan (Province of China)", "TAIWAN", region_name),
-    region_name = ifelse(region %in% c("Cabo Verde", 
-                                       "Czechia", 
-                                       "Eswatini", 
-                                       "North Macedonia"),
-                         toupper(region), region_name)
-    )
-
-GBD <- left_join(GBD, standard_country_names, by = "region") %>% 
-  select(-region) %>% 
-  rename(region = region_name) %>% 
-  select(region, everything())
-
-# check that we did not miss any country  
-GBD %>% filter(region == "") 
-
-
-# write.csv(unique(GBD$region), file = "data-raw/GBD2019/GBD_regions.csv")
-
+gbd_global$year %>% unique()
+sum(gbd_global$val)
+sum(gbd_level2$val)
+sum(GBD$deaths)
+ # We can notice a small difference between the global data and the Level2 data
+ # downloaded form GBD. 
 
 # ------------------------------------------
-meta = tibble(`Column Name` = colnames(GBD),
-              Description = c("Region, subregion, country or area",
-                              "Period of time",
-                              "Sex",
-                              "Cause ID code",
-                              "Cause of death name",
-                              "Age (x)",
-                              "Death counts",
-                              "Percentage"))
-
-data_gbd2019 <- list(data = GBD,
-                     meta = meta)
-
 # include data in the package
-usethis::use_data(data_gbd2019, overwrite = TRUE)
+
+data_gbd2019_cod <- GBD 
+
+usethis::use_data(data_gbd2019_cod, overwrite = TRUE)
 

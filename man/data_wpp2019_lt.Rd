@@ -3,8 +3,7 @@
 \docType{data}
 \name{data_wpp2019_lt}
 \alias{data_wpp2019_lt}
-\title{Abridged life table, for both sexes combined, by region, 
-subregion and country, 2015-2020}
+\title{Abridged life table for 2015-2020 -- World Population Prospects 2019}
 \format{
 An object of class \code{list} of length 2.
 }
@@ -18,8 +17,7 @@ Population Division (2019). World Population Prospects 2019,
 data_wpp2019_lt
 }
 \description{
-Abridged life table, for both sexes combined, by region, 
-subregion and country, 2015-2020
+Abridged life table for 2015-2020 -- World Population Prospects 2019
 }
 \examples{
 data_wpp2019_lt
