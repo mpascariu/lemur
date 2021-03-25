@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Mar 24 15:24:37 2021
+# Last update: Thu Mar 25 14:21:22 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -30,7 +30,7 @@ rank2 <- D %>%
   arrange(desc(France)) %>% 
   print(n = Inf)
 
-openxlsx::write.xlsx(rank2, file = "data-raw/Rank_COD_2015-19_v2.xlsx")
+openxlsx::write.xlsx(rank2, file = "data-raw/Rank_COD_2015-19_v3.xlsx")
 
 
 # ------------------------------------------

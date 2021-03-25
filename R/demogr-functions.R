@@ -6,7 +6,7 @@
 #' Perform decomposition of age-specific mortality contributions 
 #' in life expectancy between any two populations
 #' 
-#' Decompose the difference in life expectancy (at the smallest age) 
+#' Decompose the difference in life expectancy (at the smallest available age) 
 #' of two populations represented by their life tables in a given 
 #' period of time.
 #'  
@@ -15,28 +15,20 @@
 #' @author ...
 #' @references ...
 #' @examples 
-#' library(MortalityCauses)
-#' library(dplyr)
+#' # Data
+#' X <- data_gbd2019_lt
 #' 
-#' # Select Life Table 1
-#' L1 <- data_gbd2019_lt %>% 
-#'   filter(region == "Romania",
-#'          sex == "both",
-#'          level == "median")
-#' 
-#' # Life Table 2
-#' L2 <- data_gbd2019_lt %>% 
-#'   filter(region == "Republic of Moldova",
-#'          sex == "both",
-#'          level == "median")
+#' # Select Life Table 1 & 2
+#' L1 <- X[X$region == "Romania" & X$sex == "both" & X$level == "median", ]
+#' L2 <- X[X$region == "Republic of Moldova" & X$sex == "both" & X$level == "median", ]
 #' 
 #' # Life expectancy at birth difference
-#' delta_ex <- L2$ex[1] - L1$ex[1] # about 2 years diff
+#' L2$ex[1] - L1$ex[1] # about 2 years diff
 #' 
 #' # Age decomposition
-#' delta_ex_by_age <- decompose_ex_by_age(L1, L2)
+#' decompose_by_age(L1, L2)
 #' @export
-decompose_ex_by_age <- function(A, B){
+decompose_by_age <- function(A, B){
   
   l <- A$lx
   L <- A$Lx

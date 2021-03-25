@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Mar 24 20:15:52 2021
+# Last update: Thu Mar 25 09:11:18 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -8,49 +8,62 @@ library(stringr)
 library(readr)
 library(readxl)
 library(janitor)
+library(ungroup)
 
-# The data have been obtained form GBD tool:
-# Global Burden of Disease Collaborative Network.
-# Global Burden of Disease Study 2019 (GBD 2019) Results.
-# Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
-# Available from http://ghdx.healthdata.org/gbd-results-tool.
+# # The data have been obtained form GBD tool:
+# # Global Burden of Disease Collaborative Network.
+# # Global Burden of Disease Study 2019 (GBD 2019) Results.
+# # Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
+# # Available from http://ghdx.healthdata.org/gbd-results-tool.
+# 
+# # ------------------------------------------
+# # Read GBD COD files
+# 
+# # wd        <- getwd()
+# # path      <- paste0(getwd(),"/data-raw/GBD2019COD/")
+# # 
+# # files          <- list.files(path)
+# # files_zip      <- grep(".zip", files, value = TRUE)
+# # files_level2   <- grep("Level2", files, value = TRUE)
+# # files_cardio   <- grep("-Cardio", files, value = TRUE)
+# # files_neopl    <- grep("Neoplasms", files, value = TRUE)
+# # path_files_zip <- paste0(path, files_zip)
+# # 
+# # # Level2 data
+# # gbd_level2 <- paste0(path, files_level2) %>%
+# #   # read in all the files individually, using
+# #   # the function read_csv() from the readr package
+# #   map(read_csv) %>% 
+# #   # reduce with rbind into one dataframe
+# #   reduce(rbind)  
+# # 
+# # # Cardio
+# # gbd_cardio <- paste0(path, files_cardio) %>%
+# #   map(read_csv) %>% 
+# #   reduce(rbind)  
+# # 
+# # # Neoplasms
+# # gbd_neopl <- paste0(path, files_neopl) %>%
+# #   map(read_csv) %>% 
+# #   reduce(rbind)  
+# # 
+# # # We could have done the read at once for all the files using 
+# # # path_files_zip, but we want to keep separate data objects
+# # # for later checks and validations.
+# # 
+# # 
+# # save(
+# #   gbd_level2,
+# #   gbd_cardio,
+# #   gbd_neopl,
+# #   file = "data-raw/GBD_COD_Input.Rdata"
+# # )
+# # 
 
-# ------------------------------------------
-# Read GBD COD files
+# Load all datasets created above
+load("data-raw/GBD_COD_Input.Rdata")
 
-wd        <- getwd()
-path      <- paste0(getwd(),"/data-raw/GBD2019COD/")
-
-files          <- list.files(path)
-files_zip      <- grep(".zip", files, value = TRUE)
-files_level2   <- grep("Level2", files, value = TRUE)
-files_cardio   <- grep("-Cardio", files, value = TRUE)
-files_neopl    <- grep("Neoplasms", files, value = TRUE)
-path_files_zip <- paste0(path, files_zip)
-
-# Level2 data
-gbd_level2 <- paste0(path, files_level2) %>%
-  # read in all the files individually, using
-  # the function read_csv() from the readr package
-  map(read_csv) %>% 
-  # reduce with rbind into one dataframe
-  reduce(rbind)  
-
-# Cardio
-gbd_cardio <- paste0(path, files_cardio) %>%
-  map(read_csv) %>% 
-  reduce(rbind)  
-
-# Neoplasms
-gbd_neopl <- paste0(path, files_neopl) %>%
-  map(read_csv) %>% 
-  reduce(rbind)  
-
-# We could have done the read at once for all the files using 
-# path_files_zip, but we want to keep separate data objects
-# for later checks and validations.
-
-# Bind everything here 
+# Bind everything here
 gbd_cod <- bind_rows(
   gbd_level2,
   gbd_cardio,
@@ -65,13 +78,12 @@ file_map <- "IHME_GBD_2019_A1_HIERARCHIES_Y2020M10D15.XLSX"
 path_file_map <- paste0(path_map, file_map)
 
 cod_map <- read_excel(
-  path = path_file_map, 
-  sheet = "Cause Hierarchy") %>% 
-  clean_names() %>% 
+  path = path_file_map,
+  sheet = "Cause Hierarchy") %>%
+  clean_names() %>%
   filter(app_selection != "not_used")
-  # The app_selection and app_selection2 columns have been added by me based on 
-  # my selections
-
+  # The app_selection and app_selection2 columns have been added by us based on
+  # our selections
 
 cod_map2 <- cod_map %>% 
   select(
@@ -103,7 +115,9 @@ gbd <- left_join(gbd_cod, cod_map2, by = "cause_id") %>%
     # create a numerical age column
     x = str_extract(age_name, "^.{2}"),
     x = ifelse(age_name == "<1 year", 0, x),
-    x = as.numeric(x)) %>% 
+    x = as.numeric(x),
+    # use only lower-case characters
+    sex_name = tolower(sex_name)) %>% 
   select(
     # drop few more
     - age_name
@@ -126,7 +140,8 @@ gbd <- left_join(gbd_cod, cod_map2, by = "cause_id") %>%
   # add period column in the second position 
   add_column(period = "2015-2019", .after = 1) %>% 
   # remove group_by to avoid future trouble
-  ungroup()
+  ungroup() %>% 
+  pivot_longer(cols = median:lower, names_to = "level", values_to = "deaths") 
 
 
 # ------------------------------------------
@@ -157,38 +172,139 @@ gbd_level2 %>%
   select(val) %>% 
   sum()
 
-sum(gbd$median)
+gbd %>% 
+  filter(level == "median") %>% 
+  select(deaths) %>% 
+  sum()
+
 # Since all is good and we did not miss anything out in our 
 # COD selection/mapping we can move on and further process the data.
 
 # ------------------------------------------
+# UNGROUP the last age interval (95+)
 
+# THIS IS A FUNCTION
+#' Ungroup the values of the last age interval (95+) using the 
+#' pclm method by adding 3 additional age bands (100, 105, and 110).
+#' 
+#' We do not extend the values towards the younger ages if they are missing
+#' but consider them equal to zero. 
+#' @param X A tibble containing COD data
+ungroup_last_age_int <- function(X) {
+  options(dplyr.summarise.inform = FALSE)
+  
+  out <- NULL
+  n   <- nrow(X)
+  
+  if (n != 0) {
+    # The input data must have few rows to be able to do anything
+    cols <- c("region", 
+              "period",
+              "sex",
+              "cause_name", 
+              "cause_name2", 
+              "level")
+    p   <- X$deaths[n]/sum(X$deaths) 
+    
+    if (X$x[n] == 95 & p >= 0.005) {
+      # We are doing the ungrouping only if the last age interval is 95+
+      # AND the death count in the group is higher than 0.5% of the total. 
+      # Else return the input.
+      M <- pclm(x = X$x,
+                y = X$deaths,
+                out.step = 1,
+                nlast = 16)
+      
+      # Ages
+      ages <- sort(c(rep(seq(X$x[1], 105, by = 5), 5), 110))
+      # Create the output table in the same format as the input table + 
+      # the additional ages
+      
+      out <- tibble(X[1, cols],
+                    x = ages,
+                    deaths = M$fitted) %>% 
+        # group-by everything except 'deaths'
+        group_by_at(setdiff(names(.), "deaths")) %>%
+        summarise(deaths = sum(deaths)) %>% 
+        ungroup()
+      
+    } else {
+      out <- X[, c(cols, "x", "deaths")]
+      
+    }
+  }
+  
+  return(out)
+}
+
+
+
+key <- c("region", "period", "sex", "cause_name", "level")
+cases <- gbd %>% 
+  select(region, period, sex, cause_name, level) %>% 
+  unique() %>% 
+   # add a key for faster filtering in the loop
+  unite(col = "key", key, 
+        sep = "-",
+        remove = TRUE) %>% 
+  unlist() %>% 
+  as.character()
+
+threshold = 75
+
+gbd2 <- gbd %>% 
+  filter(
+    x >= threshold
+    ) %>%  # use only data above 70 for ungrouping)
+  unite("key", key, sep = "-", remove = FALSE) 
+
+
+
+system.time({ 
+  # THIS LOOP SHOULD TAKE SOME MINUTES!!! Be prepared or go grab a coffee.
+  #  15m30s on my maybe 8yo Thinkpad T530. 
+  #  Yes, I am still using this bad boy. It won't die. 
+  gbd_to_110 <- NULL
+  i = 1
+  j = cases[i]
+  lc = length(cases)
+  for (j in cases) {
+    # print(paste0(i,"/", lc, "- ", j))
+    gbd_to_110 <- gbd2 %>% 
+      filter(key == j) %>% 
+      ungroup_last_age_int(.) %>% 
+      bind_rows(gbd_to_110, .)
+    i = i + 1
+  }
+})
+
+
+gbd110 <- gbd %>% 
+  filter(x < threshold) %>% 
+  bind_rows(., gbd_to_110) %>% 
+  arrange(level, cause_name, region, period, sex, x)
+
+# UNGROUPING FINISHED HERE
+
+# ------------------------------------------
 # Compute figures for both sexes
-gbd_both <- gbd %>% 
+gbd_both <- gbd110 %>% 
   # group-by everything except 'deaths' and 'sex' columns
-  group_by_at(setdiff(names(.), c("sex", "median", "upper", "lower"))) %>% 
+  group_by_at(setdiff(names(.), c("sex", "deaths"))) %>% 
   # aggregate data across sexes
-  summarise(
-    median = sum(median),
-    upper = sum(upper),
-    lower = sum(lower)
-  ) %>%
+  summarise(deaths = sum(deaths)) %>%
   # add sex column in the 3rd position 
-  add_column(sex = "Both", .after = 2) %>% 
+  add_column(sex = "both", .after = 2) %>% 
   # remove group_by to avoid future trouble
   ungroup() 
 
-  
-
 
 # Create the big dataset with 3 sexes
-GBD <- bind_rows(gbd, gbd_both) %>% 
-  pivot_longer(cols = median:lower, names_to = "level", values_to = "deaths") %>%  
+GBD <- bind_rows(gbd110, gbd_both) %>% 
   # compute percentages of each disease for given region-period-sex and across ages
   group_by(region, period, sex, level) %>% 
   mutate(perc = deaths / sum(deaths)) %>% 
-  ungroup() %>% 
-  arrange(level, cause_name, region, period, sex, x)
+  ungroup() 
 
 # ------------------------------------------
 # CHECK POINT: 
@@ -200,12 +316,11 @@ GBD %>%
   # the distributions should be equal to 3 sexes x 3 levels = 9. 100% for each sex. 
   colSums()              
 
-# 4. COMPARISON with GBD Global data 2015-2019
-gbd_global <- read_csv(file = path_files_zip[6])
+# # 4. COMPARISON with GBD Global data 2015-2019
+# gbd_global <- read_csv(file = path_files_zip[6])
+# gbd_global$year %>% unique()
+# sum(gbd_global$val)
 
-gbd_global$year %>% unique()
-
-sum(gbd_global$val)
 sum(gbd_level2$val)
 GBD %>% 
   filter(level == "median") %>% 
@@ -213,6 +328,9 @@ GBD %>%
   sum()
  # We can notice a small difference between the global data and the Level2 data
  # downloaded form GBD. However, this is a data provider issue.
+ # 
+ # We can notice a small difference between Level2 data and processed data
+ # due to ungrouping residuals.
 
 # ------------------------------------------
 # include data in the package
