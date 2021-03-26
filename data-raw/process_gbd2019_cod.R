@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Thu Mar 25 09:11:18 2021
+# Last update: Fri Mar 26 16:57:01 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -233,18 +233,18 @@ ungroup_last_age_int <- function(X) {
       
     }
   }
-  
   return(out)
 }
 
-
-
+# Since we have the ungrouping function ready 
+# we can prepare the data
 key <- c("region", "period", "sex", "cause_name", "level")
 cases <- gbd %>% 
   select(region, period, sex, cause_name, level) %>% 
   unique() %>% 
    # add a key for faster filtering in the loop
-  unite(col = "key", key, 
+  unite(col = "key", 
+        all_of(key), 
         sep = "-",
         remove = TRUE) %>% 
   unlist() %>% 
@@ -255,7 +255,7 @@ threshold = 75
 gbd2 <- gbd %>% 
   filter(
     x >= threshold
-    ) %>%  # use only data above 70 for ungrouping)
+    ) %>%  # use only data above 70 for ungrouping
   unite("key", key, sep = "-", remove = FALSE) 
 
 
@@ -287,7 +287,7 @@ gbd110 <- gbd %>%
 # UNGROUPING FINISHED HERE
 
 # ------------------------------------------
-# Compute figures for both sexes
+# Compute figures for both sexes combined
 gbd_both <- gbd110 %>% 
   # group-by everything except 'deaths' and 'sex' columns
   group_by_at(setdiff(names(.), c("sex", "deaths"))) %>% 
@@ -301,8 +301,10 @@ gbd_both <- gbd110 %>%
 
 # Create the big dataset with 3 sexes
 GBD <- bind_rows(gbd110, gbd_both) %>% 
-  # compute percentages of each disease for given region-period-sex and across ages
-  group_by(region, period, sex, level) %>% 
+  # compute percentages of each disease for 
+  # given age-region-period-sex and across ages
+  group_by(region, period, sex, x, level) %>% 
+  # group_by(region, period, sex, level, x, cause_name) %>% 
   mutate(perc = deaths / sum(deaths)) %>% 
   ungroup() 
 
@@ -310,11 +312,28 @@ GBD <- bind_rows(gbd110, gbd_both) %>%
 # CHECK POINT: 
 
 # 3. Pick a country and see if the processing makes sense
+# the distributions for each age group must be 100% in each scenario. OK.
 GBD %>% 
-  filter(region == "Romania") %>% 
-  select(deaths:perc) %>% 
-  # the distributions should be equal to 3 sexes x 3 levels = 9. 100% for each sex. 
-  colSums()              
+  filter(region == "Romania") %>%
+  group_by(sex, x, level) %>% 
+  summarise(perc = sum(perc))
+
+# the distributions for each cod should be different than 100%. OK.
+GBD %>% 
+  filter(region == "Romania") %>%
+  group_by(sex, cause_name, level) %>% 
+  summarise(perc = sum(perc))
+
+# The sum of all % in region-period-sex-level must be equal to the 
+# no. of age groups
+length(unique(GBD$x))  # 24
+
+GBD %>% 
+  filter(region == "Romania") %>%
+  group_by(region, period, sex, level) %>% 
+  summarise(perc = sum(perc))
+
+
 
 # # 4. COMPARISON with GBD Global data 2015-2019
 # gbd_global <- read_csv(file = path_files_zip[6])
@@ -330,7 +349,7 @@ GBD %>%
  # downloaded form GBD. However, this is a data provider issue.
  # 
  # We can notice a small difference between Level2 data and processed data
- # due to ungrouping residuals.
+ # due to ungrouping residuals (116 out of 5B)
 
 # ------------------------------------------
 # include data in the package
