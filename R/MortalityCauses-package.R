@@ -1,7 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# License: GNU General Public License v3.0
-# Last update: Sun Mar 14 19:00:25 2021
+# Author: Marius D. Pascariu
+# Last update: Fri Mar 26 17:55:45 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -10,7 +9,7 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
-#' @import dplyr
+#' @import dplyr tidyr tibble MortalityLaws
 #' @importFrom magrittr %>%
 #' @name MortalityCauses
 #' @docType package

@@ -13,7 +13,7 @@ decompose_by_age(A, B)
 \item{B}{Life table 2.}
 }
 \description{
-Decompose the difference in life expectancy (at the smallest age) 
+Decompose the difference in life expectancy (at the smallest available age) 
 of two populations represented by their life tables in a given 
 period of time.
 }

@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Mar 24 19:01:01 2021
+# Last update: Fri Mar 26 18:10:49 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -57,17 +57,91 @@ decompose_by_age <- function(A, B){
 }
 
 
+#' Modify life table by changing the cause of death associated risks
+#'
+#' @param lt Life table;
+#' @param cod Causes of death matrix corresponding to the population and 
+#' time period of the life table;
+#' @param cod_change The change to be applied to the causes of death risks
+#' in order to reduce of increase the mortality estimates given by the life 
+#' table.
+#' @examples 
+#' L <- data_gbd2019_lt  # life tables
+#' D <- data_gbd2019_cod # cod data
+#' 
+#' # Select Life Table
+#' lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median", ]
+#' # Select COD data
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' 
+#' # How does the life table modify if the cause-specific mortality is
+#' # reduced by 50%?
+#' lt_reduced <- reduce_LifeTable(lt, cod, cod_change = 50)
+#' lt_reduced
+#' @export
+reduce_LifeTable <- function(lt, cod, cod_change) {
+  
+  cod <- build_cod_matrix(cod)
+  # Reduction
+  r <- 1 - cod_change / 100
+  
+  # Compute competing risks prob. and apply the reduction/change
+  # WORKS FOR VECTOR INPUTS TOO. TO BE TESTED FOR MATRICES!!!
+  qx  <- replace_na(lt$qx, 0)
+  qxi <- 1 - (1 - qx) ^ t(t(cod) * r) 
+  
+  # Convert qx's to lx's
+  lxi <- convertFx(
+    x    = lt$x,
+    data = qxi,
+    from = "qx",
+    to   = "lx",
+    lx0  = 1)
+  
+  # Compute non-COD lx 
+  lx <- apply(lxi, 1, prod)
+  
+  # Build life-table from lx using standard procedure from {MortalityLaws}
+  sex <- lt$sex[1]
+  sex <- ifelse(lt$sex[1] == "both", "total", lt$sex[1])
+  
+  LT <- LifeTable(
+    x   = lt$x,
+    lx  = lx,
+    ax  = lt$ax,
+    sex = sex
+    )
+  
+  # Exit
+  # The output should have the same format as the input life table
+  out <- lt %>% 
+    select(
+      -all_of(names(LT$lt))
+    ) %>% 
+    bind_cols(LT$lt)
+  
+  return(out)
+}
 
 
 
-
-
-
-
-
-
-
-
+#' Transform the COD data from a long table to a matrix with ages as rows and 
+#' cod's as columns. Also replace na's with a very small number to avoid errors.
+#' 
+#' @param y COD long table
+#' @param vsn very small scalar to replace na values
+#' @keywords internal
+build_cod_matrix <- function(y, vsn = 0) {
+  y %>%
+    select(x, cause_name, perc) %>% 
+    pivot_wider(
+      names_from = cause_name,
+      values_from = perc
+    ) %>% 
+    arrange(x) %>% 
+    mutate_all(~replace(., is.na(.), vsn)) %>%
+    column_to_rownames("x")
+}
 
 
 
