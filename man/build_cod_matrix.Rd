@@ -3,17 +3,20 @@
 \name{build_cod_matrix}
 \alias{build_cod_matrix}
 \title{Transform the COD data from a long table to a matrix with ages as rows and 
-cod's as columns. Also replace na's with a very small number to avoid errors.}
+cod's as columns.}
 \usage{
-build_cod_matrix(y, vsn = 0)
+build_cod_matrix(cod, na.rm = TRUE)
 }
 \arguments{
-\item{y}{COD long table}
+\item{cod}{COD long table}
 
-\item{vsn}{very small scalar to replace na values}
+\item{na.rm}{logical.Should missing values be replaced with zero's?}
+}
+\value{
+A matrix with percentages.
 }
 \description{
 Transform the COD data from a long table to a matrix with ages as rows and 
-cod's as columns. Also replace na's with a very small number to avoid errors.
+cod's as columns.
 }
 \keyword{internal}

@@ -1,3 +1,6 @@
+version 0.1.0 
+- add function to compute cause modified life tables;
+
 version 0.0.6
 - Create function for performing decomposition of age-specific mortality 
 contributions in life expectancy: decompose_ex_by_age().

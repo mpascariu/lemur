@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri Mar 26 18:10:49 2021
+# Last update: Mon Mar 29 16:23:17 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -12,6 +12,7 @@
 #'  
 #' @param A Life table 1.
 #' @param B Life table 2.
+#' @return A numerical vector.
 #' @author ...
 #' @references ...
 #' @examples 
@@ -60,57 +61,91 @@ decompose_by_age <- function(A, B){
 #' Modify life table by changing the cause of death associated risks
 #'
 #' @param lt Life table;
-#' @param cod Causes of death matrix corresponding to the population and 
-#' time period of the life table;
-#' @param cod_change The change to be applied to the causes of death risks
-#' in order to reduce of increase the mortality estimates given by the life 
-#' table.
+#' @param cod Causes of death matrix containing death counts corresponding 
+#' to the population and time period of the life table;
+#' @param cod_change Numerical scalar, vector or matrix. 
+#' The changes to be applied to the causes of death rate, m[c,x],
+#' in order to reduce or increase the mortality estimates given by the life 
+#' table. Accepted input: any value greater than -100. See examples.
+#' @return A life table in the same format as the input life table.
 #' @examples 
+#' 
 #' L <- data_gbd2019_lt  # life tables
 #' D <- data_gbd2019_cod # cod data
+#' 
 #' 
 #' # Select Life Table
 #' lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median", ]
 #' # Select COD data
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod_change = -50
 #' 
+#' # Example 1:
 #' # How does the life table modify if the cause-specific mortality is
 #' # reduced by 50%?
-#' lt_reduced <- reduce_LifeTable(lt, cod, cod_change = 50)
+#' lt_reduced <- cause_modify_life_table(lt, cod, cod_change = -50)
 #' lt_reduced
+#' 
+#' # Example 2:
+#' # Let's change the first cod by 1%, second one with 2% and so on until 17%
+#' # Note, we are increasing death rates. This should result in a lower life 
+#' # expectancy.
+#' 
+#' unique(cod$cause_name) # we have 17 causes
+#' 
+#' lt_reduced2 <- cause_modify_life_table(lt, cod, cod_change = 1:17)
+#' lt_reduced2
+#' 
+#' # Example 3:
+#' # Apply a specific change by cause and age
+#' # Say, we want to decrease the cod's risk only between age 45 and 75 
+#' # with values between 24% and 40%.
+#' 
+#' # we have to build a matrix with 24 rows and 17 columns (ages x cods)
+#' # to indicate the change for each combination
+#' M <- matrix(24:40, nrow = 24, ncol = 17, byrow = TRUE)
+#' dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
+#' M[!(rownames(M) %in% 45:75), ] <- 0
+#' 
+#' lt_reduced3 <- cause_modify_life_table(lt, cod, cod_change = -M)
+#' lt_reduced3
 #' @export
-reduce_LifeTable <- function(lt, cod, cod_change) {
+cause_modify_life_table <- function(lt, cod, cod_change) {
   
-  cod <- build_cod_matrix(cod)
-  # Reduction
-  r <- 1 - cod_change / 100
-  
-  # Compute competing risks prob. and apply the reduction/change
-  # WORKS FOR VECTOR INPUTS TOO. TO BE TESTED FOR MATRICES!!!
+  cod <- build_cod_matrix(cod)    # death counts by cod from a long dataset
+  r   <- 1 + cod_change / 100      # Reduction
   qx  <- replace_na(lt$qx, 0)
-  qxi <- 1 - (1 - qx) ^ t(t(cod) * r) 
   
-  # Convert qx's to lx's
-  lxi <- convertFx(
-    x    = lt$x,
-    data = qxi,
-    from = "qx",
-    to   = "lx",
-    lx0  = 1)
+  # reduced probability of survival by cod
+  if (all(r <= 0)) {
+    stop(
+      paste(
+        "The mortality reduction cannot be 100% or more.",
+        "That would make us immortals; and this software",
+        "does not know how to deal with that!", 
+        call. = FALSE)
+    )
+    
+  } else if (is.matrix(cod_change)) {
+    pxi_r <- (1 - qx) ^ (cod * r)
+    
+  } else {
+    # is cod_change is a vector then we have to transpose to 
+    # do the multiplication correctly 
+    pxi_r <- (1 - qx) ^ t(t(cod) * r)
+    
+  }
   
-  # Compute non-COD lx 
-  lx <- apply(lxi, 1, prod)
+  qx_r <- 1 - apply(pxi_r, 1, prod)  # all-cause reduced qx
   
-  # Build life-table from lx using standard procedure from {MortalityLaws}
-  sex <- lt$sex[1]
-  sex <- ifelse(lt$sex[1] == "both", "total", lt$sex[1])
-  
+  # Build life-table from qx_r using standard procedure 
+  # from {MortalityLaws}. The sex argument is not required since we have the
+  # a[x] which would give us a more accurate construction.
   LT <- LifeTable(
     x   = lt$x,
-    lx  = lx,
-    ax  = lt$ax,
-    sex = sex
-    )
+    qx  = qx_r,
+    ax  = lt$ax
+  )
   
   # Exit
   # The output should have the same format as the input life table
@@ -126,25 +161,36 @@ reduce_LifeTable <- function(lt, cod, cod_change) {
 
 
 #' Transform the COD data from a long table to a matrix with ages as rows and 
-#' cod's as columns. Also replace na's with a very small number to avoid errors.
+#' cod's as columns. 
 #' 
-#' @param y COD long table
-#' @param vsn very small scalar to replace na values
+#' @param cod COD long table
+#' @param na.rm logical.Should missing values be replaced with zero's?
+#' @return A matrix with percentages.
 #' @keywords internal
-build_cod_matrix <- function(y, vsn = 0) {
-  y %>%
+build_cod_matrix <- function(cod, na.rm = TRUE) {
+  
+  M <- cod %>%
+    # compute percentages of each disease for 
+    # given age-region-period-sex and across ages
+    group_by(region, period, sex, x, level) %>% 
+    mutate(perc = deaths / sum(deaths)) %>% 
+    ungroup() %>% 
     select(x, cause_name, perc) %>% 
+    # and build a matrix
     pivot_wider(
       names_from = cause_name,
       values_from = perc
     ) %>% 
-    arrange(x) %>% 
-    mutate_all(~replace(., is.na(.), vsn)) %>%
+    arrange(x)  %>% 
     column_to_rownames("x")
+  
+  if(na.rm) {
+    M <- M %>% 
+      mutate_all(~replace(., is.na(.), 0))
+  }
+  
+  return(M)  
 }
-
-
-
 
 
 
