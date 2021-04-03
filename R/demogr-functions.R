@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Mon Mar 29 16:23:17 2021
+# Last update: Sat Apr 03 15:42:43 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -72,7 +72,6 @@ decompose_by_age <- function(A, B){
 #' 
 #' L <- data_gbd2019_lt  # life tables
 #' D <- data_gbd2019_cod # cod data
-#' 
 #' 
 #' # Select Life Table
 #' lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median", ]
@@ -164,10 +163,17 @@ cause_modify_life_table <- function(lt, cod, cod_change) {
 #' cod's as columns. 
 #' 
 #' @param cod COD long table
-#' @param na.rm logical.Should missing values be replaced with zero's?
 #' @return A matrix with percentages.
-#' @keywords internal
-build_cod_matrix <- function(cod, na.rm = TRUE) {
+#' @examples 
+#' # cod data
+#' D <- data_gbd2019_cod 
+#' # Select COD data for 1 region
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' # COD data in matrix format
+#' 
+#' build_cod_matrix(cod) 
+#' @export
+build_cod_matrix <- function(cod) {
   
   M <- cod %>%
     # compute percentages of each disease for 
@@ -182,16 +188,13 @@ build_cod_matrix <- function(cod, na.rm = TRUE) {
       values_from = perc
     ) %>% 
     arrange(x)  %>% 
+    # replace na with 0
+    mutate_all(~replace(., is.na(.), 0)) %>% 
+    # name rows
     column_to_rownames("x")
-  
-  if(na.rm) {
-    M <- M %>% 
-      mutate_all(~replace(., is.na(.), 0))
-  }
   
   return(M)  
 }
-
 
 
 

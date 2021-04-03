@@ -28,7 +28,6 @@ Modify life table by changing the cause of death associated risks
 L <- data_gbd2019_lt  # life tables
 D <- data_gbd2019_cod # cod data
 
-
 # Select Life Table
 lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median", ]
 # Select COD data

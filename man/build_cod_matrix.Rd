@@ -5,12 +5,10 @@
 \title{Transform the COD data from a long table to a matrix with ages as rows and 
 cod's as columns.}
 \usage{
-build_cod_matrix(cod, na.rm = TRUE)
+build_cod_matrix(cod)
 }
 \arguments{
 \item{cod}{COD long table}
-
-\item{na.rm}{logical.Should missing values be replaced with zero's?}
 }
 \value{
 A matrix with percentages.
@@ -19,4 +17,12 @@ A matrix with percentages.
 Transform the COD data from a long table to a matrix with ages as rows and 
 cod's as columns.
 }
-\keyword{internal}
+\examples{
+# cod data
+D <- data_gbd2019_cod 
+# Select COD data for 1 region
+cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+# COD data in matrix format
+
+build_cod_matrix(cod) 
+}
