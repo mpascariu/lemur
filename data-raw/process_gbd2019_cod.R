@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Fri Mar 26 16:57:01 2021
+# Author: Marius D. PASCARIU
+# Last update: Thu Apr 08 20:39:22 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -301,11 +301,11 @@ gbd_both <- gbd110 %>%
 
 # Create the big dataset with 3 sexes
 GBD <- bind_rows(gbd110, gbd_both) %>% 
-  # compute percentages of each disease for 
+  # compute percentages of each disease for
   # given age-region-period-sex and across ages
-  group_by(region, period, sex, x, level) %>% 
-  # group_by(region, period, sex, level, x, cause_name) %>% 
-  mutate(perc = deaths / sum(deaths)) %>% 
+  group_by(region, period, sex, x, level) %>%
+  # group_by(region, period, sex, level, x, cause_name) %>%
+  mutate(perc = deaths / sum(deaths)) %>%
   ungroup() 
 
 # ------------------------------------------
@@ -354,7 +354,8 @@ GBD %>%
 # ------------------------------------------
 # include data in the package
 
-data_gbd2019_cod <- GBD 
+data_gbd2019_cod <- GBD %>% 
+  select(-perc, -cause_name2)
 
 usethis::use_data(data_gbd2019_cod, overwrite = TRUE)
 

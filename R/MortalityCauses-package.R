@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Sat Apr 03 15:53:05 2021
+# Author: Marius D. PASCARIU
+# Last update: Thu Apr 08 19:50:22 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -11,10 +11,11 @@
 #'
 #' @importFrom dplyr arrange all_of bind_rows bind_cols 
 #' group_by mutate mutate_all select ungroup
-#' @importFrom tidyr pivot_wider replace_na
-#' @importFrom tibble column_to_rownames
+#' @importFrom tidyr pivot_wider pivot_longer replace_na
+#' @importFrom tibble column_to_rownames rownames_to_column
 #' @importFrom MortalityLaws LifeTable
 #' @importFrom magrittr %>%
+#' @importFrom utils head tail
 #' @name MortalityCauses
 #' @docType package
 "_PACKAGE"

@@ -1,8 +1,7 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Sat Apr 03 15:24:36 2021
+# Author: Marius D. PASCARIU
+# Last update: Thu Apr 08 22:16:10 2021
 # --------------------------------------------------- #
-
 
 #' Pipe operator
 #'
@@ -21,12 +20,23 @@ NULL
 globalVariables(
   c(
     "region", 
+    "r1",
+    "r2",
     "period", 
+    "p1", 
+    "p2", 
     "sex",
+    "sex1",
+    "sex2",
     "x",
     "level",
-    "deaths",
+    "l1",
+    "l2",
     "cause_name",
-    "perc"
+    "deaths",
+    "decomposition",
+    "perc",
+    "x.int",
+    "."
     )
 )
