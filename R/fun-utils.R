@@ -3,19 +3,8 @@
 # Last update: Thu Apr 08 22:16:10 2021
 # --------------------------------------------------- #
 
-#' Pipe operator
-#'
-#' See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
-#'
-#' @name %>%
-#' @rdname pipe
-#' @keywords internal
-#' @usage lhs \%>\% rhs
-#' @export
-NULL
 
 
-# ----------------------------------------------------------------------------
 # Hack CRAN check warnings related to tidyverse coding style
 globalVariables(
   c(

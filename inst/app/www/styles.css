@@ -1,0 +1,116 @@
+body  {
+  margin-top: 60px;
+  background-color: #fbfbfb;
+  font-family: 'Roboto Condensed', Helvetica, Arial, sans-serif !important;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto Condensed', Helvetica, Arial, sans-serif !important;
+}
+
+/*
+@media only screen and (min-width : 320px) {
+  .tab-content {
+    margin-top: 140px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  .tab-content {
+    margin-top: 60px;
+  }
+}
+*/
+
+.nav-image {
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.box-title .form-group{
+  margin-bottom: 0 !important;
+}
+
+.checkbox{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.selectize-dropdown {
+  z-index: 10000
+}
+
+.small, small {
+  font-size: 60%;
+}
+
+@media only screen and (min-width : 320px) {
+  .countup {
+    font-size: 38px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  .countup {
+    font-size: 2vw;
+  }
+  
+  #hc-cases-mini, #hc-deaths-mini {
+    height: -o-calc(15vh - 100px) !important; /* opera */
+    height: -webkit-calc(15vh - 100px) !important; /* google, safari */
+    height: -moz-calc(15vh - 100px) !important; /* firefox */
+    height: calc(15vh - 100px) !important;
+  }
+}
+
+/*
+.hc-hide {
+  height: -o-calc(15vh - 100px) !important; 
+  height: -webkit-calc(15vh - 100px) !important; 
+  height: -moz-calc(15vh - 100px) !important; 
+  height: calc(15vh - 100px) !important;
+}
+
+.highchart {
+  height: -o-calc(15vh - 100px) !important; 
+  height: -webkit-calc(15vh - 100px) !important; 
+  height: -moz-calc(15vh - 100px) !important; 
+  height: calc(15vh - 100px) !important;
+}
+*/
+
+#map_1-map {
+  min-height: 300px;
+  height: -o-calc(50vh - 100px) !important; /* opera */
+  height: -webkit-calc(50vh - 100px) !important; /* google, safari */
+  height: -moz-calc(50vh - 100px) !important; /* firefox */
+  height: calc(50vh - 100px) !important;
+}
+
+#map_1-table {
+  min-height: 300px;
+  height: -o-calc(50vh - 100px) !important; /* opera */
+  height: -webkit-calc(50vh - 100px) !important; /* google, safari */
+  height: -moz-calc(50vh - 100px) !important; /* firefox */
+  height: calc(50vh - 100px) !important;
+}
+
+.ReactTable{
+  height: 100% !important;
+}
+
+#map_1-epicurve {
+  min-height: 300px;
+  height: -o-calc(40vh - 100px) !important; /* opera */
+  height: -webkit-calc(40vh - 100px) !important; /* google, safari */
+  height: -moz-calc(40vh - 100px) !important; /* firefox */
+  height: calc(40vh - 100px) !important;
+}
+
+#map_1-cumulative {
+  min-height: 300px;
+  height: -o-calc(40vh - 100px) !important; /* opera */
+  height: -webkit-calc(40vh - 100px) !important; /* google, safari */
+  height: -moz-calc(40vh - 100px) !important; /* firefox */
+  height: calc(40vh - 100px) !important;
+}
