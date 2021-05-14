@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 12 20:43:16 2021
+# Last update: Thu May 13 20:20:24 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -21,10 +21,15 @@ app_ui <- function() {
       
       # tabs 
       tabPanel(
+        title = icon("home"), 
+        mod_home_ui("home")
+      ), 
+      
+      tabPanel(
         title = icon("globe-africa"), 
         mod_map_ui("map_1")
-      ), #"Global overview", 
-      
+      ), 
+
       tabPanel(
         #title = "About",
         title = icon("info"), 
@@ -36,23 +41,36 @@ app_ui <- function() {
               tabPanel(
                 "About", 
                 includeMarkdown(
-                  system.file('app/www/about.md', package = 'MortalityCauses')
+                  system.file('app/www/doc_about.md', 
+                              package = 'MortalityCauses')
+                )
+              ),
+              tabPanel(
+                "Sources", 
+                includeMarkdown(
+                  system.file('app/www/doc_sources.md', 
+                              package = 'MortalityCauses')
                 )
               ),
               tabPanel(
                 "Methods Protocol", 
                 includeMarkdown(
-                  system.file('app/www/trends.md', package = 'MortalityCauses')
+                  system.file('app/www/doc_methods.md', 
+                              package = 'MortalityCauses')
+                )
+              ),
+              tabPanel(
+                "Methods Protocol", 
+                includeMarkdown(
+                  system.file('app/www/doc_contact.md', 
+                              package = 'MortalityCauses')
                 )
               )
             )
           )
         )
       )
-      
-    ),
-    # waiter::waiter_show_on_load(html = waiter::spin_3()),
-    # waiter::waiter_hide_on_render("map_1-cumulative")
+    )
   )
 }
 

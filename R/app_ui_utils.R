@@ -22,6 +22,10 @@ col_6 <- function(...){
   div(class = "col-xs-12 col-sm-12 col-md-6", ...)
 }
 
+col_5 <- function(...){
+  column(5, ...)
+}
+
 col_4 <- function(...){
   div(class = "col-xs-12 col-sm-12 col-md-4", ...)
 }

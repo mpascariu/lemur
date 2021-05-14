@@ -1,6 +1,6 @@
 Package: MortalityCauses
 Title: Caused Deleted Mortality Shiny App
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -13,6 +13,7 @@ Imports:
   DT,
   dplyr (>= 1.0.2),
   leaflet,
+  leaflet.extras,
   markdown,
   rmarkdown,
   magrittr (>= 2.0.1),

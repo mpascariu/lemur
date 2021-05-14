@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 12 20:46:59 2021
+# Last update: Thu May 13 15:11:59 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -10,6 +10,7 @@
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
 #' @import leaflet
+#' @importFrom leaflet.extras addFullscreenControl addResetMapButton 
 #' @importFrom dplyr arrange all_of bind_rows bind_cols 
 #' group_by mutate mutate_all select ungroup
 #' @importFrom tidyr pivot_wider pivot_longer replace_na
@@ -22,7 +23,7 @@
 #' @import golem
 #' @importFrom config get
 #' @importFrom metathis meta meta_social
-#' @importFrom shinyWidgets useShinydashboard
+#' @importFrom shinyWidgets useShinydashboard setBackgroundImage
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shinydashboard box
 #' @importFrom reactable reactableOutput
