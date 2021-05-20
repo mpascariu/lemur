@@ -3,6 +3,11 @@
 # Last update: Thu May 13 16:02:01 2021
 # --------------------------------------------------- #
 
+#' Server module: MAP
+#' @param input input
+#' @param output output
+#' @param session session
+#' 
 #' @rdname mod_map
 mod_map_server <- function(input, output, session) {
   ns <- session$ns

@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 13 15:11:59 2021
+# Last update: Wed May 19 11:47:33 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -14,12 +14,14 @@
 #' @importFrom dplyr arrange all_of bind_rows bind_cols 
 #' group_by mutate mutate_all select ungroup
 #' @importFrom tidyr pivot_wider pivot_longer replace_na
-#' @importFrom tibble column_to_rownames rownames_to_column
+#' @importFrom tibble column_to_rownames rownames_to_column new_tibble
+#' @importFrom forcats as_factor
 #' @importFrom MortalityLaws LifeTable
 #' @importFrom magrittr %>%
 #' @importFrom utils head tail
 #' 
 #' @import shiny
+#' @import ggplot2
 #' @import golem
 #' @importFrom config get
 #' @importFrom metathis meta meta_social

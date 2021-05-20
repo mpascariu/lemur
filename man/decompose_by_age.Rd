@@ -34,7 +34,10 @@ L1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
 L2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
 
 # Age decomposition
-decompose_by_age(L1, L2)
+dec <- decompose_by_age(L1, L2)
+dec
+
+plot_decompose(dec)
 }
 \references{
 ...

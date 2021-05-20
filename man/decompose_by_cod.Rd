@@ -76,6 +76,8 @@ dec  <- decompose_by_cod(L1 = lt1,
                          C2 = cod2)
 
 dec
+
+plot_decompose(dec)
 }
 \references{
 ...

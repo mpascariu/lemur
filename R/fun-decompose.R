@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Apr 08 22:16:22 2021
+# Last update: Wed May 19 11:47:41 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -27,7 +27,10 @@
 #' L2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
 #' 
 #' # Age decomposition
-#' decompose_by_age(L1, L2)
+#' dec <- decompose_by_age(L1, L2)
+#' dec
+#' 
+#' plot_decompose(dec)
 #' @export
 decompose_by_age <- function(L1, L2){
   
@@ -63,14 +66,28 @@ decompose_by_age <- function(L1, L2){
       x
     ) %>% 
     mutate(
+      x.int = forcats::as_factor(x.int),
       decomposition = dec,
-      region = ifelse(L1$region == L2$region, region, paste(L1$region, "-", L2$region)),
-      period = ifelse(L1$period == L2$period, period, paste(L1$period, "-", L2$period)),
-      sex = ifelse(L1$sex == L2$sex, sex, paste(L1$sex, "-", L2$sex)),
-      level = ifelse(L1$level == L2$level, level, paste(L1$level, "-", L2$level)),
+      region = ifelse(
+        L1$region == L2$region, 
+        region, 
+        paste(L1$region, "-", L2$region)),
+      period = ifelse(
+        L1$period == L2$period, 
+        period, 
+        paste(L1$period, "-", L2$period)),
+      sex = ifelse(
+        L1$sex == L2$sex, 
+        sex, 
+        paste(L1$sex, "-", L2$sex)),
+      level = ifelse(
+        L1$level == L2$level, 
+        level, 
+        paste(L1$level, "-", L2$level)),
     )
   
-  # exit
+  # Add a new S3 class and exit
+  out <- new_tibble(out, nrow = nrow(out), class = "decompose")
   return(out)
 }
 
@@ -131,6 +148,8 @@ decompose_by_age <- function(L1, L2){
 #'                          C2 = cod2)
 #' 
 #' dec
+#' 
+#' plot_decompose(dec)
 #' @export
 decompose_by_cod <- function(L1, 
                              L2,
@@ -197,7 +216,8 @@ decompose_by_cod <- function(L1,
   # Create a nice long table before exit
   out <- matrix_to_long_table(dec, C1, C2)
   
-  #Exit
+  # Add a new S3 class and exit
+  out <- new_tibble(out, nrow = nrow(out), class = "decompose")
   return(out)
 }
 
@@ -242,6 +262,9 @@ matrix_to_long_table <- function(X, C1, C2){
     # if info differs in the two cod tables we merge them
     mutate(
       x      = as.numeric(x),
+      x.int  = as.character(cut(x, breaks = c(unique(x), Inf), right = FALSE)),
+      x.int  = ifelse(x.int == "[110,Inf)", "[110,+)", x.int),
+      x.int  = forcats::as_factor(x.int),
       
       r1     = unique(C1$region),
       r2     = unique(C2$region),
@@ -263,18 +286,71 @@ matrix_to_long_table <- function(X, C1, C2){
       region, 
       period, 
       sex, 
-      cause_name, 
-      x, 
       level, 
+      x.int,
+      x, 
+      cause_name, 
       decomposition) %>% 
     arrange(cause_name, x)
   
 } 
 
 
+# ----------------------------------------------------------------------------
+# Plot Function
 
+#' Plot Function for decompose
+#' 
+#' @param object An object of class decompose
+#' @param ... Arguments to be passed to methods, such as graphical
+#' @seealso 
+#' \code{\link{decompose_by_cod}}
+#' \code{\link{decompose_by_age}}
+#' @examples 
+#' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
+#' @export
+plot_decompose <- function(object, ...) {
+  
+  # Define the aesthetics
+  if("cause_name" %in% names(object)) {
+    aess <- aes(
+      x = x.int,
+      y = decomposition, 
+      fill = cause_name)
+  } else {
+    aess <- aes(
+      x = x.int,
+      y = decomposition)
+  }
+  
+  # Build the plot
+  p <- object %>% 
+    ggplot(aess) +
+    geom_bar(
+      stat = "identity",
+      width = 0.9,
+      position = position_stack(reverse = FALSE)) +
+    geom_hline(yintercept = 0) + 
+    labs(
+      size = 10) +
+    theme_custom()
+  
+  # Exit
+  return(p)
+}
 
-
+#' ggplot custom theme
+#' @keywords internal 
+theme_custom <- function() {
+  theme_light() + 
+    theme(
+      plot.margin = margin(25, 10, 10, 20),
+      strip.text.x = element_text(size = 12, colour = "black", face = "bold"),
+      strip.background = element_rect(fill = "gray87"),
+      text = element_text(size = 14),
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+}
 
 
 
