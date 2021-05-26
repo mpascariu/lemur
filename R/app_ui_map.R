@@ -189,7 +189,10 @@ mod_map_ui <- function(id) {
               )
             ),
             
-            highcharter::highchartOutput(ns("cumulative"))
+            plotOutput(
+              outputId = ns("chart4_decomposition")
+            )
+            
           )
         )
       )

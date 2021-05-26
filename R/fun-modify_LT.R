@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Apr 08 22:16:39 2021
+# Last update: Wed May 26 15:27:57 2021
 # --------------------------------------------------- #
 
 #' Modify life table by changing the cause of death associated risks
@@ -57,30 +57,16 @@
 modify_life_table <- function(lt, cod, cod_change) {
   
   cod <- build_cod_matrix(cod)    # death counts by cod from a long dataset
-  r   <- 1 + cod_change / 100      # Reduction
   qx  <- replace_na(lt$qx, 0)
   
-  # reduced probability of survival by cod
-  if (all(r <= 0)) {
-    stop(
-      paste(
-        "The mortality reduction cannot be 100% or more.",
-        "That would make us immortals; and this software",
-        "does not know how to deal with that!", 
-        call. = FALSE)
-    )
-    
-  } else if (is.matrix(cod_change)) {
-    pxi_r <- (1 - qx) ^ (cod * r)
-    
-  } else {
-    # is cod_change is a vector then we have to transpose to 
-    # do the multiplication correctly 
-    pxi_r <- (1 - qx) ^ t(t(cod) * r)
-    
-  }
+  # Modify cod matrix by applying a change
+  mod_cod <- modify_cod(cod, cod_change)
   
-  qx_r <- 1 - apply(pxi_r, 1, prod)  # all-cause reduced qx
+  # reduced probability of survival by cod
+  pxi_r <- (1 - qx) ^ mod_cod
+  
+  # all-cause reduced qx
+  qx_r <- 1 - apply(pxi_r, 1, prod)  
   
   # Build life-table from qx_r using standard procedure 
   # from {MortalityLaws}. The sex argument is not required since we have the
@@ -102,6 +88,77 @@ modify_life_table <- function(lt, cod, cod_change) {
   return(out)
 }
 
+
+#' Modify COD table by changing the cause of death associated risks
+#' 
+#' @inheritParams modify_life_table
+#' @return A long table with the same format as the input data
+#' @examples 
+#' D <- data_gbd2019_cod # cod data
+#' 
+#' # Select COD data
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod_change = -50
+#' 
+#' # Example 1:
+#' # Modify by 50% all COD values. This is trivial and not need really.
+#' modify_cod_table(cod, cod_change = -50)
+#' 
+#' 
+#' # Example 2:
+#' # Change the first cod by 1%, second one with 2% and so on until 17%
+#' modify_cod_table(cod, cod_change = 1:17)
+#' 
+#' # Example 3:
+#' # Apply a specific change by cause and age
+#' # Say, we want to decrease the cod's risk only between age 45 and 75
+#' # with values between 24% and 40%.
+#' 
+#' # we have to build a matrix with 24 rows and 17 columns (ages x cods)
+#' # to indicate the change for each combination
+#' M <- matrix(24:40, nrow = 24, ncol = 17, byrow = TRUE)
+#' dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
+#' M[!(rownames(M) %in% 45:75), ] <- 0
+#' M
+#' 
+#' modify_cod_table(cod, cod_change = -M)
+#' @export
+modify_cod_table <- function(cod, cod_change){
+  
+  #build cod matrix
+  cod2 <- cod %>%
+    select(x, cause_name, deaths) %>% 
+    # and build a matrix
+    pivot_wider(
+      names_from = cause_name,
+      values_from = deaths
+    ) %>% 
+    arrange(x)  %>% 
+    # replace na with 0
+    mutate_all(~replace(., is.na(.), 0)) %>% 
+    # name rows
+    column_to_rownames("x") %>% 
+    as.matrix()
+  
+  # Modify cod matrix by applying a change
+  mod_cod <- modify_cod(cod2, cod_change)
+  
+  # Go from matrix to long table
+  out <- mod_cod %>% 
+    as.data.frame() %>% 
+    rownames_to_column(., var = "x") %>% 
+    pivot_longer(
+      cols = -x, 
+      names_to = "cause_name", 
+      values_to = "deaths") %>% 
+    mutate(x = as.numeric(x)) %>% 
+    arrange(cause_name) %>% 
+    # remove original deaths column and join the datasets
+    left_join(cod[-7], ., by = c("x", "cause_name")) 
+  
+  # Exit
+  return(out)
+}
 
 
 #' Format COD data
@@ -145,4 +202,35 @@ build_cod_matrix <- function(cod) {
 }
 
 
-
+#' Modify COD values by changing the cause of death associated risks
+#' 
+#' @inheritParams modify_life_table
+#' @return A long table with the same format as the input cod
+#' @keywords internal
+modify_cod <- function(cod, cod_change) {
+  
+  # Reduction
+  r   <- 1 + cod_change / 100      
+  
+  # reduced probability of survival by cod
+  if (all(r <= 0)) {
+    stop(
+      paste(
+        "The mortality reduction cannot be 100% or more.",
+        "That would make us immortals; and this software",
+        "does not know how to deal with that!", 
+        call. = FALSE)
+    )
+    
+  } else if (is.matrix(cod_change)) {
+    out <- cod * r
+    
+  } else {
+    # is cod_change is a vector then we have to transpose to 
+    # do the multiplication correctly 
+    out <- t(t(cod) * r)
+    
+  }
+  
+  return(out)
+}

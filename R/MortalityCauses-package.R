@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 19 11:47:33 2021
+# Last update: Wed May 26 15:30:48 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -12,7 +12,7 @@
 #' @import leaflet
 #' @importFrom leaflet.extras addFullscreenControl addResetMapButton 
 #' @importFrom dplyr arrange all_of bind_rows bind_cols 
-#' group_by mutate mutate_all select ungroup
+#' group_by mutate mutate_all select ungroup left_join
 #' @importFrom tidyr pivot_wider pivot_longer replace_na
 #' @importFrom tibble column_to_rownames rownames_to_column new_tibble
 #' @importFrom forcats as_factor

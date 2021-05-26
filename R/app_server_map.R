@@ -39,4 +39,36 @@ mod_map_server <- function(input, output, session) {
       )
     
   })
+  
+
+  chart4_data <- reactive({
+    L <- MortalityCauses::data_gbd2019_lt  # life tables
+    D <- MortalityCauses::data_gbd2019_cod # cod data
+    
+    # Select two Life Tables
+    region1 = "Romania"
+    region2 = "Mexico"
+    sex     = "male"
+    level   = "median"
+    
+    lt1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
+    lt2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
+    
+    # Select COD corresponding data
+    cod1 <- D[D$region == region1 & D$sex == sex & D$level == level, ]
+    cod2 <- D[D$region == region2 & D$sex == sex & D$level == level, ]
+    
+    ## Example of decomposition by age and cause of death
+    dec  <- decompose_by_cod(L1 = lt1,
+                             L2 = lt2,
+                             C1 = cod1,
+                             C2 = cod2)
+    dec
+  })
+  
+  output$chart4_decomposition <- renderPlot(
+    plot_decompose(chart4_data)
+  )
+
 }
+
