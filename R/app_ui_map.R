@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 13 20:09:09 2021
+# Last update: Wed May 26 21:14:20 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -15,47 +15,72 @@ mod_map_ui <- function(id) {
   # )
   
   tagList(
-    col_2(
-      tags$div(
-        "Control Panel",
-        style = "display: inline-block; font-weight: bold;"
-      ),
+    column(
+      width = 2,
+      # tags$div(
+      #   "Control Panel",
+      #   style = "display: inline-block; font-weight: bold;"
+      # ),
+      
+      selectInput(
+        inputId  = ns("region1"),
+        label    = "Region focus",
+        choices  = unique(data_gbd2019_lt$region),
+        selected = "Romania",
+        width    = "100%"
+      ), 
+      
+      sliderInput(
+        inputId = "cod_change",
+        label = "COD change",
+        value = 0,
+        min = -99,
+        max = 200,
+        step = 1)
     ),
     
-    col_10(
+    column(
+      width = 10,
       fluidRow(
-        col_3(
-          selectInput(
-            ns("region"),
-            "Region focus",
-            choices = unique(data_gbd2019_lt$region),
-            width = "100%"
-          )
-        ),
-        col_3(
+        column(
+          width = 2,
           shinyWidgets::radioGroupButtons(
-            inputId = ns("source"),
-            label = "Data source",
+            inputId = ns("mode"),
+            label   = "Mode",
             choices = c(
-              "GBD" = "GBD", 
-              "UN" = "UN"), # "WHO",
+              "COD Risk Change" = "cod_change", 
+              "Country Comparisons" = "cntr_compare"),
             justified = TRUE,
             size = "sm"
           )
         ),
-        col_3(
+        
+        column(
+          width = 2,
           shinyWidgets::radioGroupButtons(
-            inputId = ns("indicator"),
-            label = "Indicator",
+            inputId = ns("sex"),
+            label   = "Sex",
             choices = c(
-              "Life Expectancy" = "a", 
-              "Death rate" = "b"),
+              "Female" = "female", 
+              "Male"   = "male",
+              "Both"   = "both"),
+            selected = "both",
             justified = TRUE,
             size = "sm"
           )
         ),
-        col_3(
-          
+        
+        column(
+          width = 2,
+          shinyWidgets::radioGroupButtons(
+            inputId = ns("legend_labs"),
+            label   = "Legend Labels",
+            choices = c(
+              "Long"  = "long", 
+              "Short" = "short"),
+            justified = TRUE,
+            size = "sm"
+          )
         )
       ),
       
@@ -64,49 +89,51 @@ mod_map_ui <- function(id) {
         shinydashboard::box(
           width = 7, 
           solidHeader = TRUE,
-          leafletOutput(ns("map"))
+          leafletOutput(ns("figure1"))
         ),
         
-        col_5(
-        shinydashboard::box(
-          width = NULL,
-          solidHeader = TRUE,
-          
-          title = tagList(
-            tags$div(
-              "Cause of Death Distribution",
-              style = "display: inline-block; font-weight: bold;"
-            ),
-            tags$div(
-              style = "display: inline-block; padding-right: 1px;"
-            ),
-            tags$div(
-              style = "display: inline-block;",
-              shinyWidgets::dropdownButton(
-                size = "xs",
-                label = "params",
-                icon = icon("sliders"),
-                inline = TRUE,
-                width = "50px",
-                circle = FALSE,
-                checkboxGroupInput(
-                  ns("c_params"),
-                  label = "",
-                  inline = FALSE,
-                  choices = c("log scale" = "log",
-                              "percentage" = "perc"))
-
+        column(
+          width = 5,
+          shinydashboard::box(
+            # div(style = "height:400px;background-color: yellow;"),
+            width = NULL,
+            solidHeader = TRUE,
+            
+            title = tagList(
+              tags$div(
+                "Cause of Death Distribution",
+                style = "display: inline-block; font-weight: bold; height: 2px"
+              ),
+              tags$div(
+                style = "display: inline-block; padding-left: 320px;",
+                shinyWidgets::dropdownButton(
+                  size = "xs",
+                  label = "params",
+                  icon = icon("sliders"),
+                  inline = TRUE,
+                  width = "10px",
+                  circle = FALSE,
+                  checkboxGroupInput(
+                    ns("c_params"),
+                    label = "",
+                    inline = FALSE,
+                    choices = c("log scale" = "log",
+                                "percentage" = "perc"))
+                )
               )
+            ),
+            
+            plotOutput(
+              outputId = ns("figure2"),
+              height = 360
             )
           )
-        ),
-        
-        highcharter::highchartOutput(ns("table"))
         )
       ),
     
       fluidRow(
-        col_6(
+        column(
+          width = 6,
           shinydashboard::box(
             width = NULL, 
             solidHeader = TRUE,
@@ -117,10 +144,7 @@ mod_map_ui <- function(id) {
                 style = "display: inline-block; font-weight: bold;"
               ),
               tags$div(
-                style = "display: inline-block; padding-right: 1px;"
-              ),
-              tags$div(
-                style = "display: inline-block;",
+                style = "display: inline-block; padding-left: 400px;",
                 shinyWidgets::dropdownButton(
                   size = "xs",
                   label = "params",
@@ -138,11 +162,15 @@ mod_map_ui <- function(id) {
               )
             ),
             
-            highcharter::highchartOutput(ns("epicurve"))
+            plotOutput(
+              outputId = ns("figure3"),
+              height = 330
+            )
           )
         ),
   
-        col_6(
+        column(
+          width = 6,
           shinydashboard::box(
             width = NULL, 
             solidHeader = TRUE,
@@ -153,10 +181,7 @@ mod_map_ui <- function(id) {
                 style = "display: inline-block; font-weight: bold;"
               ),
               tags$div(
-                style = "display: inline-block; padding-right: 1px;"
-              ),
-              tags$div(
-                style = "display: inline-block;",
+                style = "display: inline-block; padding-left: 380px;",
                 shinyWidgets::dropdownButton(
                   size = "xs", 
                   label = "params", 
@@ -190,9 +215,9 @@ mod_map_ui <- function(id) {
             ),
             
             plotOutput(
-              outputId = ns("chart4_decomposition")
+              outputId = ns("figure4"),
+              height = 330
             )
-            
           )
         )
       )

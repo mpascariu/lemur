@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 13 20:20:24 2021
+# Last update: Wed May 26 21:21:58 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -29,7 +29,7 @@ app_ui <- function() {
         title = icon("globe-africa"), 
         mod_map_ui("map_1")
       ), 
-
+      
       tabPanel(
         #title = "About",
         title = icon("info"), 

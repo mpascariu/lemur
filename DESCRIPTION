@@ -1,6 +1,6 @@
 Package: MortalityCauses
 Title: Caused Deleted Mortality Shiny App
-Version: 0.3.3
+Version: 0.3.4
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -23,14 +23,14 @@ Imports:
   golem,
   ggplot2,
   reactable,
+  scales,
   shiny,
   shinydashboard,
   shinyjs,
   shinyWidgets,
   tidyr (>= 1.1.2),
   tibble (>= 3.0.4),
-  htmltools,
-  highcharter
+  htmltools
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

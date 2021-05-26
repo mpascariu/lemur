@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 15:30:48 2021
+# Last update: Wed May 26 21:45:28 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -9,30 +9,64 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
-#' @import leaflet
-#' @importFrom leaflet.extras addFullscreenControl addResetMapButton 
-#' @importFrom dplyr arrange all_of bind_rows bind_cols 
-#' group_by mutate mutate_all select ungroup left_join
-#' @importFrom tidyr pivot_wider pivot_longer replace_na
-#' @importFrom tibble column_to_rownames rownames_to_column new_tibble
-#' @importFrom forcats as_factor
-#' @importFrom MortalityLaws LifeTable
-#' @importFrom magrittr %>%
-#' @importFrom utils head tail
-#' 
 #' @import shiny
 #' @import ggplot2
 #' @import golem
-#' @importFrom config get
-#' @importFrom metathis meta meta_social
-#' @importFrom shinyWidgets useShinydashboard setBackgroundImage
+#' @import leaflet
+#' 
+#' @importFrom reactable reactableOutput
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shinydashboard box
-#' @importFrom reactable reactableOutput
-#' @importFrom htmltools tags tagList tagAppendAttributes HTML
-#' @importFrom highcharter highchartOutput
+#' @importFrom scales label_number_si
+#' @importFrom config get
 #' @importFrom rmarkdown render
 #' @importFrom markdown markdownToHTML
+#' @importFrom forcats as_factor
+#' @importFrom MortalityLaws LifeTable
+#' @importFrom magrittr %>%
+#' 
+#' @importFrom leaflet.extras 
+#' addFullscreenControl 
+#' addResetMapButton 
+#' 
+#' @importFrom dplyr 
+#' all_of 
+#' arrange 
+#' bind_rows 
+#' bind_cols 
+#' group_by 
+#' left_join 
+#' filter
+#' mutate 
+#' mutate_all 
+#' summarise
+#' select 
+#' ungroup 
+#' 
+#' @importFrom tidyr 
+#' pivot_wider 
+#' pivot_longer 
+#' replace_na
+#' 
+#' @importFrom tibble 
+#' column_to_rownames 
+#' rownames_to_column 
+#' new_tibble
+#' 
+#' @importFrom metathis 
+#' meta 
+#' meta_social
+#' 
+#' @importFrom shinyWidgets 
+#' useShinydashboard 
+#' setBackgroundImage
+#' 
+#' @importFrom htmltools 
+#' tags 
+#' tagList 
+#' tagAppendAttributes 
+#' HTML
+#' 
 #' @name MortalityCauses
 #' @docType package
 "_PACKAGE"

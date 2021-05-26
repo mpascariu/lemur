@@ -6,13 +6,7 @@
 \usage{
 mod_map_server(input, output, session)
 }
-\arguments{
-\item{input}{input}
-
-\item{output}{output}
-
-\item{session}{session}
-}
 \description{
 Server module: MAP
 }
+\keyword{internal}

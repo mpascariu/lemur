@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 19 11:47:41 2021
+# Last update: Wed May 26 21:48:33 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -234,9 +234,9 @@ exFUN <- function(x, cod){
   nx <- c(diff(x), Inf)
   px <- exp(-mx*{{nx}})
   qx <- 1-px
-  lx <- head(cumprod(c(1, px)), -1)
-  dx <- c(-diff(lx), tail(lx, 1))
-  Lx <- ifelse(mx==0, lx*nx, dx/mx)
+  lx <- cumprod(c(1, px))[seq_along(px)]
+  dx <- c(-diff(lx), rev(lx)[1])
+  Lx <- ifelse(mx == 0, lx * nx, dx/mx)
   Tx <- rev(cumsum(rev(Lx)))
   ex <- Tx/lx
   
@@ -294,63 +294,6 @@ matrix_to_long_table <- function(X, C1, C2){
     arrange(cause_name, x)
   
 } 
-
-
-# ----------------------------------------------------------------------------
-# Plot Function
-
-#' Plot Function for decompose
-#' 
-#' @param object An object of class decompose
-#' @param ... Arguments to be passed to methods, such as graphical
-#' @seealso 
-#' \code{\link{decompose_by_cod}}
-#' \code{\link{decompose_by_age}}
-#' @examples 
-#' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
-#' @export
-plot_decompose <- function(object, ...) {
-  
-  # Define the aesthetics
-  if("cause_name" %in% names(object)) {
-    aess <- aes(
-      x = x.int,
-      y = decomposition, 
-      fill = cause_name)
-  } else {
-    aess <- aes(
-      x = x.int,
-      y = decomposition)
-  }
-  
-  # Build the plot
-  p <- object %>% 
-    ggplot(aess) +
-    geom_bar(
-      stat = "identity",
-      width = 0.9,
-      position = position_stack(reverse = FALSE)) +
-    geom_hline(yintercept = 0) + 
-    labs(
-      size = 10) +
-    theme_custom()
-  
-  # Exit
-  return(p)
-}
-
-#' ggplot custom theme
-#' @keywords internal 
-theme_custom <- function() {
-  theme_light() + 
-    theme(
-      plot.margin = margin(25, 10, 10, 20),
-      strip.text.x = element_text(size = 12, colour = "black", face = "bold"),
-      strip.background = element_rect(fill = "gray87"),
-      text = element_text(size = 14),
-      axis.text.x = element_text(angle = 45, hjust = 1)
-    )
-}
 
 
 
