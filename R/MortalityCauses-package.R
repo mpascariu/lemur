@@ -10,6 +10,7 @@
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
 #' @import shiny
+#' @import shinyWidgets
 #' @import ggplot2
 #' @import golem
 #' @import leaflet
@@ -56,10 +57,6 @@
 #' @importFrom metathis 
 #' meta 
 #' meta_social
-#' 
-#' @importFrom shinyWidgets 
-#' useShinydashboard 
-#' setBackgroundImage
 #' 
 #' @importFrom htmltools 
 #' tags 

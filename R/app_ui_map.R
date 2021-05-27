@@ -1,49 +1,74 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 21:14:20 2021
+# Last update: Thu May 27 08:49:32 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
 mod_map_ui <- function(id) {
   ns <- NS(id)
   
-  # shinyWidgets::setBackgroundColor(
-  #   color = "ghost=white",
-  #   gradient = c("linear", "radial"),
-  #   direction = c("bottom", "top", "right", "left"),
-  #   shinydashboard = FALSE
-  # )
-  
   tagList(
+
     column(
       width = 2,
-      # tags$div(
-      #   "Control Panel",
-      #   style = "display: inline-block; font-weight: bold;"
-      # ),
+
+      shinyWidgets::radioGroupButtons(
+        inputId = ns("sex"),
+        label   = "Sex",
+        choices = c(
+          "Female" = "female", 
+          "Male"   = "male",
+          "Both"   = "both"),
+        selected = "both",
+        justified = TRUE,
+        size = "sm"
+      ),
       
       selectInput(
         inputId  = ns("region1"),
-        label    = "Region focus",
+        label    = "Region",
         choices  = unique(data_gbd2019_lt$region),
         selected = "Romania",
         width    = "100%"
       ), 
       
+      conditionalPanel(
+        condition = "input.mode == cntr_compare",
+        selectInput(
+          inputId  = ns("region2"),
+          label    = "Region 2",
+          choices  = unique(data_gbd2019_lt$region),
+          selected = "Mexico",
+          width    = "100%"
+        ), 
+      ),
+      
       sliderInput(
         inputId = "cod_change",
-        label = "COD change",
+        label = "Modify the case-specific risk of dying:",
+        post = "%",
         value = 0,
         min = -99,
-        max = 200,
-        step = 1)
+        max = 100,
+        step = 1),
+      
+      prettyCheckboxGroup(
+        inputId = "cod_target",
+        label = "Which cause of death to be affected:", 
+        choices = unique(data_gbd2019_cod$cause_name),
+        icon = icon("check"),
+        status = "success",
+        animation = "rotate",
+        outline = TRUE,
+        inline = FALSE
+      )
     ),
     
     column(
       width = 10,
       fluidRow(
         column(
-          width = 2,
+          width = 3,
           shinyWidgets::radioGroupButtons(
             inputId = ns("mode"),
             label   = "Mode",
@@ -54,22 +79,7 @@ mod_map_ui <- function(id) {
             size = "sm"
           )
         ),
-        
-        column(
-          width = 2,
-          shinyWidgets::radioGroupButtons(
-            inputId = ns("sex"),
-            label   = "Sex",
-            choices = c(
-              "Female" = "female", 
-              "Male"   = "male",
-              "Both"   = "both"),
-            selected = "both",
-            justified = TRUE,
-            size = "sm"
-          )
-        ),
-        
+
         column(
           width = 2,
           shinyWidgets::radioGroupButtons(

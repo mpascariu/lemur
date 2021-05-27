@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 17:31:12 2021
+# Last update: Thu May 27 20:38:45 2021
 # --------------------------------------------------- #
 
 # Hack CRAN check warnings related to tidyverse coding style
@@ -11,6 +11,7 @@ globalVariables(
     "deaths",
     "decomposition",
     "data_gbd2019_lt",
+    "data_gbd2019_cod",
     "l1",
     "l2",
     "level",

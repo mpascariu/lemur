@@ -1,7 +1,9 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 13 16:02:01 2021
+# Last update: Thu May 27 08:12:40 2021
 # --------------------------------------------------- #
+
+
 
 #' Server module: MAP
 #' @keywords internal
@@ -25,7 +27,7 @@ mod_map_server <- function(input, output, session) {
   data_cod2 <- reactive({
     data_cod() %>% 
       dplyr::filter(
-        region == "Mexico",
+        region == input$region2,
         sex == input$sex,
         level == "median")
   })
@@ -44,7 +46,7 @@ mod_map_server <- function(input, output, session) {
   data_lt2 <- reactive({
     data_lt() %>% 
       dplyr::filter(
-        region == "Mexico",
+        region == input$region2,
         sex == input$sex,
         level == "median")
   })
@@ -79,12 +81,14 @@ mod_map_server <- function(input, output, session) {
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(
-    plot_decompose(data_figure4())
+    plot_decompose(data_figure4()) +
+      theme(
+        legend.position = "none"
+      )
   )
   
   # outputOptions(output, "figure1", suspendWhenHidden = FALSE)
   # outputOptions(output, "figure2", suspendWhenHidden = FALSE)
   # outputOptions(output, "figure4", suspendWhenHidden = FALSE)
-
 }
 

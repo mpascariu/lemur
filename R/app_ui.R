@@ -19,7 +19,7 @@ app_ui <- function() {
       position = "fixed-top",
       collapsible = TRUE,
       
-      # tabs 
+      # The 3 main tabs defined in 3 separate modules
       tabPanel(
         title = icon("home"), 
         mod_home_ui("home")
@@ -28,47 +28,11 @@ app_ui <- function() {
       tabPanel(
         title = icon("globe-africa"), 
         mod_map_ui("map_1")
-      ), 
+      ),
       
       tabPanel(
-        #title = "About",
         title = icon("info"), 
-        fluidRow(
-          column(
-            width = 8, 
-            offset = 2,
-            tabsetPanel(
-              tabPanel(
-                "About", 
-                includeMarkdown(
-                  system.file('app/www/doc_about.md', 
-                              package = 'MortalityCauses')
-                )
-              ),
-              tabPanel(
-                "Sources", 
-                includeMarkdown(
-                  system.file('app/www/doc_sources.md', 
-                              package = 'MortalityCauses')
-                )
-              ),
-              tabPanel(
-                "Methods Protocol", 
-                includeMarkdown(
-                  system.file('app/www/doc_methods.md', 
-                              package = 'MortalityCauses')
-                )
-              ),
-              tabPanel(
-                "Methods Protocol", 
-                includeMarkdown(
-                  system.file('app/www/doc_contact.md', 
-                              package = 'MortalityCauses')
-                )
-              )
-            )
-          )
-        )
+        mod_info_ui("info")
       )
     )
   )
@@ -76,43 +40,5 @@ app_ui <- function() {
 
 
 
-#' Add external Resources to the Application
-#' 
-#' This function is internally used to add external 
-#' resources inside the Shiny application. 
-#' 
-#' @import shiny
-#' @importFrom golem add_resource_path activate_js favicon bundle_resources
-#' @noRd
-golem_add_external_resources <- function(){
-  
-  addResourcePath(
-    'www', system.file('app/www', package = 'MortalityCauses')
-  )
-  
-  tags$head(
-    metathis::meta() %>%
-      metathis::meta_social(
-        title = "MortalityCauses Dashboard",
-        description = "Developed by Pascariu et al.",
-        url = "https://github.com/mpascariu",  # to be updated
-        # image = "",
-        image_alt = "MortalityCauses",
-        twitter_card_type = "summary_large_image"
-      ),
-    
-    golem::activate_js(),
-    tags$link(
-      href = "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap", 
-      rel = "stylesheet"),
-    # waiter::use_waiter(),
-    shinyjs::useShinyjs(),
-    tags$link(
-      rel="stylesheet", 
-      type="text/css", 
-      href="www/styles.css"),
-    tags$script(src="www/addNavLink.js"),
-    shinyWidgets::useShinydashboard()
-  )
-}
+
 

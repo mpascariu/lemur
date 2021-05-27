@@ -8,18 +8,6 @@ body  {
   font-family: 'Roboto Condensed', Helvetica, Arial, sans-serif !important;
 }
 
-/*
-@media only screen and (min-width : 320px) {
-  .tab-content {
-    margin-top: 140px;
-  }
-}
-@media only screen and (min-width: 768px) {
-  .tab-content {
-    margin-top: 60px;
-  }
-}
-*/
 
 .nav-image {
   padding-top: 5px !important;
