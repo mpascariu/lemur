@@ -70,14 +70,12 @@ mod_map_server <- function(input, output, session) {
     plot_map()
   )
   
+  # Figure 2 - The change
   
-  # Figure 2 - The COD Distribution
-  output$figure2 <- renderPlot(
+  # Figure 3 - The COD Distribution
+  output$figure3 <- renderPlot(
     plot_cod(data_cod1())
   )
-  
-  
-  # Figure 3 - The change
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(

@@ -96,29 +96,50 @@ mod_map_ui <- function(id) {
       
       
       fluidRow(
-        shinydashboard::box(
-          width = 7, 
-          solidHeader = TRUE,
-          leafletOutput(ns("figure1"))
+        style = 'padding-top:0px; padding-bottom:0px;',
+        
+        column(
+          width = 7,
+          style ='padding-right:0px; padding-top:0px; padding-bottom:0px',
+          
+          shinydashboard::box(
+            width = NULL,
+            style = 'padding:0px',
+            solidHeader = TRUE,
+            
+            title = tagList(
+              tags$div(
+                "World Map",
+                style = "display: inline-block; font-weight: bold;"
+              )
+            ),
+            
+            leafletOutput(
+              outputId = ns("figure1"),
+              height = 381
+            )
+          )
         ),
         
         column(
           width = 5,
+          style='padding:0px;',
+          
           shinydashboard::box(
-            # div(style = "height:400px;background-color: yellow;"),
             width = NULL,
             solidHeader = TRUE,
             
             title = tagList(
               tags$div(
-                "Cause of Death Distribution",
-                style = "display: inline-block; font-weight: bold; height: 2px"
+                "Difference in Life Expectancy",
+                style = "display: inline-block; font-weight: bold; padding:0px;"
               ),
               tags$div(
-                style = "display: inline-block; padding-left: 320px;",
+                style = "display: inline-block; padding-left: 340px;",
                 shinyWidgets::dropdownButton(
                   size = "xs",
                   label = "params",
+                  right = TRUE,
                   icon = icon("sliders"),
                   inline = TRUE,
                   width = "10px",
@@ -142,22 +163,27 @@ mod_map_ui <- function(id) {
       ),
     
       fluidRow(
+        style = 'padding-top:0px; padding-bottom:0px; margin-top:-50%;',
+        
         column(
           width = 6,
+          style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
+          
           shinydashboard::box(
             width = NULL, 
             solidHeader = TRUE,
             
             title = tagList(
               tags$div(
-                "Cause Reduced Life Expectancy",
-                style = "display: inline-block; font-weight: bold;"
+                "Cause of Death Distribution",
+                style = "display: inline-block; font-weight: bold; padding:0px;"
               ),
               tags$div(
                 style = "display: inline-block; padding-left: 400px;",
                 shinyWidgets::dropdownButton(
                   size = "xs",
                   label = "params",
+                  right = TRUE,
                   icon = icon("sliders"),
                   inline = TRUE,
                   width = "50px",
@@ -181,6 +207,8 @@ mod_map_ui <- function(id) {
   
         column(
           width = 6,
+          style='padding:0px;',
+          
           shinydashboard::box(
             width = NULL, 
             solidHeader = TRUE,
@@ -188,14 +216,15 @@ mod_map_ui <- function(id) {
             title = tagList(
               tags$div(
                 "Cause of Death / Age Decomposition", 
-                style = "display: inline-block; font-weight: bold;"
+                style = "display: inline-block; font-weight: bold; padding:0px;"
               ),
               tags$div(
-                style = "display: inline-block; padding-left: 380px;",
+                style = "display: inline-block; padding-left: 400px;",
                 shinyWidgets::dropdownButton(
                   size = "xs", 
-                  label = "params", 
-                  icon = icon("sliders"), # status = "primary",
+                  label = "params",
+                  right = TRUE,
+                  icon = icon("sliders"),
                   inline = TRUE, 
                   width = "50px", 
                   circle = FALSE,

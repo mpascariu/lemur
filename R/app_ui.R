@@ -25,14 +25,41 @@ app_ui <- function() {
         mod_home_ui("home")
       ), 
       
-      tabPanel(
+      tabPanel( # Dashboard
         title = icon("globe-africa"), 
         mod_map_ui("map_1")
       ),
       
-      tabPanel(
-        title = icon("info"), 
-        mod_info_ui("info")
+      tabPanel( # "Methods Protocol"
+        title = icon("calculator"), 
+        includeMarkdown(
+          system.file('app/www/doc_methods.md', 
+                      package = 'MortalityCauses')
+        )
+      ),
+      
+      tabPanel( # sources
+        title = icon("database"), 
+        includeMarkdown(
+          system.file('app/www/doc_sources.md', 
+                      package = 'MortalityCauses')
+        )
+      ),
+      
+      tabPanel( # About
+        title = icon("info-circle"), 
+        includeMarkdown(
+          system.file('app/www/doc_about.md', 
+                      package = 'MortalityCauses')
+        )
+      ),
+      
+      tabPanel( # Contact
+        title = icon("address-book"), 
+        includeMarkdown(
+          system.file('app/www/doc_contact.md', 
+                      package = 'MortalityCauses')
+        )
       )
     )
   )

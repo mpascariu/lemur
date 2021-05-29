@@ -1,6 +1,6 @@
 Package: MortalityCauses
 Title: Caused Deleted Mortality Shiny App
-Version: 0.3.5
+Version: 0.3.6
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
