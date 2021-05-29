@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 27 08:49:32 2021
+# Last update: Sat May 29 18:21:03 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -71,7 +71,7 @@ mod_map_ui <- function(id) {
           width = 3,
           shinyWidgets::radioGroupButtons(
             inputId = ns("mode"),
-            label   = "Mode",
+            label   = "Dashboard Mode",
             choices = c(
               "COD Risk Change" = "cod_change", 
               "Country Comparisons" = "cntr_compare"),
@@ -96,8 +96,6 @@ mod_map_ui <- function(id) {
       
       
       fluidRow(
-        style = 'padding-top:0px; padding-bottom:0px;',
-        
         column(
           width = 7,
           style ='padding-right:0px; padding-top:0px; padding-bottom:0px',
@@ -129,29 +127,10 @@ mod_map_ui <- function(id) {
             width = NULL,
             solidHeader = TRUE,
             
-            title = tagList(
-              tags$div(
-                "Difference in Life Expectancy",
-                style = "display: inline-block; font-weight: bold; padding:0px;"
-              ),
-              tags$div(
-                style = "display: inline-block; padding-left: 340px;",
-                shinyWidgets::dropdownButton(
-                  size = "xs",
-                  label = "params",
-                  right = TRUE,
-                  icon = icon("sliders"),
-                  inline = TRUE,
-                  width = "10px",
-                  circle = FALSE,
-                  checkboxGroupInput(
-                    ns("c_params"),
-                    label = "",
-                    inline = FALSE,
-                    choices = c("log scale" = "log",
-                                "percentage" = "perc"))
-                )
-              )
+            title = boxTitleInput(
+              title = "Difference in Life Expectancy",
+              inputId = ns("perc2"),
+              db_style = "display: inline-block; padding-left: 340px;"
             ),
             
             plotOutput(
@@ -163,8 +142,6 @@ mod_map_ui <- function(id) {
       ),
     
       fluidRow(
-        style = 'padding-top:0px; padding-bottom:0px; margin-top:-50%;',
-        
         column(
           width = 6,
           style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
@@ -173,29 +150,10 @@ mod_map_ui <- function(id) {
             width = NULL, 
             solidHeader = TRUE,
             
-            title = tagList(
-              tags$div(
-                "Cause of Death Distribution",
-                style = "display: inline-block; font-weight: bold; padding:0px;"
-              ),
-              tags$div(
-                style = "display: inline-block; padding-left: 400px;",
-                shinyWidgets::dropdownButton(
-                  size = "xs",
-                  label = "params",
-                  right = TRUE,
-                  icon = icon("sliders"),
-                  inline = TRUE,
-                  width = "50px",
-                  circle = FALSE,
-                  checkboxGroupInput(
-                    ns("c_params"),
-                    label = "",
-                    inline = FALSE,
-                    choices = c("log scale" = "log",
-                                "percentage" = "perc"))
-                )
-              )
+            title = boxTitleInput(
+              title = "Cause of Death Distribution",
+              inputId = ns("perc3"),
+              db_style = "display: inline-block; padding-left: 450px;"
             ),
             
             plotOutput(
@@ -213,44 +171,10 @@ mod_map_ui <- function(id) {
             width = NULL, 
             solidHeader = TRUE,
             
-            title = tagList(
-              tags$div(
-                "Cause of Death / Age Decomposition", 
-                style = "display: inline-block; font-weight: bold; padding:0px;"
-              ),
-              tags$div(
-                style = "display: inline-block; padding-left: 400px;",
-                shinyWidgets::dropdownButton(
-                  size = "xs", 
-                  label = "params",
-                  right = TRUE,
-                  icon = icon("sliders"),
-                  inline = TRUE, 
-                  width = "50px", 
-                  circle = FALSE,
-                  checkboxGroupInput(
-                    ns("c_params"), 
-                    label = "", 
-                    inline = FALSE,
-                    choices = c("log scale" = "log", 
-                                "set days since" = "days")),
-                  checkboxInput(
-                    ns("log"), 
-                    label = "log scale", 
-                    value = TRUE),
-                  checkboxInput(
-                    ns("set_days"), 
-                    label = "xaxis to days since...", 
-                    value = FALSE),
-                  tags$br(),
-                  numericInput(
-                    ns("n_days"), 
-                    label = paste("n", "cases"), 
-                    value = 10, 
-                    min = 1, 
-                    step = 10)
-                )
-              )
+            title = boxTitleInput(
+              title = "Cause of Death / Age Decomposition",
+              inputId = ns("perc4"),
+              db_style = "display: inline-block; padding-left: 410px;"
             ),
             
             plotOutput(
@@ -262,6 +186,40 @@ mod_map_ui <- function(id) {
       )
     )
   )
+}
+
+#' @keywords internal
+boxTitleInput <- function(title, inputId, db_style, ...) {
+  
+  tagList(
+    tags$div(
+      title,
+      style = "display: inline-block; font-weight: bold; padding:0px;"
+    ),
+
+    tags$div(
+      style = db_style,
+      
+      shinyWidgets::dropdownButton(
+        size = "xs",
+        label = "params",
+        right = TRUE,
+        icon = icon("sliders"),
+        inline = TRUE,
+        width = "50px",
+        circle = FALSE,
+        
+        switchInput(
+          inputId = inputId,
+          onStatus = "success", 
+          offStatus = "danger",
+          label = icon("percent")
+        ),
+        ...
+      )
+    )
+  )
+  
 }
 
 

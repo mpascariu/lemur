@@ -1,8 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 19:32:04 2021
+# Last update: Sat May 29 18:20:51 2021
 # --------------------------------------------------- #
-
 
 # ----------------------------------------------------------------------------
 # Figure 1.
@@ -40,19 +39,76 @@ plot_map <- function() {
     )
 }
 
+
 # ----------------------------------------------------------------------------
 # Figure 2.
+
+#' Plot the difference in life expectancy of two life tables
+#' 
+#' @inheritParams decompose_by_cod
+#' @inheritParams plot_cod
+#' @param age Reference ages.
+#' @export
+plot_change <- function(L1, L2,
+                        age = c(0, 45, 65),
+                        perc = FALSE) {
+  
+  # Data
+  d <- L1 %>% 
+    mutate(
+      value = ex - L2$ex,
+      col = ifelse(value < 0, "red", "green")) %>% 
+    filter(x %in% age) 
+  
+  if (perc) {
+    d <- mutate(d, value = value/ex * 100)
+    xlab <- "Difference in Life Expectancy\n(Years)"
+    
+  } else {
+    xlab <- "Difference in Life Expectancy\n[%]"
+    
+  }
+  
+  dmax <- max(abs(d$value))
+  
+  # Figure
+  p <- d %>%   
+    ggplot(aes(x = value, y = x.int, color = col)) + 
+    geom_segment(
+      xend = 0, 
+      yend = d$x.int,
+      linetype = 2,
+      color = 1,
+      size = 1) +
+    geom_point(size = 7) +
+    geom_vline(xintercept = 0, size = 2) + 
+    
+    scale_x_continuous(
+      limits = c(-dmax, dmax),
+      labels = scales::label_number_si(accuracy = 0.01)) +
+    
+    scale_color_manual(values = c("red", "green")) +
+    labs(x = xlab,
+         y = "Age Group") + 
+    plot_theme()
+  
+  return(p)
+}
+
+
+# ----------------------------------------------------------------------------
+# Figure 3.
 
 #' Plot function for COD data
 #' @inheritParams modify_life_table
 #' @param perc Logical. If TRUE data will be displayed as percentages else
-#' as absolute values. Default: TRUE.
+#' as absolute values. Default: FALSE.
 #' @examples 
 #' D <- data_gbd2019_cod # cod data
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
 #' plot_cod(cod)
 #' @export
-plot_cod <- function(cod, perc = TRUE) {
+plot_cod <- function(cod, perc = FALSE) {
   
   # Data preparation
   dt <- cod %>% 
@@ -64,7 +120,7 @@ plot_cod <- function(cod, perc = TRUE) {
     ungroup() %>% 
     mutate(cause_name  = forcats::as_factor(cause_name))
   
-  x_lab = "Number of Deaths"
+  
   
   if (perc) {
     dt <- dt %>% 
@@ -73,7 +129,11 @@ plot_cod <- function(cod, perc = TRUE) {
         value = value / sum(value) * 100,
       )
     
-    x_lab <- "Percentage [%]" 
+    x_lab <- "Proportion of the Total No. of Deaths\n[%]" 
+    
+  } else {
+    x_lab <- "Number of Deaths\n"
+    
   }
   
   # ggplot
@@ -92,21 +152,12 @@ plot_cod <- function(cod, perc = TRUE) {
       labels = scales::label_number_si(accuracy = 1)) +
     labs(
       x = x_lab,
-      y = "Cause of Death",
-      size = 10) +
-    theme_custom() + 
-    theme(
-      axis.text.x = element_text(angle = 0, hjust = 0.5),
-      legend.position = "none"
-    )
+      y = "Cause of Death") +
+    plot_theme()
   
   # exit
   return(p)
 }
-
-# ----------------------------------------------------------------------------
-# Figure 3.
-
 
 
 # ----------------------------------------------------------------------------
@@ -115,38 +166,59 @@ plot_cod <- function(cod, perc = TRUE) {
 #' Plot function for decompose
 #' 
 #' @param object An object of class decompose
-#' @param ... Arguments to be passed to methods, such as graphical
+#' @inheritParams plot_cod
 #' @seealso 
 #' \code{\link{decompose_by_cod}}
 #' \code{\link{decompose_by_age}}
 #' @examples 
 #' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
 #' @export
-plot_decompose <- function(object, ...) {
+plot_decompose <- function(object, perc = FALSE) {
+  
+  # data
+  if (perc) {
+    ylab <- "Change in Life Expectancy at Birth\n[%]"
+    d <- object %>%
+      mutate(value = decomposition / sum(decomposition))
+    
+  } else {
+    ylab <- "Change in Life Expectancy at Birth\n(Years)"
+    d <- object %>%
+      mutate(value = decomposition)
+    
+  }
   
   # Define the aesthetics
-  if("cause_name" %in% names(object)) {
+  if("cause_name" %in% names(d)) {
     aess <- aes(
       x = x.int,
-      y = decomposition, 
+      y = value, 
       fill = cause_name)
   } else {
     aess <- aes(
       x = x.int,
-      y = decomposition)
+      y = value)
   }
   
   # Build the plot
-  p <- object %>% 
+  p <- d %>% 
     ggplot(aess) +
     geom_bar(
       stat = "identity",
       width = 0.9,
       position = position_stack(reverse = FALSE)) +
-    geom_hline(yintercept = 0) + 
+    geom_hline(yintercept = 0) +
+    scale_y_continuous(
+      trans = "identity",
+      labels = scales::label_number_si(accuracy = 0.01)) +
     labs(
-      size = 10) +
-    theme_custom()
+      x = "Age Group",
+      y = ylab
+    ) +
+    plot_theme() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
   
   # Exit
   return(p)
@@ -159,15 +231,18 @@ plot_decompose <- function(object, ...) {
 # ----------------------------------------------------------------------------
 # Extras
 
-#' ggplot custom theme
-#' @keywords internal 
-theme_custom <- function() {
+#' Plot theme
+#' \code{ggplot2} custom theme used in the package.
+#' @export 
+plot_theme <- function() {
   theme_light() + 
     theme(
+      axis.title = element_text(size = 12),
+      # axis.text.x = element_text(angle = 0, hjust = 0.5),
       plot.margin = margin(25, 10, 10, 20),
       strip.text.x = element_text(size = 12, colour = "black", face = "bold"),
       strip.background = element_rect(fill = "gray87"),
       text = element_text(size = 14),
-      axis.text.x = element_text(angle = 45, hjust = 1)
+      legend.position = "none"
     )
 }

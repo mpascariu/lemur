@@ -4,12 +4,13 @@
 \alias{plot_decompose}
 \title{Plot function for decompose}
 \usage{
-plot_decompose(object, ...)
+plot_decompose(object, perc = FALSE)
 }
 \arguments{
 \item{object}{An object of class decompose}
 
-\item{...}{Arguments to be passed to methods, such as graphical}
+\item{perc}{Logical. If TRUE data will be displayed as percentages else
+as absolute values. Default: FALSE.}
 }
 \description{
 Plot function for decompose

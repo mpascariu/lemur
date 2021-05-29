@@ -1,9 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu May 27 08:12:40 2021
+# Last update: Sat May 29 18:21:13 2021
 # --------------------------------------------------- #
-
-
 
 #' Server module: MAP
 #' @keywords internal
@@ -56,10 +54,12 @@ mod_map_server <- function(input, output, session) {
   
   # Figure data sets
   data_figure4 <- reactive({
-    decompose_by_cod(L1 = data_lt1(),
-                     L2 = data_lt2(),
-                     C1 = data_cod1(),
-                     C2 = data_cod2())
+    decompose_by_cod(
+      L1 = data_lt1(),
+      L2 = data_lt2(),
+      C1 = data_cod1(),
+      C2 = data_cod2()
+    )
   })
   
   # ----------------------------------------------------------------------------
@@ -70,19 +70,32 @@ mod_map_server <- function(input, output, session) {
     plot_map()
   )
   
+
+  
   # Figure 2 - The change
+  output$figure2 <- renderPlot(
+    plot_change(
+      L1 = data_lt1(),
+      L2 = data_lt2(),
+      age = c(0, 45, 65),
+      perc = input$perc2
+      )
+  )
   
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlot(
-    plot_cod(data_cod1())
+    plot_cod(
+      data_cod1(),
+      perc = input$perc3
+    )
   )
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(
-    plot_decompose(data_figure4()) +
-      theme(
-        legend.position = "none"
-      )
+    plot_decompose(
+      data_figure4(),
+      perc = input$perc4
+    )
   )
   
   # outputOptions(output, "figure1", suspendWhenHidden = FALSE)
