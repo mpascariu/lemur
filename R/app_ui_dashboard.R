@@ -1,19 +1,18 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Sat May 29 18:21:03 2021
+# Last update: Tue Jun 01 21:47:38 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
-mod_map_ui <- function(id) {
-  ns <- NS(id)
-  
+ui_dashbord <- function() {
+
   tagList(
 
     column(
       width = 2,
 
       shinyWidgets::radioGroupButtons(
-        inputId = ns("sex"),
+        inputId = "sex",
         label   = "Sex",
         choices = c(
           "Female" = "female", 
@@ -25,7 +24,7 @@ mod_map_ui <- function(id) {
       ),
       
       selectInput(
-        inputId  = ns("region1"),
+        inputId  = "region1",
         label    = "Region",
         choices  = unique(data_gbd2019_lt$region),
         selected = "Romania",
@@ -35,7 +34,7 @@ mod_map_ui <- function(id) {
       conditionalPanel(
         condition = "input.mode == cntr_compare",
         selectInput(
-          inputId  = ns("region2"),
+          inputId  = "region2",
           label    = "Region 2",
           choices  = unique(data_gbd2019_lt$region),
           selected = "Mexico",
@@ -48,9 +47,17 @@ mod_map_ui <- function(id) {
         label = "Modify the case-specific risk of dying:",
         post = "%",
         value = 0,
-        min = -99,
+        min = -100,
         max = 100,
-        step = 1),
+        step = 5),
+      
+      sliderTextInput(
+        inputId = "age_change",
+        label = "Which age interval to modify?",
+        choices = unique(data_gbd2019_lt$x),
+        selected = c(0, 110),
+        grid = TRUE
+      ),
       
       prettyCheckboxGroup(
         inputId = "cod_target",
@@ -70,7 +77,7 @@ mod_map_ui <- function(id) {
         column(
           width = 3,
           shinyWidgets::radioGroupButtons(
-            inputId = ns("mode"),
+            inputId = "mode",
             label   = "Dashboard Mode",
             choices = c(
               "COD Risk Change" = "cod_change", 
@@ -83,7 +90,7 @@ mod_map_ui <- function(id) {
         column(
           width = 2,
           shinyWidgets::radioGroupButtons(
-            inputId = ns("legend_labs"),
+            inputId = "legend_labs",
             label   = "Legend Labels",
             choices = c(
               "Long"  = "long", 
@@ -91,29 +98,48 @@ mod_map_ui <- function(id) {
             justified = TRUE,
             size = "sm"
           )
+        ),
+        
+        column(
+          width = 1,
+          offset = 6,
+          
+          tags$div(
+            style = "padding-top: 25px;"
+          ), 
+          
+          switchInput(
+            inputId = "perc",
+            onStatus = "success", 
+            offStatus = "danger",
+            label = icon("percent")
+          )
         )
       ),
       
+      # Disable the vertical scroll bar in shiny dashboard
+      tags$head(
+        tags$style(
+          "body {overflow-y: hidden;}"
+        )
+      ),
       
       fluidRow(
         column(
           width = 7,
           style ='padding-right:0px; padding-top:0px; padding-bottom:0px',
           
-          shinydashboard::box(
-            width = NULL,
+          boxFrame(
             style = 'padding:0px',
-            solidHeader = TRUE,
-            
             title = tagList(
               tags$div(
                 "World Map",
-                style = "display: inline-block; font-weight: bold;"
+                style = "display: inline-block; font-weight: bold; padding:0px;"
               )
             ),
             
             leafletOutput(
-              outputId = ns("figure1"),
+              outputId = "figure1",
               height = 381
             )
           )
@@ -123,18 +149,14 @@ mod_map_ui <- function(id) {
           width = 5,
           style='padding:0px;',
           
-          shinydashboard::box(
-            width = NULL,
-            solidHeader = TRUE,
-            
+          boxFrame(
             title = boxTitleInput(
               title = "Difference in Life Expectancy",
-              inputId = ns("perc2"),
-              db_style = "display: inline-block; padding-left: 340px;"
+              db_style = "padding-left: 340px;"
             ),
             
             plotOutput(
-              outputId = ns("figure2"),
+              outputId = "figure2",
               height = 360
             )
           )
@@ -146,18 +168,14 @@ mod_map_ui <- function(id) {
           width = 6,
           style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
           
-          shinydashboard::box(
-            width = NULL, 
-            solidHeader = TRUE,
-            
+          boxFrame(
             title = boxTitleInput(
               title = "Cause of Death Distribution",
-              inputId = ns("perc3"),
-              db_style = "display: inline-block; padding-left: 450px;"
+              db_style = "padding-left: 450px;"
             ),
             
             plotOutput(
-              outputId = ns("figure3"),
+              outputId = "figure3",
               height = 330
             )
           )
@@ -167,18 +185,14 @@ mod_map_ui <- function(id) {
           width = 6,
           style='padding:0px;',
           
-          shinydashboard::box(
-            width = NULL, 
-            solidHeader = TRUE,
-            
+          boxFrame(
             title = boxTitleInput(
               title = "Cause of Death / Age Decomposition",
-              inputId = ns("perc4"),
-              db_style = "display: inline-block; padding-left: 410px;"
+              db_style = "padding-left: 410px;"
             ),
             
             plotOutput(
-              outputId = ns("figure4"),
+              outputId = "figure4",
               height = 330
             )
           )
@@ -188,8 +202,23 @@ mod_map_ui <- function(id) {
   )
 }
 
+
 #' @keywords internal
-boxTitleInput <- function(title, inputId, db_style, ...) {
+boxFrame <- function(..., 
+                     width = NULL, 
+                     solidHeader = TRUE, 
+                     style = NULL) {
+  shinydashboard::box(
+    width = width, 
+    solidHeader = solidHeader,
+    style = style,
+    ...
+  )
+}
+
+
+#' @keywords internal
+boxTitleInput <- function(title, db_style, ...) {
   
   tagList(
     tags$div(
@@ -198,7 +227,7 @@ boxTitleInput <- function(title, inputId, db_style, ...) {
     ),
 
     tags$div(
-      style = db_style,
+      style = paste0("display: inline-block;", db_style),
       
       shinyWidgets::dropdownButton(
         size = "xs",
@@ -208,18 +237,9 @@ boxTitleInput <- function(title, inputId, db_style, ...) {
         inline = TRUE,
         width = "50px",
         circle = FALSE,
-        
-        switchInput(
-          inputId = inputId,
-          onStatus = "success", 
-          offStatus = "danger",
-          label = icon("percent")
-        ),
         ...
       )
     )
   )
-  
 }
-
 

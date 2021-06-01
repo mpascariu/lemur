@@ -1,9 +1,8 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Sat May 29 18:20:51 2021
+# Last update: Tue Jun 01 22:03:44 2021
 # --------------------------------------------------- #
 
-# ----------------------------------------------------------------------------
 # Figure 1.
 
 #' Plot map
@@ -62,10 +61,10 @@ plot_change <- function(L1, L2,
   
   if (perc) {
     d <- mutate(d, value = value/ex * 100)
-    xlab <- "Difference in Life Expectancy\n(Years)"
+    xlab <- "Difference in Life Expectancy\n[%]"
     
   } else {
-    xlab <- "Difference in Life Expectancy\n[%]"
+    xlab <- "Difference in Life Expectancy\n(Years)"
     
   }
   
