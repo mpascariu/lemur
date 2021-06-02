@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 10:41:26 2021
+# Last update: Wed Jun 02 21:06:37 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -13,20 +13,9 @@ top_panel <- function() {
         label   = "Dashboard Mode",
         choices = c(
           "COD Risk Change" = "cod_change", 
-          "Country Comparisons" = "cntr_compare"),
-        justified = TRUE,
-        size = "sm"
-      )
-    ),
-    
-    column(
-      width = 2,
-      shinyWidgets::radioGroupButtons(
-        inputId = "legend_labs",
-        label   = "Legend Labels",
-        choices = c(
-          "Long"  = "long", 
-          "Short" = "short"),
+          "Country Comparison" = "cntr_compare",
+          "Sex Comparison" = "sex_compare"),
+        selected = "cod_change",
         justified = TRUE,
         size = "sm"
       )
@@ -34,14 +23,14 @@ top_panel <- function() {
     
     column(
       width = 1,
-      offset = 6,
+      offset = 8,
       
       tags$div(
         style = "padding-top: 25px;"
       ), 
-      
       switchInput(
         inputId = "perc",
+        value = TRUE,
         onStatus = "success", 
         offStatus = "danger",
         label = icon("percent")
@@ -54,17 +43,19 @@ top_panel <- function() {
 #' @keywords internal
 side_panel <- function() {
   tagList(
-    
-    shinyWidgets::radioGroupButtons(
-      inputId = "sex",
-      label   = "Sex",
-      choices = c(
-        "Female" = "female", 
-        "Male"   = "male",
-        "Both"   = "both"),
-      selected = "both",
-      justified = TRUE,
-      size = "sm"
+    conditionalPanel(
+      condition = "input.mode != 'sex_compare'",
+      shinyWidgets::radioGroupButtons(
+        inputId = "sex",
+        label   = "Sex",
+        choices = c(
+          "Female" = "female", 
+          "Male"   = "male",
+          "Both"   = "both"),
+        selected = "both",
+        justified = TRUE,
+        size = "sm"
+      )
     ),
     
     selectInput(
@@ -76,42 +67,47 @@ side_panel <- function() {
     ), 
     
     conditionalPanel(
-      condition = "input.mode == cntr_compare",
+      condition = "input.mode == 'cntr_compare'",
+      
       selectInput(
         inputId  = "region2",
         label    = "Region 2",
         choices  = unique(data_gbd2019_lt$region),
         selected = "Mexico",
         width    = "100%"
-      ), 
+      )
     ),
     
-    sliderInput(
-      inputId = "cod_change",
-      label = "Modify the case-specific risk of dying:",
-      post = "%",
-      value = 0,
-      min = -100,
-      max = 100,
-      step = 5),
-    
-    sliderTextInput(
-      inputId = "age_change",
-      label = "Which age interval to modify?",
-      choices = unique(data_gbd2019_lt$x),
-      selected = c(0, 110),
-      grid = TRUE
-    ),
-    
-    prettyCheckboxGroup(
-      inputId = "cod_target",
-      label = "Which cause of death to be affected:", 
-      choices = unique(data_gbd2019_cod$cause_name),
-      icon = icon("check"),
-      status = "success",
-      animation = "rotate",
-      outline = TRUE,
-      inline = FALSE
+    conditionalPanel(
+      condition = "input.mode == 'cod_change'",
+      sliderInput(
+        inputId = "cod_change",
+        label = "Modify the case-specific risk of dying:",
+        post = "%",
+        value = -10,
+        min = -100,
+        max = 100,
+        step = 5),
+      
+      sliderTextInput(
+        inputId = "age_change",
+        label = "On which age interval to change the risks?",
+        choices = unique(data_gbd2019_lt$x),
+        selected = c(0, 110),
+        grid = TRUE
+      ),
+      
+      prettyCheckboxGroup(
+        inputId = "cod_target",
+        label = "Which cause of death to be affected:", 
+        choices = c("ALL", levels(data_gbd2019_cod$cause_name)),
+        selected = levels(data_gbd2019_cod$cause_name),
+        icon = icon("check"),
+        status = "success",
+        animation = "rotate",
+        outline = TRUE,
+        inline = FALSE
+      )
     )
   )
 }
@@ -237,4 +233,34 @@ boxTitleInput <- function(title, db_style, ...) {
     )
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

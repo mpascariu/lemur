@@ -88,8 +88,7 @@ cod_map <- read_excel(
 cod_map2 <- cod_map %>% 
   select(
     cause_id, 
-    app_selection, 
-    app_selection2)
+    app_selection)
   
   
 # ------------------------------------------.
@@ -107,7 +106,6 @@ gbd <- left_join(gbd_cod, cod_map2, by = "cause_id") %>%
     age_name,
     year,
     app_selection,
-    app_selection2,
     val,
     upper,
     lower) %>% 
@@ -125,7 +123,6 @@ gbd <- left_join(gbd_cod, cod_map2, by = "cause_id") %>%
   rename(
     # rename few columns to follow the life table data
     cause_name = app_selection,
-    cause_name2 = app_selection2,
     region = location_name,
     sex = sex_name
   ) %>% 
@@ -202,7 +199,6 @@ ungroup_last_age_int <- function(X) {
               "period",
               "sex",
               "cause_name", 
-              "cause_name2", 
               "level")
     p   <- X$deaths[n]/sum(X$deaths) 
     
@@ -354,8 +350,9 @@ GBD %>%
 # ------------------------------------------
 # include data in the package
 
-data_gbd2019_cod <- GBD %>% 
-  select(-perc, -cause_name2)
+data_gbd2019_cod <- GBD %>%
+  mutate(cause_name = as_factor(cause_name)) %>% 
+  select(-perc)
 
 usethis::use_data(data_gbd2019_cod, overwrite = TRUE)
 

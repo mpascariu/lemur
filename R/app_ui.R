@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 10:41:37 2021
+# Last update: Wed Jun 02 21:06:30 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -11,7 +11,16 @@ app_ui <- function() {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    # List the first level UI elements here 
+    ui_tabs()
+
+  )
+}
+
+
+#' UI -  List the first level UI elements here 
+#' @keywords internal
+ui_tabs <- function() {
+  tagList(
     navbarPage(
       title = tagList("Mortality Causes"),
       windowTitle = "Mortality Causes",
@@ -19,9 +28,8 @@ app_ui <- function() {
       collapsible = TRUE,
       
       # The 6 main tabs defined in 6 separate modules
-      tabPanel(
+      tabPanel( # Home page
         title = icon("home"), 
-        # mod_home_ui("home")
         ui_home()
       ), 
       
@@ -57,26 +65,30 @@ app_ui <- function() {
 #' UI - home page
 #' @keywords internal
 ui_home <- function() {
-  
-  div(
-    style = '
-    height: 897px; 
-    width: 2100px; 
-    background: url(www/background_mountain.jpg) no-repeat center center fixed;
-    ',
-    
-    HTML(r'(
 
-      <h1>This is a heading</h1>
-      <p class="my-class">This is some text!</p>
-      <ul>
-        <li>First bullet</li>
-        <li>Second bullet</li>
-      </ul>
+  tagList(
+    
+    div(
+      style = '
+      height: 1200px; 
+      width: 1920px;
+      margin-top:-28px;
+      margin-left:-18px;
+      margin-right:-8px;
+      background: url(www/Background_4.jpg) no-repeat center center fixed;
+      ',
+      
+      HTML(r'(
+      <h1>Infant mortality and life expectancy are reasonable 
+          indicators of general well-being in a society.</h1>
+      <p class="my-class">  P. J. O Rourke</p>
     )')
+    )
+
   )
   
 }
+
 
 #' UI - dashboard page
 #' @keywords internal
@@ -89,21 +101,12 @@ ui_dashbord <- function() {
       tags$style(
         "body {overflow-y: hidden;}"
       )
-    ),    
-    
-    column(
-      width = 2,
-      side_panel()
     ),
     
-    column(
-      width = 10,
-      top_panel(),
-      main_panel()
-    )
-    
+    uiOutput("ui_dashboard")
   )
 }
+
 
 #' UI - markdown pages
 #' @keywords internal
@@ -150,7 +153,6 @@ golem_add_external_resources <- function(){
     tags$link(
       href = "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap", 
       rel = "stylesheet"),
-    # waiter::use_waiter(),
     shinyjs::useShinyjs(),
     tags$link(
       rel="stylesheet", 

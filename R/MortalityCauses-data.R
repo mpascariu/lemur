@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Wed Mar 24 15:10:56 2021
+# Author: Marius D. PASCARIU
+# Last update: Wed Jun 02 14:54:16 2021
 # --------------------------------------------------- #
 
 #' Abridged life table for 2015-2020 -- World Population Prospects 2019
@@ -40,3 +40,15 @@
 #' @examples 
 #' data_gbd2019_cod
 "data_gbd2019_cod"
+
+
+#' Causes of Death List Mapped to ICD Codes
+#' 
+#' This table contains the cause of death list used in the package 
+#' mapped to International Classification of Diseases (ICD) codes: ICD-10, 
+#' ICD-10 used in hospital/claim analyses, ICD-9 and ICD-9 used in 
+#' hospital/claim analyses.
+#' 
+#' @examples 
+#' data_cod_mapping
+"data_cod_mapping"

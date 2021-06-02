@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Sat May 29 18:20:42 2021
+# Last update: Wed Jun 02 21:07:47 2021
 # --------------------------------------------------- #
 
 # Hack CRAN check warnings related to tidyverse coding style
@@ -23,6 +23,7 @@ globalVariables(
     "r1",
     "r2",
     "region", 
+    "sign_",
     "sex",
     "sex1",
     "sex2",

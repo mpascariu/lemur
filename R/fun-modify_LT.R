@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 15:27:57 2021
+# Last update: Wed Jun 02 21:07:21 2021
 # --------------------------------------------------- #
 
 #' Modify life table by changing the cause of death associated risks
@@ -234,3 +234,32 @@ modify_cod <- function(cod, cod_change) {
   
   return(out)
 }
+
+
+#' Build reduction matrix to be used in the app
+#' @keywords internal
+build_reduction_matrix <- function(
+  data, 
+  select_cod, 
+  select_x, 
+  cod_change) {
+  
+  cn <- levels(data$cause_name)
+  rn <- unique(data$x)
+  
+  mat <- matrix(0, 
+                ncol = length(cn),
+                nrow = length(rn),
+                dimnames = list(rn, cn))
+  
+  select_ages <- rn %in% select_x[1]:select_x[2]
+  mat[select_ages, select_cod] <- cod_change
+  
+  return(mat)
+}
+
+
+
+
+
+

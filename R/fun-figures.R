@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Jun 01 22:03:44 2021
+# Last update: Wed Jun 02 21:07:03 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -73,14 +73,14 @@ plot_change <- function(L1, L2,
   # Figure
   p <- d %>%   
     ggplot(aes(x = value, y = x.int, color = col)) + 
+    geom_vline(xintercept = 0, size = 1) + 
     geom_segment(
       xend = 0, 
       yend = d$x.int,
       linetype = 2,
       color = 1,
       size = 1) +
-    geom_point(size = 7) +
-    geom_vline(xintercept = 0, size = 2) + 
+    geom_point(size = 6) +
     
     scale_x_continuous(
       limits = c(-dmax, dmax),
@@ -111,22 +111,20 @@ plot_cod <- function(cod, perc = FALSE) {
   
   # Data preparation
   dt <- cod %>% 
-    # compute percentages of each disease for
-    # given age-region-period-sex and across ages
     group_by(region, period, sex, cause_name, level) %>%
     summarise(value = sum(deaths)) %>% 
     arrange(value) %>% 
-    ungroup() %>% 
-    mutate(cause_name  = forcats::as_factor(cause_name))
+    ungroup()
   
-  
-  
+    # compute percentages of each disease for
+    # given age-region-period-sex and across ages
   if (perc) {
     dt <- dt %>% 
+      group_by(region) %>% 
       mutate(
-        cause_name  = forcats::as_factor(cause_name),
         value = value / sum(value) * 100,
-      )
+      ) %>% 
+      ungroup()
     
     x_lab <- "Proportion of the Total No. of Deaths\n[%]" 
     
@@ -146,6 +144,7 @@ plot_cod <- function(cod, perc = FALSE) {
       stat = "identity",
       width = 0.9,
       position = position_stack(reverse = FALSE)) +
+    facet_wrap(~ region) + 
     scale_x_continuous(
       trans = "identity",
       labels = scales::label_number_si(accuracy = 1)) +
@@ -178,7 +177,11 @@ plot_decompose <- function(object, perc = FALSE) {
   if (perc) {
     ylab <- "Change in Life Expectancy at Birth\n[%]"
     d <- object %>%
-      mutate(value = decomposition / sum(decomposition))
+      mutate(
+        sign_ = sign(decomposition),
+        value = decomposition / sum(decomposition),
+        value = abs(value) * sign_
+        )
     
   } else {
     ylab <- "Change in Life Expectancy at Birth\n(Years)"
