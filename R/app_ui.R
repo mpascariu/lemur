@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Jun 01 21:52:31 2021
+# Last update: Wed Jun 02 10:41:37 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -78,7 +78,34 @@ ui_home <- function() {
   
 }
 
+#' UI - dashboard page
+#' @keywords internal
+ui_dashbord <- function() {
+  
+  tagList(
+    
+    # Disable the vertical scroll bar in shiny dashboard
+    tags$head(
+      tags$style(
+        "body {overflow-y: hidden;}"
+      )
+    ),    
+    
+    column(
+      width = 2,
+      side_panel()
+    ),
+    
+    column(
+      width = 10,
+      top_panel(),
+      main_panel()
+    )
+    
+  )
+}
 
+#' UI - markdown pages
 #' @keywords internal
 tab_md <- function(title, file) {
   
