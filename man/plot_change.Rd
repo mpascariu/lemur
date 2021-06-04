@@ -4,7 +4,7 @@
 \alias{plot_change}
 \title{Plot the difference in life expectancy of two life tables}
 \usage{
-plot_change(L1, L2, age = c(0, 45, 65), perc = FALSE)
+plot_change(L1, L2, age = c(0, 40, 65), perc = FALSE)
 }
 \arguments{
 \item{L1}{Life table corresponding to the region/time period 1;}

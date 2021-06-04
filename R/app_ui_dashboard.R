@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:06:37 2021
+# Last update: Fri Jun 04 17:38:12 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -13,11 +13,12 @@ top_panel <- function() {
         label   = "Dashboard Mode",
         choices = c(
           "COD Risk Change" = "cod_change", 
-          "Country Comparison" = "cntr_compare",
+          "Region Comparison" = "cntr_compare",
           "Sex Comparison" = "sex_compare"),
         selected = "cod_change",
         justified = TRUE,
-        size = "sm"
+        size = "sm",
+        checkIcon = list(yes = icon("ok", lib = "glyphicon"))
       )
     ),
     
@@ -54,14 +55,15 @@ side_panel <- function() {
           "Both"   = "both"),
         selected = "both",
         justified = TRUE,
-        size = "sm"
+        size = "sm",
+        checkIcon = list(yes = icon("ok", lib = "glyphicon"))
       )
     ),
     
     selectInput(
       inputId  = "region1",
       label    = "Region",
-      choices  = unique(data_gbd2019_lt$region),
+      choices  = unique(MortalityCauses::data_gbd2019_lt$region),
       selected = "Romania",
       width    = "100%"
     ), 
@@ -72,43 +74,64 @@ side_panel <- function() {
       selectInput(
         inputId  = "region2",
         label    = "Region 2",
-        choices  = unique(data_gbd2019_lt$region),
+        choices  = unique(MortalityCauses::data_gbd2019_lt$region),
         selected = "Mexico",
         width    = "100%"
       )
     ),
     
-    conditionalPanel(
-      condition = "input.mode == 'cod_change'",
-      sliderInput(
-        inputId = "cod_change",
-        label = "Modify the case-specific risk of dying:",
-        post = "%",
-        value = -10,
-        min = -100,
-        max = 100,
-        step = 5),
-      
-      sliderTextInput(
-        inputId = "age_change",
-        label = "On which age interval to change the risks?",
-        choices = unique(data_gbd2019_lt$x),
-        selected = c(0, 110),
-        grid = TRUE
+    sliderInput(
+      inputId = "cod_change",
+      label = "Modify the case-specific risk of dying:",
+      post = "%",
+      value = 0,
+      min = -100,
+      max = 100,
+      step = 5
+    ),
+    
+    sliderTextInput(
+      inputId = "age_change",
+      label = "On which age interval to change the risks?",
+      choices = unique(MortalityCauses::data_gbd2019_lt$x),
+      selected = c(0, 110),
+      grid = TRUE
+    ),
+    
+    fluidRow(
+      column(
+        width = 10,
+        prettyCheckboxGroup(
+          inputId = "cod_target",
+          label = "Which cause of death to be affected:", 
+          choices = levels(MortalityCauses::data_gbd2019_cod$cause_name),
+          selected = levels(MortalityCauses::data_gbd2019_cod$cause_name),
+          icon = icon("check"),
+          status = "success",
+          animation = "rotate",
+          outline = TRUE,
+          inline = FALSE
+        )
       ),
       
-      prettyCheckboxGroup(
-        inputId = "cod_target",
-        label = "Which cause of death to be affected:", 
-        choices = c("ALL", levels(data_gbd2019_cod$cause_name)),
-        selected = levels(data_gbd2019_cod$cause_name),
-        icon = icon("check"),
-        status = "success",
-        animation = "rotate",
-        outline = TRUE,
-        inline = FALSE
+      column(
+        width = 2,
+        style='padding:0px;',
+        br(),
+        actionButton(
+          inputId = "cod_target_all", 
+          label = "ALL",
+          style = "width:100%;"
+          ),
+        actionButton(
+          inputId = "cod_target_none", 
+          label = "NONE",
+          style = "width:100%;"
+          )
+        
       )
     )
+
   )
 }
 

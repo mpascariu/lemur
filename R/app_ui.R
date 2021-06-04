@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:06:30 2021
+# Last update: Fri Jun 04 17:52:47 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -75,12 +75,13 @@ ui_home <- function() {
       margin-top:-28px;
       margin-left:-18px;
       margin-right:-8px;
-      background: url(www/Background_4.jpg) no-repeat center center fixed;
+      background: url(www/background_hands.jpg) no-repeat center center fixed;
+      background-size:100% 100%;
       ',
       
       HTML(r'(
-      <h1>Infant mortality and life expectancy are reasonable 
-          indicators of general well-being in a society.</h1>
+      <p class="my-class">  Infant mortality and life expectancy are reasonable 
+          indicators of general well-being in a society.</p>
       <p class="my-class">  P. J. O Rourke</p>
     )')
     )
@@ -103,7 +104,18 @@ ui_dashbord <- function() {
       )
     ),
     
-    uiOutput("ui_dashboard")
+    tagList(
+      column(
+        width = 2,
+        side_panel()
+      ),
+      
+      column(
+        width = 10,
+        top_panel(),
+        main_panel()
+      )
+    )
   )
 }
 

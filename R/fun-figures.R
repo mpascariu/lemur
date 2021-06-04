@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:07:03 2021
+# Last update: Fri Jun 04 12:02:07 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -49,7 +49,7 @@ plot_map <- function() {
 #' @param age Reference ages.
 #' @export
 plot_change <- function(L1, L2,
-                        age = c(0, 45, 65),
+                        age = c(0, 40, 65),
                         perc = FALSE) {
   
   # Data
@@ -72,23 +72,21 @@ plot_change <- function(L1, L2,
   
   # Figure
   p <- d %>%   
-    ggplot(aes(x = value, y = x.int, color = col)) + 
+    ggplot(aes(x = value, y = x, color = col)) + 
     geom_vline(xintercept = 0, size = 1) + 
     geom_segment(
       xend = 0, 
-      yend = d$x.int,
+      yend = d$x,
       linetype = 2,
       color = 1,
-      size = 1) +
+      size = 0.5) +
     geom_point(size = 6) +
-    
     scale_x_continuous(
       limits = c(-dmax, dmax),
       labels = scales::label_number_si(accuracy = 0.01)) +
-    
     scale_color_manual(values = c("red", "green")) +
     labs(x = xlab,
-         y = "Age Group") + 
+         y = "Age\n(Years)") + 
     plot_theme()
   
   return(p)
@@ -144,7 +142,6 @@ plot_cod <- function(cod, perc = FALSE) {
       stat = "identity",
       width = 0.9,
       position = position_stack(reverse = FALSE)) +
-    facet_wrap(~ region) + 
     scale_x_continuous(
       trans = "identity",
       labels = scales::label_number_si(accuracy = 1)) +
@@ -214,7 +211,7 @@ plot_decompose <- function(object, perc = FALSE) {
       trans = "identity",
       labels = scales::label_number_si(accuracy = 0.01)) +
     labs(
-      x = "Age Group",
+      x = "Age Group\n(Years)",
       y = ylab
     ) +
     plot_theme() +

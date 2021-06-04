@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:06:06 2021
+# Last update: Fri Jun 04 17:38:21 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -9,30 +9,7 @@
 #' @noRd
 app_server <- function(input, output, session) {
   
-  # The reactive UI has to live in the server... to be reactive
-  output$ui_dashboard <- renderUI({
-    tagList(
-      column(
-        width = 2,
-        side_panel()
-      ),
-      
-      column(
-        width = 10,
-        top_panel(),
-        main_panel()
-      )
-    )
-  })
-  
-  outputOptions(output, "ui_dashboard", suspendWhenHidden = FALSE)
-  
-  # ----------------------------------------------------------------------------
   # INPUT DATA
-  
-  
-
-  
   # cod data ---
   data_cod <- reactive({
     MortalityCauses::data_gbd2019_cod %>% 
@@ -43,40 +20,6 @@ app_server <- function(input, output, session) {
     
   })
   
-  data_cod1 <- reactive({
-    data_cod() %>% 
-      dplyr::filter(
-        region == input$region1)
-  })
-  
-  # Reduction matrix
-  data_cod_change <- reactive({
-    build_reduction_matrix(
-      data = data_cod1(), 
-      select_cod = input$cod_target,
-      select_x = input$age_change,
-      cod_change = input$cod_change
-    )
-  })
-  
-  data_cod2 <- reactive({
-    if (input$mode == 'cntr_compare') {
-      cod <- data_cod() %>% 
-        dplyr::filter(
-          region == input$region2)
-    }
-    
-    if (input$mode == 'cod_change') {
-      cod <- modify_cod_table(
-        cod = data_cod1(), 
-        cod_change = data_cod_change())
-    }
-    
-    cod
-  })
-  
-
-  
   # life tables data
   data_lt  <- reactive({
     MortalityCauses::data_gbd2019_lt %>% 
@@ -86,42 +29,50 @@ app_server <- function(input, output, session) {
         level == "median")
     }) 
   
-  data_lt1 <- reactive({
-    data_lt() %>% 
-      dplyr::filter(
-        region == input$region1)
-  })
-  
-  data_lt2 <- reactive({
-    
-    if (input$mode == 'cntr_compare') {
-      lt <- data_lt() %>% 
-        dplyr::filter(
-          region == input$region2)
-      
-    } 
-    
-    if (input$mode == 'cod_change') {
-      lt <- modify_life_table(
-        lt = data_lt1(), 
-        cod = data_cod1(), 
-        cod_change = data_cod_change())
-    }
-    
-    lt
-  })
-  
-  # ----------------------------------------------------------------------------
-  # FIGURE DATA
-  
-  # Figure data sets
-  data_figure4 <- reactive({
-    decompose_by_cod(
-      L1 = data_lt1(),
-      L2 = data_lt2(),
-      C1 = data_cod1(),
-      C2 = data_cod2()
+  # Reduction matrix
+  data_cod_change <- reactive({
+    build_reduction_matrix(
+      data = data_cod(), 
+      select_cod = input$cod_target,
+      select_x = input$age_change,
+      cod_change = input$cod_change
     )
+  })
+  
+  # Prepare data for figures depending on with mode is selected
+  data_fig <- reactive({
+    if (input$mode == 'cod_change') {
+      prepare_data_mode1(
+        data_cod(), 
+        data_lt(), 
+        input$region1, 
+        input$region2, 
+        input$cod_target,
+        data_cod_change()
+      )
+      
+    } else if (input$mode == 'cntr_compare') {
+      prepare_data_mode2(
+        data_cod(), 
+        data_lt(), 
+        input$region1, 
+        input$region2,
+        input$cod_target,
+        data_cod_change()
+      )
+      
+    } else if (input$mode == 'sex_compare') {
+      prepare_data_mode3(
+        input$region1, 
+        input$cod_target,
+        data_cod_change()
+      )
+    }
+  })
+  
+  # Decompose the difference in life expectancy at birth
+  decomp <- reactive({
+    with(data_fig(), decompose_by_cod(lt1, lt2, cod1, cod2))
   })
   
   # ----------------------------------------------------------------------------
@@ -135,8 +86,8 @@ app_server <- function(input, output, session) {
   # Figure 2 - The change
   output$figure2 <- renderPlot({
     plot_change(
-      L1 = data_lt2(),
-      L2 = data_lt1(),
+      L1 = data_fig()$lt2,
+      L2 = data_fig()$lt1,
       age = c(0, 45, 65),
       perc = input$perc
     )
@@ -144,35 +95,145 @@ app_server <- function(input, output, session) {
   
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlot({
+    
     if (input$mode == "cntr_compare") {
-      plot_cod(data_cod(), perc = input$perc)
+      cod <- bind_rows(data_fig()$cod1, data_fig()$cod2)
+      plot_cod(cod, perc = input$perc) + 
+        facet_wrap("region")
       
     } else if (input$mode == 'cod_change') {
-      plot_cod(data_cod2(), perc = input$perc)
+      plot_cod(data_fig()$cod2, perc = input$perc)
+      
+    } else if (input$mode == "sex_compare") {
+      cod <- bind_rows(data_fig()$cod1, data_fig()$cod2)
+      plot_cod(cod, perc = input$perc) + 
+        facet_wrap("sex")
     }
   })
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(
-    plot_decompose(data_figure4(), perc = input$perc)
+    plot_decompose(decomp(), perc = input$perc)
   )
   
   # ----------------------------------------------------------------------------
   # EVENTS
-  observeEvent(input$cod_target, {
-    
-    if(any(input$cod_target == "ALL")) {
-      updatePrettyCheckboxGroup(
-        session,
-        inputId = "cod_target",
-        selected = levels(data_gbd2019_cod$cause_name)
-      )}
+  observeEvent(input$cod_target_all, {
+    updatePrettyCheckboxGroup(
+      session,
+      inputId = "cod_target",
+      selected = levels(data_cod()$cause_name)
+    )
+  })
+  
+  observeEvent(input$cod_target_none, {
+    updatePrettyCheckboxGroup(
+      session,
+      inputId = "cod_target",
+      selected = "none"
+    )
   })
   
 }
 
 
+#' Prepare data for risk changes
+#' @keywords internal
+prepare_data_mode1 <- function(cod, 
+                               lt, 
+                               region1, 
+                               region2, 
+                               cod_target, 
+                               cod_change) {
+  
+  # Select cod and lt for 1 region
+  # If no risk change is applied the tables before and after are the same
+  # not change in LE no decomposition
+  c1 <- dplyr::filter(cod, region == region1)
+  c2 <- c1
+  l1 <- dplyr::filter(lt, region == region1)
+  l2 <- l1
+  
+  # IF there is a change applied we take the initial tables and
+  # we modify them
+  logic <- any(cod_change != 0) & !is.null(cod_target)
+    if(logic) {
+    c2 <- modify_cod_table(c1, cod_change)
+    l2 <- modify_life_table(l1, c1, cod_change)
+  }
+  
+  out <- list(cod1 = c1, cod2 = c2, lt1 = l1, lt2 = l2)
+  return(out)
+} 
 
 
+#' Prepare data for country comparisons
+#' @keywords internal
+prepare_data_mode2 <- function(cod, 
+                               lt, 
+                               region1, 
+                               region2, 
+                               cod_target, 
+                               cod_change) {
+  
+  # select cod and lt tables for 2 regions
+  c1 <- dplyr::filter(cod, region == region1)
+  c2 <- dplyr::filter(cod, region == region2)
+  l1 <- dplyr::filter(lt, region == region1)
+  l2 <- dplyr::filter(lt, region == region2)
+  
+  # IF we look at 2 regions and we change the risks 
+  # we need to adjust the cod and lt tables for both regions
+  logic <- any(cod_change != 0) & !is.null(cod_target)
+  if(logic) {
+    c1 <- modify_cod_table(c1, cod_change)
+    c2 <- modify_cod_table(c2, cod_change)
+    l1 <- modify_life_table(l1, c1, cod_change)
+    l2 <- modify_life_table(l2, c2, cod_change)
+  }
+  
+  out <- list(cod1 = c1, cod2 = c2, lt1 = l1, lt2 = l2)
+  return(out)
+}
+  
+
+#' Prepare data for sex comparisons
+#' @keywords internal
+prepare_data_mode3 <- function(region1, 
+                               cod_target, 
+                               cod_change){
+  
+  sexes <- c("male", "female")
+  
+  cod <- MortalityCauses::data_gbd2019_cod %>% 
+    dplyr::filter(
+      region == region1,
+      level == "median")
+  
+  lt <- MortalityCauses::data_gbd2019_lt %>% 
+    dplyr::filter(
+      region == region1,
+      level == "median")
+  
+  # select cod and lt tables for the 2 sexes
+  c1 <- dplyr::filter(cod, sex == sexes[1])
+  c2 <- dplyr::filter(cod, sex == sexes[2])
+  l1 <- dplyr::filter(lt, sex == sexes[1])
+  l2 <- dplyr::filter(lt, sex == sexes[2])
+  
+  # IF we look at 2 gender and we change the risks 
+  # we need to adjust the cod and lt tables for both populations
+  logic <- any(cod_change != 0) | !is.null(cod_target)
+  if(logic) {
+    c1 <- modify_cod_table(c1, cod_change)
+    c2 <- modify_cod_table(c2, cod_change)
+    l1 <- modify_life_table(l1, c1, cod_change)
+    l2 <- modify_life_table(l2, c2, cod_change)
+  }
+  
+  out <- list(cod1 = c1, cod2 = c2, lt1 = l1, lt2 = l2)
+  return(out)
+  
+}
 
 
