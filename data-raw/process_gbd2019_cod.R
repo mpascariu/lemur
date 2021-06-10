@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Apr 08 20:39:22 2021
+# Last update: Thu Jun 10 16:04:10 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -349,9 +349,16 @@ GBD %>%
 
 # ------------------------------------------
 # include data in the package
+rank <- data_gbd2019_cod %>%
+  filter(region == "Romania",
+         sex == "both",
+         level == "median") %>% 
+  group_by(cause_name) %>% 
+  summarise(value = sum(deaths)) %>% 
+  arrange(value)
 
 data_gbd2019_cod <- GBD %>%
-  mutate(cause_name = as_factor(cause_name)) %>% 
+  mutate(cause_name = factor(cause_name, levels = rank$cause_name)) %>% 
   select(-perc)
 
 usethis::use_data(data_gbd2019_cod, overwrite = TRUE)

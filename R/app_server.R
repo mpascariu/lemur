@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Jun 04 17:38:21 2021
+# Last update: Thu Jun 10 16:57:15 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -88,7 +88,7 @@ app_server <- function(input, output, session) {
     plot_change(
       L1 = data_fig()$lt2,
       L2 = data_fig()$lt1,
-      age = c(0, 45, 65),
+      age = input$fig2_x,
       perc = input$perc
     )
   })

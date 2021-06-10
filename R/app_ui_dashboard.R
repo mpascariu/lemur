@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Jun 04 17:38:12 2021
+# Last update: Thu Jun 10 10:00:41 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -13,9 +13,9 @@ top_panel <- function() {
         label   = "Dashboard Mode",
         choices = c(
           "COD Risk Change" = "cod_change", 
-          "Region Comparison" = "cntr_compare",
+          "Compare Regions" = "cntr_compare",
           "Sex Comparison" = "sex_compare"),
-        selected = "cod_change",
+        selected = "cntr_compare",
         justified = TRUE,
         size = "sm",
         checkIcon = list(yes = icon("ok", lib = "glyphicon"))
@@ -80,6 +80,8 @@ side_panel <- function() {
       )
     ),
     
+    chooseSliderSkin("Nice"),
+    setSliderColor(c("black", "black"), c(1, 2)),
     sliderInput(
       inputId = "cod_change",
       label = "Modify the case-specific risk of dying:",
@@ -142,7 +144,7 @@ main_panel <- function() {
     fluidRow(
       column(
         width = 7,
-        style ='padding-right:0px; padding-top:0px; padding-bottom:0px',
+        style ='padding:0px 0px 0px 18px;',
         
         boxFrame(
           style = 'padding:0px',
@@ -155,7 +157,7 @@ main_panel <- function() {
           
           leafletOutput(
             outputId = "figure1",
-            height = 381
+            height = 381*0.93
           )
         )
       ),
@@ -167,12 +169,19 @@ main_panel <- function() {
         boxFrame(
           title = boxTitleInput(
             title = "Difference in Life Expectancy",
-            db_style = "padding-left: 340px;"
+            db_style = "padding: 0px 0px 0px 340px;",
+            selectInput(
+              inputId = "fig2_x",
+              label = "Ages to be displayed",
+              choices = unique(MortalityCauses::data_gbd2019_lt$x),
+              selected = c(0, 25, 45, 65),
+              multiple = TRUE
+            )
           ),
           
           plotOutput(
             outputId = "figure2",
-            height = 360
+            height = 343*0.93
           )
         )
       )
@@ -186,7 +195,7 @@ main_panel <- function() {
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death Distribution",
-            db_style = "padding-left: 450px;"
+            db_style = "padding: 0px 0px 0px 450px;"
           ),
           
           plotOutput(
@@ -203,7 +212,7 @@ main_panel <- function() {
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death / Age Decomposition",
-            db_style = "padding-left: 410px;"
+            db_style = "padding: 0px 0px 0px 410px;"
           ),
           
           plotOutput(
@@ -237,7 +246,7 @@ boxTitleInput <- function(title, db_style, ...) {
   tagList(
     tags$div(
       title,
-      style = "display: inline-block; font-weight: bold; padding:0px;"
+      style = "display: inline-block; font-weight: bold; padding:0px; margin: -20px 0px 0px 5px;"
     ),
 
     tags$div(
@@ -253,7 +262,12 @@ boxTitleInput <- function(title, db_style, ...) {
         circle = FALSE,
         ...
       )
-    )
+    ),
+    
+    tags$div(
+      "subtitle....",
+      style = "display: padding:0px; margin: 0px 0px -20px 5px; font-size: 12px;"
+    ),
   )
 }
 

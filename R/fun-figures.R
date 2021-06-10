@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Jun 04 12:02:07 2021
+# Last update: Thu Jun 10 16:57:00 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -46,17 +46,23 @@ plot_map <- function() {
 #' 
 #' @inheritParams decompose_by_cod
 #' @inheritParams plot_cod
+#' @inheritParams ggplot2::labs
 #' @param age Reference ages.
 #' @export
 plot_change <- function(L1, L2,
                         age = c(0, 40, 65),
-                        perc = FALSE) {
+                        perc = FALSE,
+                        title = NULL,
+                        subtitle = NULL
+                        ) {
   
   # Data
+  cols <- c("red", "green")
+  
   d <- L1 %>% 
     mutate(
       value = ex - L2$ex,
-      col = ifelse(value < 0, "red", "green")) %>% 
+      col = factor(ifelse(value < 0, "red", "green"), cols)) %>% 
     filter(x %in% age) 
   
   if (perc) {
@@ -84,9 +90,16 @@ plot_change <- function(L1, L2,
     scale_x_continuous(
       limits = c(-dmax, dmax),
       labels = scales::label_number_si(accuracy = 0.01)) +
-    scale_color_manual(values = c("red", "green")) +
-    labs(x = xlab,
-         y = "Age\n(Years)") + 
+    scale_color_manual(
+      name = "",
+      values = pals::glasbey()[2:3],
+      drop = FALSE
+    ) +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      x = xlab,
+      y = "Age\n(Years)") + 
     plot_theme()
   
   return(p)
@@ -145,6 +158,10 @@ plot_cod <- function(cod, perc = FALSE) {
     scale_x_continuous(
       trans = "identity",
       labels = scales::label_number_si(accuracy = 1)) +
+    scale_fill_manual(
+      name = "",
+      values = pals::glasbey()
+    ) +
     labs(
       x = x_lab,
       y = "Cause of Death") +
@@ -210,6 +227,10 @@ plot_decompose <- function(object, perc = FALSE) {
     scale_y_continuous(
       trans = "identity",
       labels = scales::label_number_si(accuracy = 0.01)) +
+    scale_fill_manual(
+      name = "",
+      values = pals::glasbey()
+    ) + 
     labs(
       x = "Age Group\n(Years)",
       y = ylab
@@ -236,9 +257,9 @@ plot_decompose <- function(object, perc = FALSE) {
 plot_theme <- function() {
   theme_light() + 
     theme(
-      axis.title = element_text(size = 12),
-      # axis.text.x = element_text(angle = 0, hjust = 0.5),
-      plot.margin = margin(25, 10, 10, 20),
+      axis.title = element_text(size = 12, colour = "black", face = "bold"),
+      axis.text = element_text(size = 12, colour = "black"),
+      plot.margin = margin(0, 5, 1, 10),
       strip.text.x = element_text(size = 12, colour = "black", face = "bold"),
       strip.background = element_rect(fill = "gray87"),
       text = element_text(size = 14),

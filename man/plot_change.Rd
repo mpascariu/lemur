@@ -4,7 +4,14 @@
 \alias{plot_change}
 \title{Plot the difference in life expectancy of two life tables}
 \usage{
-plot_change(L1, L2, age = c(0, 40, 65), perc = FALSE)
+plot_change(
+  L1,
+  L2,
+  age = c(0, 40, 65),
+  perc = FALSE,
+  title = NULL,
+  subtitle = NULL
+)
 }
 \arguments{
 \item{L1}{Life table corresponding to the region/time period 1;}
@@ -15,6 +22,11 @@ plot_change(L1, L2, age = c(0, 40, 65), perc = FALSE)
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
+
+\item{title}{The text for the title.}
+
+\item{subtitle}{The text for the subtitle for the plot which will be
+displayed below the title.}
 }
 \description{
 Plot the difference in life expectancy of two life tables
