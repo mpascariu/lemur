@@ -1,20 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 14:54:16 2021
+# Last update: Thu Jun 10 21:34:05 2021
 # --------------------------------------------------- #
-
-#' Abridged life table for 2015-2020 -- World Population Prospects 2019
-#' 
-#' @source 
-#' United Nations, Department of Economic and Social Affairs, 
-#' Population Division (2019). World Population Prospects 2019,
-#' \href{https://population.un.org/wpp/Download/Standard/Mortality/}{
-#'  Online Edition. Rev. 1.}
-#' 
-#' @examples 
-#' data_wpp2019_lt
-"data_wpp2019_lt"
-
 
 #' Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019 
 #' 
@@ -52,3 +39,7 @@
 #' @examples 
 #' data_cod_mapping
 "data_cod_mapping"
+
+#' Input data for the app
+#' @noRd
+"data_app_input"

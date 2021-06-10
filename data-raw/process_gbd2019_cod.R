@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 16:04:10 2021
+# Last update: Thu Jun 10 17:50:19 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -350,16 +350,42 @@ GBD %>%
 # ------------------------------------------
 # include data in the package
 rank <- data_gbd2019_cod %>%
-  filter(region == "Romania",
-         sex == "both",
+  filter(sex == "both",
          level == "median") %>% 
   group_by(cause_name) %>% 
   summarise(value = sum(deaths)) %>% 
   arrange(value)
 
+# data_gbd2019_cod <- data_gbd2019_cod %>%
+#   filter(level == "median") %>%
+#   mutate(
+#     cause_name = factor(cause_name, levels = rank$cause_name),
+#     region = factor(region)
+#     )
+
 data_gbd2019_cod <- GBD %>%
-  mutate(cause_name = factor(cause_name, levels = rank$cause_name)) %>% 
+  filter(level == "median") %>% 
+  mutate(
+    cause_name = factor(cause_name, levels = rank$cause_name),
+    region = factor(region)
+  ) %>% 
   select(-perc)
 
 usethis::use_data(data_gbd2019_cod, overwrite = TRUE)
+
+# ----------------------------------------------------------------------------
+
+D <- data_gbd2019_cod
+
+data_app_input <- list(
+  region     = levels(D$region),
+  cause_name = levels(D$cause_name),
+  period = unique(D$period),
+  sex    = unique(D$sex),
+  x      = unique(D$x),
+  level  = unique(D$level)
+)
+
+
+usethis::use_data(data_app_input, overwrite = TRUE)
 

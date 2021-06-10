@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:07:21 2021
+# Last update: Thu Jun 10 22:12:12 2021
 # --------------------------------------------------- #
 
 #' Modify life table by changing the cause of death associated risks
@@ -55,8 +55,9 @@
 #' lt_reduced3
 #' @export
 modify_life_table <- function(lt, cod, cod_change) {
-  
-  cod <- build_cod_matrix(cod)    # death counts by cod from a long dataset
+  # death counts by cod from a long dataset
+  lv  <- levels(cod$cause_name)
+  cod <- build_cod_matrix(cod)[, lv]    
   qx  <- replace_na(lt$qx, 0)
   
   # Modify cod matrix by applying a change
@@ -125,6 +126,7 @@ modify_life_table <- function(lt, cod, cod_change) {
 #' @export
 modify_cod_table <- function(cod, cod_change){
   
+  
   #build cod matrix
   cod2 <- cod %>%
     select(x, cause_name, deaths) %>% 
@@ -140,6 +142,9 @@ modify_cod_table <- function(cod, cod_change){
     column_to_rownames("x") %>% 
     as.matrix()
   
+  lv <- levels(cod$cause_name)
+  cod2 <- cod2[, lv]
+  
   # Modify cod matrix by applying a change
   mod_cod <- modify_cod(cod2, cod_change)
   
@@ -151,7 +156,9 @@ modify_cod_table <- function(cod, cod_change){
       cols = -x, 
       names_to = "cause_name", 
       values_to = "deaths") %>% 
-    mutate(x = as.numeric(x)) %>% 
+    mutate(
+      x = as.numeric(x),
+      cause_name = factor(as.character(cause_name), levels = lv)) %>% 
     arrange(cause_name) %>% 
     # remove original deaths column and join the datasets
     left_join(cod[-7], ., by = c("x", "cause_name")) 
@@ -252,7 +259,7 @@ build_reduction_matrix <- function(
                 nrow = length(rn),
                 dimnames = list(rn, cn))
   
-  select_ages <- rn %in% select_x[1]:select_x[2]
+  select_ages <- rn %in% min(select_x):max(select_x)
   mat[select_ages, select_cod] <- cod_change
   
   return(mat)

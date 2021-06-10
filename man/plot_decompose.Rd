@@ -4,13 +4,16 @@
 \alias{plot_decompose}
 \title{Plot function for decompose}
 \usage{
-plot_decompose(object, perc = FALSE)
+plot_decompose(object, perc = FALSE, by = "both")
 }
 \arguments{
 \item{object}{An object of class decompose}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
+
+\item{by}{dimensions on which to build the plot. 
+Options: "both", "age", "cod".}
 }
 \description{
 Plot function for decompose

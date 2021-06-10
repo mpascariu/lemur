@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 16:57:15 2021
+# Last update: Thu Jun 10 22:12:29 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -97,23 +97,43 @@ app_server <- function(input, output, session) {
   output$figure3 <- renderPlot({
     
     if (input$mode == "cntr_compare") {
-      cod <- bind_rows(data_fig()$cod1, data_fig()$cod2)
-      plot_cod(cod, perc = input$perc) + 
+      cod <- bind_rows(
+        data_fig()$cod1, 
+        data_fig()$cod2
+        )
+      
+      plot_cod(
+        cod = cod, 
+        perc = input$perc,
+        type = input$fig3_chart_type) + 
         facet_wrap("region")
       
     } else if (input$mode == 'cod_change') {
-      plot_cod(data_fig()$cod2, perc = input$perc)
+      plot_cod(
+        cod = data_fig()$cod2, 
+        perc = input$perc, 
+        type = input$fig3_chart_type)
       
     } else if (input$mode == "sex_compare") {
-      cod <- bind_rows(data_fig()$cod1, data_fig()$cod2)
-      plot_cod(cod, perc = input$perc) + 
+      cod <- bind_rows(
+        data_fig()$cod1, 
+        data_fig()$cod2
+        )
+      
+      plot_cod(
+        cod = cod, 
+        perc = input$perc, 
+        type = input$fig3_chart_type) + 
         facet_wrap("sex")
     }
   })
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(
-    plot_decompose(decomp(), perc = input$perc)
+    plot_decompose(
+      decomp(), 
+      perc = input$perc,
+      by = input$fig4_dim)
   )
   
   # ----------------------------------------------------------------------------
@@ -192,6 +212,9 @@ prepare_data_mode2 <- function(cod,
     l2 <- modify_life_table(l2, c2, cod_change)
   }
   
+  c1 <- mutate(c1, region = factor(region, levels = c(region1, region2)))
+  c2 <- mutate(c2, region = factor(region, levels = c(region1, region2)))
+  
   out <- list(cod1 = c1, cod2 = c2, lt1 = l1, lt2 = l2)
   return(out)
 }
@@ -202,8 +225,6 @@ prepare_data_mode2 <- function(cod,
 prepare_data_mode3 <- function(region1, 
                                cod_target, 
                                cod_change){
-  
-  sexes <- c("male", "female")
   
   cod <- MortalityCauses::data_gbd2019_cod %>% 
     dplyr::filter(
@@ -216,21 +237,21 @@ prepare_data_mode3 <- function(region1,
       level == "median")
   
   # select cod and lt tables for the 2 sexes
-  c1 <- dplyr::filter(cod, sex == sexes[1])
-  c2 <- dplyr::filter(cod, sex == sexes[2])
-  l1 <- dplyr::filter(lt, sex == sexes[1])
-  l2 <- dplyr::filter(lt, sex == sexes[2])
+  c1 <- dplyr::filter(cod, sex == "male")
+  c2 <- dplyr::filter(cod, sex == "female")
+  l1 <- dplyr::filter(lt, sex == "male")
+  l2 <- dplyr::filter(lt, sex == "female")
   
   # IF we look at 2 gender and we change the risks 
   # we need to adjust the cod and lt tables for both populations
-  logic <- any(cod_change != 0) | !is.null(cod_target)
+  logic <- any(cod_change != 0) & !is.null(cod_target)
   if(logic) {
     c1 <- modify_cod_table(c1, cod_change)
     c2 <- modify_cod_table(c2, cod_change)
     l1 <- modify_life_table(l1, c1, cod_change)
     l2 <- modify_life_table(l2, c2, cod_change)
   }
-  
+
   out <- list(cod1 = c1, cod2 = c2, lt1 = l1, lt2 = l2)
   return(out)
   

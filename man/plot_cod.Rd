@@ -4,7 +4,7 @@
 \alias{plot_cod}
 \title{Plot function for COD data}
 \usage{
-plot_cod(cod, perc = FALSE)
+plot_cod(cod, perc = FALSE, type = "barplot")
 }
 \arguments{
 \item{cod}{Causes of death matrix containing death counts corresponding 
@@ -12,6 +12,8 @@ to the population and time period of the life table;}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
+
+\item{type}{Options: "barplot" or "piechart".}
 }
 \description{
 Plot function for COD data

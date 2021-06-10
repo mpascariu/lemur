@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 26 21:45:28 2021
+# Last update: Thu Jun 10 21:33:06 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -40,7 +40,8 @@
 #' left_join 
 #' filter
 #' mutate 
-#' mutate_all 
+#' mutate_all
+#' rename 
 #' summarise
 #' select 
 #' ungroup 

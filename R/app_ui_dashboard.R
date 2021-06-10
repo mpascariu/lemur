@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 10:00:41 2021
+# Last update: Thu Jun 10 22:11:58 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -22,19 +22,24 @@ top_panel <- function() {
       )
     ),
     
+    # column(
+    #    width = 8
+    # ),
+    
     column(
       width = 1,
-      offset = 8,
+      style = 'padding-right:0px; margin-right: 0px;',
       
       tags$div(
-        style = "padding-top: 25px;"
+        style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
       ), 
       switchInput(
         inputId = "perc",
         value = TRUE,
         onStatus = "success", 
         offStatus = "danger",
-        label = icon("percent")
+        label = icon("percent"),
+        size = "small"
       )
     )
   )
@@ -63,7 +68,7 @@ side_panel <- function() {
     selectInput(
       inputId  = "region1",
       label    = "Region",
-      choices  = unique(MortalityCauses::data_gbd2019_lt$region),
+      choices  = MortalityCauses::data_app_input$region,
       selected = "Romania",
       width    = "100%"
     ), 
@@ -74,13 +79,13 @@ side_panel <- function() {
       selectInput(
         inputId  = "region2",
         label    = "Region 2",
-        choices  = unique(MortalityCauses::data_gbd2019_lt$region),
+        choices  = MortalityCauses::data_app_input$region,
         selected = "Mexico",
         width    = "100%"
       )
     ),
     
-    chooseSliderSkin("Nice"),
+    chooseSliderSkin("Flat"),
     setSliderColor(c("black", "black"), c(1, 2)),
     sliderInput(
       inputId = "cod_change",
@@ -95,7 +100,7 @@ side_panel <- function() {
     sliderTextInput(
       inputId = "age_change",
       label = "On which age interval to change the risks?",
-      choices = unique(MortalityCauses::data_gbd2019_lt$x),
+      choices = MortalityCauses::data_app_input$x,
       selected = c(0, 110),
       grid = TRUE
     ),
@@ -106,8 +111,8 @@ side_panel <- function() {
         prettyCheckboxGroup(
           inputId = "cod_target",
           label = "Which cause of death to be affected:", 
-          choices = levels(MortalityCauses::data_gbd2019_cod$cause_name),
-          selected = levels(MortalityCauses::data_gbd2019_cod$cause_name),
+          choices = sort(MortalityCauses::data_app_input$cause_name),
+          selected = MortalityCauses::data_app_input$cause_name,
           icon = icon("check"),
           status = "success",
           animation = "rotate",
@@ -118,7 +123,7 @@ side_panel <- function() {
       
       column(
         width = 2,
-        style='padding:0px;',
+        style = 'padding:0px;',
         br(),
         actionButton(
           inputId = "cod_target_all", 
@@ -173,8 +178,8 @@ main_panel <- function() {
             selectInput(
               inputId = "fig2_x",
               label = "Ages to be displayed",
-              choices = unique(MortalityCauses::data_gbd2019_lt$x),
-              selected = c(0, 25, 45, 65),
+              choices = MortalityCauses::data_app_input$x,
+              selected = seq(0, 100, 10),
               multiple = TRUE
             )
           ),
@@ -195,7 +200,19 @@ main_panel <- function() {
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death Distribution",
-            db_style = "padding: 0px 0px 0px 450px;"
+            db_style = "padding: 0px 0px 0px 450px;",
+            radioGroupButtons(
+              inputId = "fig3_chart_type",
+              label = "View by:",
+              choices = c("Bar-plot" = "barplot", 
+                          "Pie-chart" = "piechart"),
+              justified = TRUE,
+              checkIcon = list(
+                yes = tags$i(class = "fa fa-circle", 
+                             style = "color: black"),
+                no = tags$i(class = "fa fa-circle-o")),
+              direction = "vertical"
+            )
           ),
           
           plotOutput(
@@ -207,12 +224,25 @@ main_panel <- function() {
       
       column(
         width = 6,
-        style='padding:0px;',
+        style ='padding:0px;',
         
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death / Age Decomposition",
-            db_style = "padding: 0px 0px 0px 410px;"
+            db_style = "padding: 0px 0px 0px 410px;",
+            radioGroupButtons(
+              inputId = "fig4_dim",
+              label = "View by:",
+              choices = c("Age-and-COD" = "both", 
+                          "Age" = "age", 
+                          "COD" = "cod"),
+              justified = TRUE,
+              checkIcon = list(
+                yes = tags$i(class = "fa fa-circle", 
+                             style = "color: black"),
+                no = tags$i(class = "fa fa-circle-o")),
+              direction = "vertical"
+            )
           ),
           
           plotOutput(
