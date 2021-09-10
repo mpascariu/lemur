@@ -4,7 +4,7 @@
 \alias{plot_map}
 \title{Plot map}
 \usage{
-plot_map()
+plot_map(reg)
 }
 \description{
 Plot map

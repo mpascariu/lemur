@@ -41,8 +41,8 @@ app_server <- function(input, output, session) {
   
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
-    if (input$mode == 'cod_change') {
-      prepare_data_mode1(
+    if (input$mode == 'mode_cod') {
+      prepare_data_mode_cod(
         data_cod(), 
         data_lt(), 
         input$region1, 
@@ -51,8 +51,8 @@ app_server <- function(input, output, session) {
         data_cod_change()
       )
       
-    } else if (input$mode == 'cntr_compare') {
-      prepare_data_mode2(
+    } else if (input$mode == 'mode_cntr') {
+      prepare_data_mode_cntr(
         data_cod(), 
         data_lt(), 
         input$region1, 
@@ -61,8 +61,8 @@ app_server <- function(input, output, session) {
         data_cod_change()
       )
       
-    } else if (input$mode == 'sex_compare') {
-      prepare_data_mode3(
+    } else if (input$mode == 'mode_sex') {
+      prepare_data_mode_sex(
         input$region1, 
         input$cod_target,
         data_cod_change()
@@ -80,7 +80,7 @@ app_server <- function(input, output, session) {
   
   # Figure 1 - The Map
   output$figure1 <- renderLeaflet(
-    plot_map()
+    plot_map(reg = input$region1)
   )
   
   # Figure 2 - The change
@@ -96,7 +96,7 @@ app_server <- function(input, output, session) {
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlot({
     
-    if (input$mode == "cntr_compare") {
+    if (input$mode == "mode_cntr") {
       cod <- bind_rows(
         data_fig()$cod1, 
         data_fig()$cod2
@@ -108,13 +108,13 @@ app_server <- function(input, output, session) {
         type = input$fig3_chart_type) + 
         facet_wrap("region")
       
-    } else if (input$mode == 'cod_change') {
+    } else if (input$mode == 'mode_cod') {
       plot_cod(
         cod = data_fig()$cod2, 
         perc = input$perc, 
         type = input$fig3_chart_type)
       
-    } else if (input$mode == "sex_compare") {
+    } else if (input$mode == "mode_sex") {
       cod <- bind_rows(
         data_fig()$cod1, 
         data_fig()$cod2
@@ -159,7 +159,7 @@ app_server <- function(input, output, session) {
 
 #' Prepare data for risk changes
 #' @keywords internal
-prepare_data_mode1 <- function(cod, 
+prepare_data_mode_cod <- function(cod, 
                                lt, 
                                region1, 
                                region2, 
@@ -189,7 +189,7 @@ prepare_data_mode1 <- function(cod,
 
 #' Prepare data for country comparisons
 #' @keywords internal
-prepare_data_mode2 <- function(cod, 
+prepare_data_mode_cntr <- function(cod, 
                                lt, 
                                region1, 
                                region2, 
@@ -222,7 +222,7 @@ prepare_data_mode2 <- function(cod,
 
 #' Prepare data for sex comparisons
 #' @keywords internal
-prepare_data_mode3 <- function(region1, 
+prepare_data_mode_sex <- function(region1, 
                                cod_target, 
                                cod_change){
   

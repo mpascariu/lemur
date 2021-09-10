@@ -1,30 +1,27 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 22:11:58 2021
+# Last update: Thu Sep 09 18:11:21 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
 top_panel <- function() {
   fluidRow(
     column(
-      width = 3,
+      width = 4,
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
         label   = "Dashboard Mode",
         choices = c(
-          "COD Risk Change" = "cod_change", 
-          "Compare Regions" = "cntr_compare",
-          "Sex Comparison" = "sex_compare"),
-        selected = "cntr_compare",
+          "COD Risk Change" = "mode_cod", 
+          "Compare Regions" = "mode_cntr",
+          "Sex Comparison" = "mode_sex",
+          "SDGs" = "mode_sdg"),
+        selected = "mode_cntr",
         justified = TRUE,
         size = "sm",
         checkIcon = list(yes = icon("ok", lib = "glyphicon"))
       )
     ),
-    
-    # column(
-    #    width = 8
-    # ),
     
     column(
       width = 1,
@@ -50,7 +47,7 @@ top_panel <- function() {
 side_panel <- function() {
   tagList(
     conditionalPanel(
-      condition = "input.mode != 'sex_compare'",
+      condition = "input.mode != 'mode_sex'",
       shinyWidgets::radioGroupButtons(
         inputId = "sex",
         label   = "Sex",
@@ -74,7 +71,7 @@ side_panel <- function() {
     ), 
     
     conditionalPanel(
-      condition = "input.mode == 'cntr_compare'",
+      condition = "input.mode == 'mode_cntr'",
       
       selectInput(
         inputId  = "region2",
@@ -86,59 +83,136 @@ side_panel <- function() {
     ),
     
     chooseSliderSkin("Flat"),
-    setSliderColor(c("black", "black"), c(1, 2)),
-    sliderInput(
-      inputId = "cod_change",
-      label = "Modify the case-specific risk of dying:",
-      post = "%",
-      value = 0,
-      min = -100,
-      max = 100,
-      step = 5
-    ),
+    setSliderColor(rep("black", 10), c(1:10)),
     
-    sliderTextInput(
-      inputId = "age_change",
-      label = "On which age interval to change the risks?",
-      choices = MortalityCauses::data_app_input$x,
-      selected = c(0, 110),
-      grid = TRUE
-    ),
-    
-    fluidRow(
-      column(
-        width = 10,
-        prettyCheckboxGroup(
-          inputId = "cod_target",
-          label = "Which cause of death to be affected:", 
-          choices = sort(MortalityCauses::data_app_input$cause_name),
-          selected = MortalityCauses::data_app_input$cause_name,
-          icon = icon("check"),
-          status = "success",
-          animation = "rotate",
-          outline = TRUE,
-          inline = FALSE
-        )
+    conditionalPanel(
+      condition = "input.mode != 'mode_sdg'",
+      sliderInput(
+        inputId = "cod_change",
+        label = "Modify the case-specific risk of dying:",
+        post = "%",
+        value = 0,
+        min = -100,
+        max = 100,
+        step = 5
       ),
       
-      column(
-        width = 2,
-        style = 'padding:0px;',
-        br(),
-        actionButton(
-          inputId = "cod_target_all", 
-          label = "ALL",
-          style = "width:100%;"
-          ),
-        actionButton(
-          inputId = "cod_target_none", 
-          label = "NONE",
-          style = "width:100%;"
+      sliderTextInput(
+        inputId = "age_change",
+        label = "On which age interval to change the risks?",
+        choices = MortalityCauses::data_app_input$x,
+        selected = c(0, 110),
+        grid = TRUE
+      ),
+      
+      fluidRow(
+        column(
+          width = 10,
+          prettyCheckboxGroup(
+            inputId = "cod_target",
+            label = "Which cause of death to be affected:", 
+            choices = sort(MortalityCauses::data_app_input$cause_name),
+            selected = MortalityCauses::data_app_input$cause_name,
+            icon = icon("check"),
+            status = "success",
+            animation = "rotate",
+            outline = TRUE,
+            inline = FALSE
           )
+        ),
         
+        column(
+          width = 2,
+          style = 'padding:0px;',
+          br(),
+          actionButton(
+            inputId = "cod_target_all", 
+            label = "ALL",
+            style = "width:100%;"
+            ),
+          actionButton(
+            inputId = "cod_target_none", 
+            label = "NONE",
+            style = "width:100%;"
+            )
+        )
       )
+    ),
+    
+    # Side panel for sdg mode
+    conditionalPanel(
+      condition = "input.mode == 'mode_sdg'",
+      
+      sliderInput(
+        inputId = "goal_1_maternal",
+        label = "Maternal mortality ratio:",
+        post = " per 100k",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput(
+        inputId = "goal_2_underfive",
+        label = "Under-five mortality rate:",
+        post = " per 1000 live births",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput( # goal 25
+        inputId = "goal_3_neonatal",
+        label = "Neonatal mortality rate:",
+        post = " per 1000 live births",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput( # goal 0
+        inputId = "goal_4_cardio",
+        label = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
+        post = " per 1,000 uninfected",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput(
+        inputId = "goal_5_suicide",
+        label = "Suicide mortality rate:",
+        post = " ",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput( # halve the number of global deaths on road traffic accidents
+        inputId = "goal_6_road",
+        label = "Death rate due to road traffic injuries:",
+        post = " per 100k",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
+      
+      sliderInput( # substantially reduce the number of deaths from pollution
+        inputId = "goal_7_road",
+        label = "Mortality due to air pollution:",
+        post = " per 100k",
+        value = 80,
+        min = 0,
+        max = 200,
+        step = 1
+      ),
     )
-
   )
 }
 

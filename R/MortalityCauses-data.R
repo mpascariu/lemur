@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 21:34:05 2021
+# Last update: Thu Sep 09 22:47:14 2021
 # --------------------------------------------------- #
 
 #' Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019 
@@ -43,3 +43,7 @@
 #' Input data for the app
 #' @noRd
 "data_app_input"
+
+#' sf data
+#' @noRd
+"data_sf"

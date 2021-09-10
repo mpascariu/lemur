@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 22:12:21 2021
+# Last update: Wed Jun 30 12:42:09 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -10,33 +10,77 @@
 #' @examples 
 #' plot_map()
 #' @export  
-plot_map <- function() {
+plot_map <- function(reg) {
+  
+  tag.map.title <- tags$style(
+    HTML("
+   .leaflet-control.map-title { 
+     text-align: left;
+     padding-left: 2px; 
+     padding-right: 2px; 
+     color: rgba(85, 85, 85);
+     font-size: 12px;
+     font-family: Arial;
+     background: rgba(255,255,255,0.8);
+     box-shadow: 0 0 15px rgba(0,0,0,0.2);
+     border-radius: 5px;
+   }
+  ")
+  )
+  
+  tooltip <- glue::glue_data(
+    data_sf,
+    "<b>{name}</b><br>
+  Population: {scales::number(pop, accuracy = 1)}<br>
+  Life Expectancy - Females: {scales::number(e0F, accuracy = 0.1)}<br>
+  Life Expectancy - Males: {scales::number(e0M, accuracy = 0.1)}<br>
+  Total Fertility Rate: {scales::number(tfr, accuracy = 0.01)}<br>
+  Sex Ratio: {scales::number(sexRatio, accuracy = 0.01)}<br>
+  "
+  ) %>% 
+    purrr::map(htmltools::HTML)
+  
+  dt <- data_sf %>% 
+    filter(name == reg)
   
   leaflet() %>%
+    addTiles() %>%
     addMapPane(name = "choropleth", zIndex = 410) %>%
     addMapPane(name = "polygons", zIndex = 420) %>%
     addMapPane(name = "borders", zIndex = 430) %>%
-    addMapPane(name = "circles", zIndex = 440) %>%
     addMapPane(name = "place_labels", zIndex = 450) %>%
-    addProviderTiles("CartoDB.PositronNoLabels") %>%
     addProviderTiles("CartoDB.PositronOnlyLabels",
                      group = "Place Labels",
                      options = leafletOptions(pane = "place_labels")) %>%
-    setView(0, 40, zoom = 1) %>%
     addScaleBar(position = "bottomleft") %>%
-    # addControl(
-    #   tags$div(tag.map.title, HTML("click country on<br>map to filter")),
-    #   position = "bottomleft", 
-    #   className = "map-title", 
-    #   layerId = "title") %>%
+    addControl(
+      tags$div(tag.map.title, HTML("click country on<br>map to filter")),
+      position = "topright",
+      className = "map-title",
+      layerId = "title") %>%
     leaflet.extras::addFullscreenControl(position = "topleft") %>%
     leaflet.extras::addResetMapButton() %>%
-    addLayersControl(
-      # baseGroups = c("Labels", "No Labels"),
-      overlayGroups = c("Place Labels", "Trends", "Cases/Deaths"),
-      position = "topleft"
-    )
+    addPolygons(
+      data = dt, 
+      weight = 2, 
+      fillColor = "yellow") %>% 
+    addPolygons(
+      data = data_sf,
+      label = tooltip,
+      color = "white",
+      weight = 0.1,
+      smoothFactor = .1,
+      opacity = 1,
+      fillOpacity = .2,
+      fillColor = ~colorQuantile("YlOrRd", e0F)(e0F),
+      highlightOptions = highlightOptions(
+        color = "white",
+        weight = 2,
+        bringToFront = TRUE)) %>%
+    setView(lng = dt$lon, lat = dt$lat, zoom = 5)
+  
 }
+
 
 
 # ----------------------------------------------------------------------------
