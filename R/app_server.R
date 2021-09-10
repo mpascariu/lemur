@@ -80,7 +80,9 @@ app_server <- function(input, output, session) {
   
   # Figure 1 - The Map
   output$figure1 <- renderLeaflet(
-    plot_map(reg = input$region1)
+    suppressWarnings(
+      plot_map(reg = input$region1)
+    )
   )
   
   # Figure 2 - The change

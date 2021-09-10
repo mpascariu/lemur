@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 30 12:42:09 2021
+# Last update: Fri Sep 10 09:53:20 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -30,12 +30,13 @@ plot_map <- function(reg) {
   
   tooltip <- glue::glue_data(
     data_sf,
-    "<b>{name}</b><br>
+    "<strong>{name}</strong><br>
   Population: {scales::number(pop, accuracy = 1)}<br>
   Life Expectancy - Females: {scales::number(e0F, accuracy = 0.1)}<br>
   Life Expectancy - Males: {scales::number(e0M, accuracy = 0.1)}<br>
   Total Fertility Rate: {scales::number(tfr, accuracy = 0.01)}<br>
   Sex Ratio: {scales::number(sexRatio, accuracy = 0.01)}<br>
+  <i>(Source: WPP 2019)</i><br>
   "
   ) %>% 
     purrr::map(htmltools::HTML)

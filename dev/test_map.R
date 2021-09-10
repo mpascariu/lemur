@@ -95,6 +95,9 @@ plot_map <- function(reg) {
   
 }
 
+plot_map("Romania")
+
+
 
 # ----------------------------------------------------------------------------
 
@@ -113,7 +116,9 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   output$map1 <- renderLeaflet(
-    plot_map(input$region1)
+    suppressWarnings(
+      plot_map(input$region1)
+    )
   )
 
 

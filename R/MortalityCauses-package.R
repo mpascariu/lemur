@@ -14,6 +14,7 @@
 #' @import ggplot2
 #' @import golem
 #' @import leaflet
+#' @import sf
 #' @import pals
 #' 
 #' @importFrom reactable reactableOutput
