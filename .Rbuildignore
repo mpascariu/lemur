@@ -3,6 +3,7 @@
 ^data-raw$
 ^sources$
 ^dev$
+^docs$
 dev_history.R
 $run_dev.*
 ^LICENSE\.md$

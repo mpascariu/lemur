@@ -29,9 +29,10 @@ region1 = "Romania"
 region2 = "Republic of Moldova"
 sex     = "female"
 level   = "median"
+year    = 2019
 
-L1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
-L2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
+L1 <- L[L$region == region1 & L$sex == sex & L$level == level & L$period == year, ]
+L2 <- L[L$region == region2 & L$sex == sex & L$level == level & L$period == year, ]
 
 # Age decomposition
 dec <- decompose_by_age(L1, L2)

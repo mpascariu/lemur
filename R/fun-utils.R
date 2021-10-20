@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Jun 02 21:07:47 2021
+# Last update: Wed Oct 20 17:31:23 2021
 # --------------------------------------------------- #
 
 # Hack CRAN check warnings related to tidyverse coding style
@@ -29,6 +29,8 @@ globalVariables(
     "sex2",
     "value",
     "x",
-    "x.int"
+    "x.int",
+    "data_sf",
+    "name"
     )
 )

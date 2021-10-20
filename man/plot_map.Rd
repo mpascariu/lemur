@@ -4,11 +4,15 @@
 \alias{plot_map}
 \title{Plot map}
 \usage{
-plot_map(reg)
+plot_map(location)
+}
+\arguments{
+\item{location}{Geographical location}
 }
 \description{
 Plot map
 }
 \examples{
-plot_map()
+plot_map(location = "Mexico")
+
 }

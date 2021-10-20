@@ -52,7 +52,6 @@ with defaults set to approximate their recommendations for replacement
 ordering and result averaging.
 }
 \examples{
-
 L <- data_gbd2019_lt  # life tables
 D <- data_gbd2019_cod # cod data
 
@@ -61,13 +60,14 @@ region1 = "Romania"
 region2 = "Mexico"
 sex     = "male"
 level   = "median"
+year    = 2019
 
-lt1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
-lt2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
+lt1 <- L[L$region == region1 & L$sex == sex & L$level == level & L$period == year, ]
+lt2 <- L[L$region == region2 & L$sex == sex & L$level == level & L$period == year, ]
 
 # Select COD corresponding data
-cod1 <- D[D$region == region1 & D$sex == sex & D$level == level, ]
-cod2 <- D[D$region == region2 & D$sex == sex & D$level == level, ]
+cod1 <- D[D$region == region1 & D$sex == sex & D$level == level & D$period == year, ]
+cod2 <- D[D$region == region2 & D$sex == sex & D$level == level & D$period == year, ]
 
 ## Example of decomposition by age and cause of death
 dec  <- decompose_by_cod(L1 = lt1,

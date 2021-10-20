@@ -28,6 +28,22 @@
 #' data_gbd2019_cod
 "data_gbd2019_cod"
 
+#' Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019
+#' 
+#' In this data object the death count data (GBD2019) is grouped in such a way 
+#' that make possible the tracking of the evolution of the UN's
+#' Sustainable Development Goals.
+#'  
+#' @source 
+#' Global Burden of Disease Collaborative Network.
+#' Global Burden of Disease Study 2019 (GBD 2019) Results.
+#' Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
+#' Available from http://ghdx.healthdata.org/gbd-results-tool.
+#' 
+#' @examples 
+#' data_gbd2019_sdg
+"data_gbd2019_sdg"
+
 
 #' Causes of Death List Mapped to ICD Codes
 #' 

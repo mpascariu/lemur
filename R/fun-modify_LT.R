@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 22:12:12 2021
+# Last update: Wed Oct 20 17:08:36 2021
 # --------------------------------------------------- #
 
 #' Modify life table by changing the cause of death associated risks
@@ -19,20 +19,20 @@
 #' D <- data_gbd2019_cod # cod data
 #' 
 #' # Select Life Table
-#' lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median", ]
+#' lt <- L[L$region == "Romania" & L$sex == "both" & L$level == "median" & L$period == 2019, ]
 #' # Select COD data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
 #' cod_change = -50
 #' 
 #' # Example 1:
 #' # How does the life table modify if the cause-specific mortality is
-#' # reduced by 50%?
+#' # reduced by 50% (all ages, all causes of death)?
 #' lt_reduced <- modify_life_table(lt, cod, cod_change = -50)
 #' lt_reduced
 #' 
 #' # Example 2:
 #' # Let's change the first cod by 1%, second one with 2% and so on until 17%
-#' # Note, we are increasing death rates. This should result in a lower life 
+#' # Note, we are increasing death rates. This should result in a lower life
 #' # expectancy.
 #' 
 #' unique(cod$cause_name) # we have 17 causes
@@ -42,7 +42,7 @@
 #' 
 #' # Example 3:
 #' # Apply a specific change by cause and age
-#' # Say, we want to decrease the cod's risk only between age 45 and 75 
+#' # Say, we want to decrease the cod's risk only between age 45 and 75
 #' # with values between 24% and 40%.
 #' 
 #' # we have to build a matrix with 24 rows and 17 columns (ages x cods)
@@ -98,7 +98,7 @@ modify_life_table <- function(lt, cod, cod_change) {
 #' D <- data_gbd2019_cod # cod data
 #' 
 #' # Select COD data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
 #' cod_change = -50
 #' 
 #' # Example 1:
@@ -177,12 +177,12 @@ modify_cod_table <- function(cod, cod_change){
 #' @return A matrix with percentages.
 #' @examples 
 #' # cod data
-#' D <- data_gbd2019_cod 
+#' D <- data_gbd2019_cod
 #' # Select COD data for 1 region
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 1990, ]
 #' # COD data in matrix format
 #' 
-#' build_cod_matrix(cod) 
+#' build_cod_matrix(cod)
 #' @export
 build_cod_matrix <- function(cod) {
   

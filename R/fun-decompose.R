@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 22:13:00 2021
+# Last update: Wed Oct 20 17:06:17 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions 
@@ -22,9 +22,10 @@
 #' region2 = "Republic of Moldova"
 #' sex     = "female"
 #' level   = "median"
+#' year    = 2019
 #' 
-#' L1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
-#' L2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
+#' L1 <- L[L$region == region1 & L$sex == sex & L$level == level & L$period == year, ]
+#' L2 <- L[L$region == region2 & L$sex == sex & L$level == level & L$period == year, ]
 #' 
 #' # Age decomposition
 #' dec <- decompose_by_age(L1, L2)
@@ -124,7 +125,6 @@ decompose_by_age <- function(L1, L2){
 #' \code{DemoDecomp::stepwise_replacement} function maintained by Tim RIFFE.
 #' @references ...
 #' @examples 
-#' 
 #' L <- data_gbd2019_lt  # life tables
 #' D <- data_gbd2019_cod # cod data
 #' 
@@ -133,13 +133,14 @@ decompose_by_age <- function(L1, L2){
 #' region2 = "Mexico"
 #' sex     = "male"
 #' level   = "median"
+#' year    = 2019
 #' 
-#' lt1 <- L[L$region == region1 & L$sex == sex & L$level == level, ]
-#' lt2 <- L[L$region == region2 & L$sex == sex & L$level == level, ]
+#' lt1 <- L[L$region == region1 & L$sex == sex & L$level == level & L$period == year, ]
+#' lt2 <- L[L$region == region2 & L$sex == sex & L$level == level & L$period == year, ]
 #' 
 #' # Select COD corresponding data
-#' cod1 <- D[D$region == region1 & D$sex == sex & D$level == level, ]
-#' cod2 <- D[D$region == region2 & D$sex == sex & D$level == level, ]
+#' cod1 <- D[D$region == region1 & D$sex == sex & D$level == level & D$period == year, ]
+#' cod2 <- D[D$region == region2 & D$sex == sex & D$level == level & D$period == year, ]
 #' 
 #' ## Example of decomposition by age and cause of death
 #' dec  <- decompose_by_cod(L1 = lt1,

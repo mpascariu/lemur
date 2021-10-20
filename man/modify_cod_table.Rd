@@ -25,7 +25,7 @@ Modify COD table by changing the cause of death associated risks
 D <- data_gbd2019_cod # cod data
 
 # Select COD data
-cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
 cod_change = -50
 
 # Example 1:

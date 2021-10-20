@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 22:12:29 2021
+# Last update: Wed Oct 20 17:36:55 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -81,7 +81,7 @@ app_server <- function(input, output, session) {
   # Figure 1 - The Map
   output$figure1 <- renderLeaflet(
     suppressWarnings(
-      plot_map(reg = input$region1)
+      plot_map(location = input$region1)
     )
   )
   

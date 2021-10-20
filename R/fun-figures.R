@@ -1,16 +1,17 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Sep 10 09:53:20 2021
+# Last update: Wed Oct 20 17:22:59 2021
 # --------------------------------------------------- #
 
 # Figure 1.
 
 #' Plot map
-#' 
+#' @param location Geographical location
 #' @examples 
-#' plot_map()
+#' plot_map(location = "Mexico")
+#' 
 #' @export  
-plot_map <- function(reg) {
+plot_map <- function(location) {
   
   tag.map.title <- tags$style(
     HTML("
@@ -42,7 +43,7 @@ plot_map <- function(reg) {
     purrr::map(htmltools::HTML)
   
   dt <- data_sf %>% 
-    filter(name == reg)
+    filter(name == location)
   
   leaflet() %>%
     addTiles() %>%
@@ -72,7 +73,7 @@ plot_map <- function(reg) {
       weight = 0.1,
       smoothFactor = .1,
       opacity = 1,
-      fillOpacity = .2,
+      fillOpacity = .5,
       fillColor = ~colorQuantile("YlOrRd", e0F)(e0F),
       highlightOptions = highlightOptions(
         color = "white",
@@ -161,10 +162,9 @@ plot_change <- function(L1, L2,
 #' @param type Options: "barplot" or "piechart".
 #' @examples 
 #' D <- data_gbd2019_cod # cod data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
 #' plot_cod(cod)
 #' @export
-
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
   
   # Data preparation
@@ -221,7 +221,6 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
       plot_theme() +
       theme(legend.position = "right")
     
-    
   }
   
   # ggplot
@@ -256,8 +255,6 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 #' @examples 
 #' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
 #' @export
-
-
 plot_decompose <- function(object, perc = FALSE, 
                            by = "both") {
   

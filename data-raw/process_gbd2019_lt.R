@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Wed Mar 24 20:32:27 2021
+# Author: Marius D. PASCARIU
+# Last update: Wed Oct 20 16:29:33 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -38,9 +38,12 @@ location_map <- read_excel(
   sheet = "GBD 2019 Locations Hierarchy") %>% 
   # for now we will be working with the 204 countries only 
   filter(Level == 3)
-  
+
 # ------------------------------------------
 # GBD Probability of death data (qxn)
+
+year_selection <- c(1990, 1995, 2000, 2005, 2010, 2015, 2019)
+
 
 gbd_qxn <- data %>% 
   select(
@@ -54,62 +57,52 @@ gbd_qxn <- data %>%
     upper,
     lower) %>% 
   filter(
-    year_id %in% 2015:2019,
+    year_id %in% year_selection,
     measure_name == "Probability of death no-shock with hiv",
-    location_name %in% location_map$`Location Name`
+    location_name %in% location_map$`Location Name`,
     ) %>% 
   mutate(
     x = word(age_group_name, 1),
     x = ifelse(x == "<1", 0, x),
-    x = as.numeric(x)) %>% 
+    x = as.numeric(x),
+    level = "median") %>% 
   select(
     # drop few more
     - age_group_name,
-    - measure_name
+    - measure_name,
+    - lower,
+    - upper,
   ) %>% 
   rename(
     # rename few columns to follow the life table data
     region = location_name,
     sex = sex_name,
-    year = year_id,
-    median = val
+    period = year_id,
+    qxn = val
   ) %>% 
-   # create a long table
-  pivot_longer(
-    cols = median:lower, 
-    names_to = "level", 
-    values_to = "qxn") %>% 
-  arrange(level, region, year, sex, x)
-
-# Aggregate the 5 years into a single period: 2015-2019
-gbd_qxn_avg <- gbd_qxn %>% 
-  group_by(region, sex, x, level) %>% 
-  summarise(qxn = mean(qxn)) %>% 
-  add_column(period = "2015-2019", .after = 1) %>% 
-  arrange(level, region, period, sex, x) %>% 
-  ungroup()
+  arrange(level, region, period, sex, x)
 
 
 # ------------------------------------------
 # BUILD complete abridged life tables with {MortalityLaws}
 
 # we will have to create 1836 life tables
-cases <- gbd_qxn_avg %>% 
+# cases <- gbd_qxn_avg %>% 
+cases <- gbd_qxn %>% 
   select(-x, -qxn) %>% 
   unique()
 
-ages <- unique(gbd_qxn_avg$x)
+ages <- unique(gbd_qxn$x)
 n    <- nrow(cases)
 
 LTS <- NULL
 for(i in 1:n) {
-  # This should be quick. Less than a minute.
   # selection
   S <- unlist(cases[i, ])
   print(paste0(i, "/", n, " - ", paste(S, collapse = "-")))
   
   # selected data
-  d <- gbd_qxn_avg %>% 
+  d <- gbd_qxn %>% 
     filter(region == S[1],
            period == S[2], 
            sex    == S[3],

@@ -18,10 +18,10 @@ containing percentages, with ages as rows and cod's as columns.
 }
 \examples{
 # cod data
-D <- data_gbd2019_cod 
+D <- data_gbd2019_cod
 # Select COD data for 1 region
-cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median", ]
+cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 1990, ]
 # COD data in matrix format
 
-build_cod_matrix(cod) 
+build_cod_matrix(cod)
 }

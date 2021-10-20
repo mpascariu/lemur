@@ -42,4 +42,6 @@ vignettes/*.pdf
 data-raw/WPP2019LT/*.xlsx
 data-raw/GBD2019LT/*.zip
 data-raw/GBD2019COD/*.zip
+data-raw/GBD2019COD_20211013/*.zip
 data-raw/*.Rdata
+docs/*.*
