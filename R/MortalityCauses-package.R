@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 10 21:33:06 2021
+# Last update: Tue Oct 26 11:11:58 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -66,6 +66,9 @@
 #' tagList 
 #' tagAppendAttributes 
 #' HTML
+#' 
+#' @importFrom glue glue_data
+#' @importFrom purrr map
 #' 
 #' @name MortalityCauses
 #' @docType package

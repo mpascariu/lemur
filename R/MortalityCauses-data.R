@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Sep 09 22:47:14 2021
+# Last update: Tue Oct 26 10:55:48 2021
 # --------------------------------------------------- #
 
 #' Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019 
@@ -33,13 +33,7 @@
 #' In this data object the death count data (GBD2019) is grouped in such a way 
 #' that make possible the tracking of the evolution of the UN's
 #' Sustainable Development Goals.
-#'  
-#' @source 
-#' Global Burden of Disease Collaborative Network.
-#' Global Burden of Disease Study 2019 (GBD 2019) Results.
-#' Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
-#' Available from http://ghdx.healthdata.org/gbd-results-tool.
-#' 
+#' @inherit data_gbd2019_cod source
 #' @examples 
 #' data_gbd2019_sdg
 "data_gbd2019_sdg"
@@ -56,10 +50,11 @@
 #' data_cod_mapping
 "data_cod_mapping"
 
-#' Input data for the app
-#' @noRd
+#' Input data for the shiny app
 "data_app_input"
 
-#' sf data
-#' @noRd
+#' Simple features data for the map
+#' @seealso \code{\link{plot_map}}
 "data_sf"
+
+

@@ -1,3 +1,6 @@
+version 0.5.1
+- specify glue and purrr dependencies, remove some more warnings.
+
 version 0.5.0
 - Add yearly COD data and also a SDG classification. 
 - Re-run the data preprocessing scripts.
