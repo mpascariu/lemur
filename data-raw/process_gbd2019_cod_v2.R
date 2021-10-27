@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 14 10:50:08 2021
+# Last update: Wed Oct 27 21:19:39 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -183,12 +183,13 @@ gbd <- left_join(gbd_cod, cod_map, by = "cause_id") %>%
   # be extracted from 'Other cardiovascular' and 'Other neoplasms' to
   # avoid double counting.
   ungroup() %>% 
+  filter(level == "median") %>% 
   complete(x, nesting(region, sex, period, cause_name, level)) %>% 
   mutate(deaths = replace_na(deaths, 0)) %>% 
   group_by(region, sex, period, x, level) %>% 
   mutate(
-    deaths = ifelse(cause_name == 'Other cardiovascular', deaths - deaths[cause_name == 'Ischemic heart disease'] - deaths[cause_name == 'Stroke'], deaths), 
-    deaths = ifelse(cause_name == 'Other neoplasms', deaths - deaths[cause_name == 'Colon and rectum cancer'] - deaths[cause_name == 'Lung cancer'], deaths),
+    deaths = ifelse(cause_name == 'Other Cardiovascular', deaths - deaths[cause_name == 'Ischemic Heart Disease'] - deaths[cause_name == 'Stroke'], deaths), 
+    deaths = ifelse(cause_name == 'Other Neoplasms', deaths - deaths[cause_name == 'Colon and Rectum Cancer'] - deaths[cause_name == 'Lung Cancer'], deaths),
     deaths = pmax(deaths, 0) # for some reason we get negative values as well!!!
   ) %>% 
   # remove group_by to avoid future trouble
@@ -279,8 +280,7 @@ ungroup_last_age_int <- function(X) {
 key <- c("region", "period", "sex", "cause_name", "level")
 cases <- gbd %>% 
   filter(
-    cause_name != "Neonatal disorders",
-    level == "median"
+    cause_name != "Neonatal Disorders",
     ) %>% 
   select(region, period, sex, cause_name, level) %>% 
   unique() %>% 

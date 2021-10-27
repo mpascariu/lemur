@@ -1,11 +1,55 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 27 10:44:16 2021
+# Last update: Thu Oct 28 00:07:44 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
 top_panel <- function() {
   fluidRow(
+    
+    column(
+      width = 3,
+      
+      conditionalPanel(
+        condition = "input.mode != 'mode_sex'",
+        shinyWidgets::radioGroupButtons(
+          inputId = "sex",
+          label   = "Sex",
+          choices = c(
+            "Female" = "female", 
+            "Male"   = "male",
+            "Both"   = "both"),
+          selected = "both",
+          justified = TRUE,
+          size = "sm",
+          checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+        ),
+      ),
+      
+      conditionalPanel(
+        condition = "input.mode == 'mode_sex'",
+        shinyWidgets::checkboxGroupButtons(
+          inputId = "sex",
+          label   = "Sex",
+          choices = c(
+            "Female" = "female", 
+            "Male"   = "male",
+            "Both"   = "both"),
+          selected = c("female", "male"),
+          justified = TRUE,
+          size = "sm",
+          checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+        ),
+      ),
+      bsTooltip(
+        id = "sex", 
+        title = paste(
+          "Select the female, male or entire population",
+          "for which to display statistics."),
+      ),
+    ),
+    
+    
     column(
       width = 4,
       shinyWidgets::radioGroupButtons(
@@ -51,6 +95,45 @@ top_panel <- function() {
 #' @keywords internal
 side_panel <- function() {
   tagList(
+    
+    conditionalPanel(
+      condition = "input.mode != 'mode_cntr'",
+      selectInput(
+        inputId  = "region1",
+        label    = "Region",
+        choices  = MortalityCauses::data_app_input$region,
+        selected = "Romania",
+        width    = "100%"
+      ), 
+    ),
+    
+    conditionalPanel(
+      condition = "input.mode == 'mode_cntr'",
+      fluidRow(
+        column(
+          width = 6,
+          selectInput(
+            inputId  = "region1",
+            label    = "Region",
+            choices  = MortalityCauses::data_app_input$region,
+            selected = "Romania",
+            width    = "100%"
+          ) 
+        ),
+        
+        column(
+          width = 6,
+          selectInput(
+            inputId  = "region2",
+            label    = "Region 2",
+            choices  = MortalityCauses::data_app_input$region,
+            selected = "Mexico",
+            width    = "100%",
+          )
+        )
+      )
+    ),
+    
     sliderTextInput(
       inputId = "time_slider",
       label = "Year",
@@ -61,48 +144,6 @@ side_panel <- function() {
     bsTooltip(
       id = "time_slider", 
       title = "Select the year for which the data to correspond to",
-    ),
-    
-    conditionalPanel(
-      condition = "input.mode != 'mode_sex'",
-      shinyWidgets::radioGroupButtons(
-        inputId = "sex",
-        label   = "Sex",
-        choices = c(
-          "Female" = "female", 
-          "Male"   = "male",
-          "Both"   = "both"),
-        selected = "both",
-        justified = TRUE,
-        size = "sm",
-        checkIcon = list(yes = icon("ok", lib = "glyphicon"))
-      ),
-      bsTooltip(
-        id = "sex", 
-        title = paste(
-          "Select the female, male or entire population",
-          "for which to display statistics."),
-      ),
-    ),
-    
-    selectInput(
-      inputId  = "region1",
-      label    = "Region",
-      choices  = MortalityCauses::data_app_input$region,
-      selected = "Romania",
-      width    = "100%"
-    ), 
-    
-    conditionalPanel(
-      condition = "input.mode == 'mode_cntr'",
-      
-      selectInput(
-        inputId  = "region2",
-        label    = "Region 2",
-        choices  = MortalityCauses::data_app_input$region,
-        selected = "Mexico",
-        width    = "100%"
-      )
     ),
     
     chooseSliderSkin("Flat"),

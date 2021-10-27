@@ -5,7 +5,7 @@
 \alias{data_gbd2019_sdg}
 \title{Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1781791 rows and 7 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1781453 rows and 7 columns.
 }
 \source{
 Global Burden of Disease Collaborative Network.

@@ -1,3 +1,8 @@
+version 0.5.3
+- update datasets processing;
+- make the sdg mode functional.Now we only need to make it work correctly and 
+will all the inputs.
+
 version 0.5.2
 - include tooltips to save dashboard real-estate;
 - now shiny app is operational except the SDG mode.

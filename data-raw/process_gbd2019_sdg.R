@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 20 14:28:46 2021
+# Last update: Wed Oct 27 21:32:53 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -50,9 +50,6 @@ cod_map <- read_excel(
     cod_selection)
 
 
-
-
-
 # ------------------------------------------.
 # GBD COD data wrangling
 
@@ -91,6 +88,7 @@ gbd <- left_join(gbd_cod, cod_map, by = "cause_id") %>%
     median = val
   ) %>%
   pivot_longer(cols = median:lower, names_to = "level", values_to = "deaths") %>% 
+  filter(level == "median") %>% 
   # group-by everything except 'val' and 'year' columns
   # so that we can aggregate data across years
   group_by_at(setdiff(names(.), c("deaths"))) %>% 
@@ -100,11 +98,11 @@ gbd <- left_join(gbd_cod, cod_map, by = "cause_id") %>%
   mutate(deaths = replace_na(deaths, 0)) %>% 
   group_by(region, sex, period, x, level) %>% 
   mutate(
-    deaths = ifelse(cause_name == 'Respiratory infections (excl. Tuberculosis)', deaths - deaths[cause_name == 'Tuberculosis'], deaths), 
-    deaths = ifelse(cause_name == 'Neglected tropical diseases (excl. Malaria)', deaths - deaths[cause_name == 'Malaria'], deaths),
-    deaths = ifelse(cause_name == 'Kidney disease', deaths - deaths[cause_name == 'Diabetes'], deaths),
-    deaths = ifelse(cause_name == 'Injuries excl. poisonings', deaths - deaths[cause_name == 'Poisonings'] - deaths[cause_name == 'Exposure to forces of nature'], deaths),
-    deaths = ifelse(cause_name == 'Interpersonal violence', deaths - deaths[cause_name == 'Self-harm'], deaths),
+    deaths = ifelse(cause_name == 'Respiratory Infections (excl. Tuberculosis)', deaths - deaths[cause_name == 'Tuberculosis'], deaths), 
+    deaths = ifelse(cause_name == 'Neglected Tropical Diseases (excl. Malaria)', deaths - deaths[cause_name == 'Malaria'], deaths),
+    deaths = ifelse(cause_name == 'Kidney Disease', deaths - deaths[cause_name == 'Diabetes'], deaths),
+    deaths = ifelse(cause_name == 'Injuries (excl. Poisonings)', deaths - deaths[cause_name == 'Poisonings'] - deaths[cause_name == 'Exposure to Forces of Nature'], deaths),
+    deaths = ifelse(cause_name == 'Interpersonal Violence', deaths - deaths[cause_name == 'Self-Harm'], deaths),
     deaths = pmax(deaths, 0) # for some reason we get negative values as well!!!
   ) %>% 
   # remove group_by to avoid future trouble
@@ -196,8 +194,8 @@ ungroup_last_age_int <- function(X) {
 key <- c("region", "period", "sex", "cause_name", "level")
 cases <- gbd %>% 
   filter(
-    cause_name != "Neonatal disorders",
-    level == "median"
+    cause_name != "Neonatal Disorders",
+    cause_name != "Maternal disorders",
   ) %>% 
   select(region, period, sex, cause_name, level) %>% 
   unique() %>% 
@@ -290,6 +288,8 @@ data_gbd2019_sdg <- GBD %>%
     region = factor(region)
   )
 
+# save(data_gbd2019_sdg, file = "data-raw/data_gbd2019_sdg.Rdata")
+# load("data-raw/data_gbd2019_sdg.Rdata")
 
 usethis::use_data(data_gbd2019_sdg, overwrite = TRUE)
 
@@ -297,8 +297,7 @@ usethis::use_data(data_gbd2019_sdg, overwrite = TRUE)
 
 
 
-
-D <- MortalityCauses::data_gbd2019_sdg
+D <- data_gbd2019_sdg
 
 data_app_input <- MortalityCauses::data_app_input
 
