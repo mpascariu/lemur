@@ -4,7 +4,7 @@
 \alias{prepare_data_mode_sex}
 \title{Prepare data for sex comparisons}
 \usage{
-prepare_data_mode_sex(region1, cod_target, cod_change)
+prepare_data_mode_sex(region1, cod_target, cod_change, year)
 }
 \description{
 Prepare data for sex comparisons

@@ -1,3 +1,7 @@
+version 0.5.2
+- include tooltips to save dashboard real-estate;
+- now shiny app is operational except the SDG mode.
+
 version 0.5.1
 - specify glue and purrr dependencies, remove some more warnings.
 

@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 20 17:36:55 2021
+# Last update: Wed Oct 27 10:44:30 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -16,6 +16,7 @@ app_server <- function(input, output, session) {
       dplyr::filter(
         region %in% c(input$region1, input$region2),
         sex == input$sex,
+        period == input$time_slider,
         level == "median")
     
   })
@@ -26,6 +27,7 @@ app_server <- function(input, output, session) {
       dplyr::filter(
         region %in% c(input$region1, input$region2),
         sex == input$sex,
+        period == input$time_slider,
         level == "median")
     }) 
   
@@ -65,7 +67,8 @@ app_server <- function(input, output, session) {
       prepare_data_mode_sex(
         input$region1, 
         input$cod_target,
-        data_cod_change()
+        data_cod_change(),
+        year = input$time_slider
       )
     }
   })
@@ -226,17 +229,22 @@ prepare_data_mode_cntr <- function(cod,
 #' @keywords internal
 prepare_data_mode_sex <- function(region1, 
                                cod_target, 
-                               cod_change){
+                               cod_change,
+                               year){
   
   cod <- MortalityCauses::data_gbd2019_cod %>% 
     dplyr::filter(
       region == region1,
-      level == "median")
+      level == "median",
+      period == year,
+      )
   
   lt <- MortalityCauses::data_gbd2019_lt %>% 
     dplyr::filter(
       region == region1,
-      level == "median")
+      level == "median",
+      period == year,
+      )
   
   # select cod and lt tables for the 2 sexes
   c1 <- dplyr::filter(cod, sex == "male")

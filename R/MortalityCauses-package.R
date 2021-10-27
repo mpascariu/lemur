@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Oct 26 11:11:58 2021
+# Last update: Wed Oct 27 12:04:49 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -11,6 +11,7 @@
 #'
 #' @import shiny
 #' @import shinyWidgets
+#' @import shinyBS
 #' @import ggplot2
 #' @import golem
 #' @import leaflet
@@ -27,6 +28,8 @@
 #' @importFrom forcats as_factor
 #' @importFrom MortalityLaws LifeTable
 #' @importFrom magrittr %>%
+#' @importFrom glue glue_data
+#' @importFrom purrr map
 #' 
 #' @importFrom leaflet.extras 
 #' addFullscreenControl 
@@ -67,8 +70,6 @@
 #' tagAppendAttributes 
 #' HTML
 #' 
-#' @importFrom glue glue_data
-#' @importFrom purrr map
 #' 
 #' @name MortalityCauses
 #' @docType package
