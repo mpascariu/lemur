@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 27 23:35:12 2021
+# Last update: Thu Oct 28 21:43:54 2021
 # --------------------------------------------------- #
 
 # ----------------------------------------------------------------------------
@@ -11,7 +11,6 @@
 prepare_data_mode_cod <- function(cod, 
                                   lt, 
                                   region1, 
-                                  region2, 
                                   cod_target, 
                                   cod_change) {
   

@@ -3,9 +3,9 @@
 \docType{data}
 \name{data_gbd2019_cod}
 \alias{data_gbd2019_cod}
-\title{Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019}
+\title{Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1575166 rows and 7 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1747872 rows and 7 columns.
 }
 \source{
 Global Burden of Disease Collaborative Network.
@@ -17,7 +17,7 @@ Available from http://ghdx.healthdata.org/gbd-results-tool.
 data_gbd2019_cod
 }
 \description{
-Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019
+Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019
 }
 \examples{
 data_gbd2019_cod

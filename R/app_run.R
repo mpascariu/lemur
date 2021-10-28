@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed May 12 20:57:43 2021
+# Last update: Thu Oct 28 20:17:18 2021
 # --------------------------------------------------- #
 
 #' Run the Shiny Application
@@ -9,6 +9,10 @@
 #' @param ... A series of options to be used inside the app.
 #' @export
 run_app <- function(..., lb = TRUE) {
+  
+  # requireNamespace("shinyBS", quietly=TRUE)
+  library("shinyBS")
+  
   with_golem_options(
     app = shinyApp(
       ui = app_ui, 

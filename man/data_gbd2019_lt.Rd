@@ -3,7 +3,7 @@
 \docType{data}
 \name{data_gbd2019_lt}
 \alias{data_gbd2019_lt}
-\title{Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019}
+\title{Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019}
 \format{
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 103320 rows and 14 columns.
 }
@@ -17,7 +17,7 @@ Population Division (2019). World Population Prospects 2019,
 data_gbd2019_lt
 }
 \description{
-Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019
+Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019
 }
 \examples{
 data_gbd2019_lt

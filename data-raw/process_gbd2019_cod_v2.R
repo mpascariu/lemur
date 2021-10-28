@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 27 21:19:39 2021
+# Last update: Thu Oct 28 20:01:27 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -233,7 +233,7 @@ ungroup_last_age_int <- function(X) {
   out <- NULL
   n   <- nrow(X)
   
-  if (n != 0 & sum(X$deaths) > 10) {
+  if (n != 0 & sum(X$deaths) > 1) {
     # The input data must have few rows to be able to do anything
     cols <- c("region", 
               "period",
@@ -340,13 +340,9 @@ gbd_both <- gbd110 %>%
 
 
 # Create the big dataset with 3 sexes
-GBD <- bind_rows(gbd110, gbd_both) #%>% 
-  # # compute percentages of each disease for
-  # # given age-region-period-sex and across ages
-  # group_by(region, period, sex, x, level) %>%
-  # # group_by(region, period, sex, level, x, cause_name) %>%
-  # mutate(perc = deaths / sum(deaths)) %>%
-  # ungroup() 
+GBD <- bind_rows(gbd110, gbd_both) %>% 
+  complete(x, nesting(region, sex, period, cause_name, level)) %>% 
+  mutate(deaths = replace_na(deaths, 0))
 
 # ------------------------------------------
 # CHECK POINT: 

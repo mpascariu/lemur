@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 00:07:44 2021
+# Last update: Thu Oct 28 12:46:42 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -41,14 +41,13 @@ top_panel <- function() {
           checkIcon = list(yes = icon("ok", lib = "glyphicon"))
         ),
       ),
-      bsTooltip(
+      shinyBS::bsTooltip(
         id = "sex", 
         title = paste(
           "Select the female, male or entire population",
           "for which to display statistics."),
       ),
     ),
-    
     
     column(
       width = 4,
@@ -58,14 +57,14 @@ top_panel <- function() {
         choices = c(
           "COD Risk Change" = "mode_cod", 
           "Compare Regions" = "mode_cntr",
-          "Sex Comparison" = "mode_sex",
-          "SDGs" = "mode_sdg"),
-        selected = "mode_cntr",
+          "Sex Comparison"  = "mode_sex",
+          "SDGs"            = "mode_sdg"),
+        selected = "mode_cod",
         justified = TRUE,
         size = "sm",
         checkIcon = list(yes = icon("ok", lib = "glyphicon"))
       ),
-      bsTooltip(
+      shinyBS::bsTooltip(
         id = "mode", 
         title = "Select the mode in which the dashboard to operate.",
         placement = "bottom"
@@ -96,41 +95,29 @@ top_panel <- function() {
 side_panel <- function() {
   tagList(
     
-    conditionalPanel(
-      condition = "input.mode != 'mode_cntr'",
-      selectInput(
-        inputId  = "region1",
-        label    = "Region",
-        choices  = MortalityCauses::data_app_input$region,
-        selected = "Romania",
-        width    = "100%"
-      ), 
-    ),
-    
-    conditionalPanel(
-      condition = "input.mode == 'mode_cntr'",
       fluidRow(
         column(
-          width = 6,
+          width = 12,
           selectInput(
             inputId  = "region1",
             label    = "Region",
             choices  = MortalityCauses::data_app_input$region,
-            selected = "Romania",
+            selected = "France",
             width    = "100%"
           ) 
         ),
-        
-        column(
-          width = 6,
-          selectInput(
-            inputId  = "region2",
-            label    = "Region 2",
-            choices  = MortalityCauses::data_app_input$region,
-            selected = "Mexico",
-            width    = "100%",
+        conditionalPanel(
+          condition = "input.mode == 'mode_cntr'",
+          column(
+            width = 12,
+            selectInput(
+              inputId  = "region2",
+              label    = "Region 2",
+              choices  = MortalityCauses::data_app_input$region,
+              selected = "Mexico",
+              width    = "100%",
+            )
           )
-        )
       )
     ),
     
@@ -141,7 +128,7 @@ side_panel <- function() {
       selected = 2019,
       grid = TRUE
     ),
-    bsTooltip(
+    shinyBS::bsTooltip(
       id = "time_slider", 
       title = "Select the year for which the data to correspond to",
     ),
@@ -155,12 +142,12 @@ side_panel <- function() {
         inputId = "cod_change",
         label = "Modify the case-specific risk of dying:",
         post = "%",
-        value = 0,
+        value = -10,
         min = -100,
         max = 100,
         step = 5
       ),
-      bsTooltip(
+      shinyBS::bsTooltip(
         id = "cod_change", 
         title = paste(
           "Apply a percentage increase or decrease (%)",
@@ -174,7 +161,7 @@ side_panel <- function() {
         selected = c(0, 110),
         grid = TRUE
       ),
-      bsTooltip(
+      shinyBS::bsTooltip(
         id = "age_change", 
         title = paste(
           "On which age interval to change the risks? ",
@@ -195,7 +182,7 @@ side_panel <- function() {
             outline = TRUE,
             inline = FALSE
           ),
-          bsTooltip(
+          shinyBS::bsTooltip(
             id = "cod_target", 
             title = paste(
               "Which causes of death to be affected? ",

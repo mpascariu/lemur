@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 27 21:32:53 2021
+# Last update: Thu Oct 28 20:02:52 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -147,7 +147,7 @@ ungroup_last_age_int <- function(X) {
   out <- NULL
   n   <- nrow(X)
   
-  if (n != 0 & sum(X$deaths) > 10) {
+  if (n != 0 & sum(X$deaths) > 1) {
     # The input data must have few rows to be able to do anything
     cols <- c("region", 
               "period",
@@ -257,11 +257,12 @@ gbd_both <- gbd110 %>%
 
 
 # Create the big dataset with 3 sexes
-GBD <- bind_rows(gbd110, gbd_both) 
+GBD <- bind_rows(gbd110, gbd_both) %>% 
+  complete(x, nesting(region, sex, period, cause_name, level)) %>% 
+  mutate(deaths = replace_na(deaths, 0))
 
 # ------------------------------------------
 # CHECK POINT: 
-
 
 sum(gbd_level2$val)
 GBD %>% 

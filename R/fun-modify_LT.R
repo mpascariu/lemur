@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 20 17:08:36 2021
+# Last update: Thu Oct 28 21:35:58 2021
 # --------------------------------------------------- #
 
 #' Modify life table by changing the cause of death associated risks
@@ -205,6 +205,11 @@ build_cod_matrix <- function(cod) {
     column_to_rownames("x") %>% 
     as.matrix()
   
+  L <- rowSums(M) < 0.999
+  if (any(L)) {
+    M[L, ] <- 1/ncol(M)
+  }
+  
   return(M)  
 }
 
@@ -257,12 +262,13 @@ build_reduction_matrix <- function(
   mat <- matrix(0, 
                 ncol = length(cn),
                 nrow = length(rn),
-                dimnames = list(rn, cn))
+                dimnames = list(rn, cn)) %>% 
+    as.data.frame()
   
   select_ages <- rn %in% min(select_x):max(select_x)
   mat[select_ages, select_cod] <- cod_change
   
-  return(mat)
+  return(as.matrix(mat))
 }
 
 

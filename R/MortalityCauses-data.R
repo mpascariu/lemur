@@ -1,9 +1,9 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Oct 26 10:55:48 2021
+# Last update: Thu Oct 28 20:04:35 2021
 # --------------------------------------------------- #
 
-#' Abridged life table for 2015-2020 -- Global Burden of Disease Study 2019 
+#' Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019 
 #' 
 #' @source 
 #' United Nations, Department of Economic and Social Affairs, 
@@ -16,7 +16,7 @@
 "data_gbd2019_lt"
 
 
-#' Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019
+#' Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019
 #' 
 #' @source 
 #' Global Burden of Disease Collaborative Network.
@@ -28,7 +28,7 @@
 #' data_gbd2019_cod
 "data_gbd2019_cod"
 
-#' Causes of Death Data for 2015-2020 -- Global Burden of Disease Study 2019
+#' Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019
 #' 
 #' In this data object the death count data (GBD2019) is grouped in such a way 
 #' that make possible the tracking of the evolution of the UN's

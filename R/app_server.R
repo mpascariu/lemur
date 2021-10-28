@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 00:07:23 2021
+# Last update: Thu Oct 28 21:43:42 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -49,45 +49,38 @@ app_server <- function(input, output, session) {
   
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
-    if (input$mode == 'mode_cod') {
-      prepare_data_mode_cod(
-        data_cod(), 
-        data_lt(), 
-        input$region1, 
-        input$region2, 
-        input$cod_target,
-        data_cod_change()
-      )
-      
-    } else if (input$mode == 'mode_cntr') {
-      prepare_data_mode_cntr(
-        data_cod(), 
-        data_lt(), 
-        input$region1, 
-        input$region2,
-        input$cod_target,
-        data_cod_change()
-      )
-      
-    } else if (input$mode == 'mode_sex') {
-      prepare_data_mode_sex(
-        input$region1, 
-        input$cod_target,
-        data_cod_change(),
-        year = input$time_slider
-      )
-      
-    } else if (input$mode == 'mode_sdg') {
-      prepare_data_mode_cod(
-        cod        = data_sdg(), 
-        lt         = data_lt(), 
-        region1    = input$region1, 
-        region2    = input$region2, 
-        cod_target = input$cod_target,
-        cod_change = data_cod_change()
-      )
-    }
+    print(input$mode)
     
+    switch (input$mode,
+            mode_cod  = prepare_data_mode_cod(
+              cod        = data_cod(), 
+              lt         = data_lt(), 
+              region1    = input$region1, 
+              cod_target = input$cod_target,
+              cod_change = data_cod_change()
+              ),
+            mode_cntr = prepare_data_mode_cntr(
+              cod        = data_cod(), 
+              lt         = data_lt(), 
+              region1    = input$region1, 
+              region2    = input$region2,
+              cod_target = input$cod_target,
+              cod_change = data_cod_change()
+              ),
+            mode_sex     = prepare_data_mode_sex(
+              region1    = input$region1, 
+              cod_target = input$cod_target,
+              cod_change = data_cod_change(),
+              year       = input$time_slider
+              ),
+            mode_sdg  = prepare_data_mode_cod(
+              cod        = data_sdg(), 
+              lt         = data_lt(), 
+              region1    = input$region1, 
+              cod_target = input$cod_target,
+              cod_change = data_cod_change()
+              )
+    )
   })
   
   # Decompose the difference in life expectancy at birth
@@ -117,6 +110,7 @@ app_server <- function(input, output, session) {
   
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlot({
+    # print(data_fig())
     
     if (input$mode == "mode_cntr") {
       cod <- bind_rows(
@@ -150,7 +144,7 @@ app_server <- function(input, output, session) {
       
     } else if (input$mode == "mode_sdg") {
       plot_cod(
-        cod = data_fig()$cod2, 
+        cod  = data_fig()$cod2, 
         perc = input$perc, 
         type = input$fig3_chart_type)
     }
