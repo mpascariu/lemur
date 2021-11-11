@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 19:19:06 2021
+# Last update: Thu Nov 11 23:42:22 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -110,23 +110,50 @@ app_server <- function(input, output, session) {
   )
   
   # Figure 2 - The change
-  output$figure2 <- renderPlot({
-    plot_change(
+  output$figure2 <- renderPlotly({
+    xlab <- if (input$perc) {
+      "Difference in Life Expectancy [%]"
+    } else {
+      "Difference in Life Expectancy (years)"
+    }
+    
+    p2 <- plot_change(
       L1 = data_fig()$lt_final,
       L2 = data_fig()$lt_initial,
       age = input$fig2_x,
-      perc = input$perc
-    )
+      perc = input$perc) +
+      geom_point(size = 4) + 
+      labs(x = "", y = "") + 
+      theme(
+        axis.text = element_text(size = 10)
+      )
+    
+    p2 <- ggplotly(p2, tooltip = c("x", "y"))%>% 
+      layout(
+        xaxis = list(title = xlab), 
+        yaxis = list(title = "Age (years)")
+      ) %>% 
+      layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
+             yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
+    
+    p2
+    
   })
   
   # Figure 3 - The COD Distribution
-  output$figure3 <- renderPlot({
+  output$figure3 <- renderPlotly({
+    
+    xlab <- if (input$perc) {
+      "Proportion of the Total No. of Deaths\n[%]"
+    } else {
+      "Number of Deaths\n"
+    }
     
     if (input$mode == "mode_cod") {
-      plot_cod(
+      p <- plot_cod(
         cod  = data_fig()$cod_final, 
         perc = input$perc, 
-        type = input$fig3_chart_type) 
+        type = "barplot") 
       
     } else if (input$mode == "mode_cntr") {
       cod <- bind_rows(
@@ -134,10 +161,10 @@ app_server <- function(input, output, session) {
         data_fig()$cod_final
         )
       
-      plot_cod(
+      p <- plot_cod(
         cod  = cod, 
         perc = input$perc,
-        type = input$fig3_chart_type) + 
+        type = "barplot") + 
         facet_wrap("region")
       
     } else if (input$mode == "mode_sex") {
@@ -146,27 +173,73 @@ app_server <- function(input, output, session) {
         data_fig()$cod_final
         )
       
-      plot_cod(
+      p <- plot_cod(
         cod  = cod, 
         perc = input$perc, 
-        type = input$fig3_chart_type) + 
+        type = "barplot") + 
         facet_wrap("sex")
       
     } else if (input$mode == "mode_sdg") {
-      plot_cod(
+      p <- plot_cod(
         cod  = data_fig()$cod_final, 
         perc = input$perc, 
-        type = input$fig3_chart_type)
+        type = "barplot")
     }
+    
+    p <- p +
+      labs(x = "", y = "") + 
+      theme(
+        axis.text = element_text(size = 7)
+      )
+    
+    p <- ggplotly(p, tooltip = c("fill", "x")) %>% 
+      layout(
+        xaxis = list(title = xlab), 
+        yaxis = list(title = 'Causes of Death')
+        ) %>% 
+      layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
+             yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
+    
+    p
   })
   
   # Figure 4 - The Decomposition
-  output$figure4 <- renderPlot(
-    plot_decompose(
+  output$figure4 <- renderPlotly({
+    
+    # compute % is necessary
+    if (input$perc & input$fig4_dim != "cod") {
+      ylab <- "Change in Life Expectancy at Birth\n[%]"
+      xlab <- "Age Group (years)"
+
+    } else if (!input$perc & input$fig4_dim != "cod"){
+      ylab <- "Change in Life Expectancy at Birth\n(years)"
+      xlab <- "Age Group (years)"
+      
+    } else if (input$perc & input$fig4_dim == "cod"){
+      ylab <- "Causes of Death"
+      xlab <- "Change in Life Expectancy at Birth [%]"
+      
+    } else if (!input$perc & input$fig4_dim == "cod"){
+      ylab <- "Causes of Death"
+      xlab <- "Change in Life Expectancy at Birth [years]"
+    }
+    
+
+    p4 <- plot_decompose(
       object = data_decomp(), 
       perc   = input$perc,
       by     = input$fig4_dim)
-  )
+    
+    p4 <- ggplotly(p4, tooltip = c("fill", "y"))%>% 
+      layout(
+        xaxis = list(title = xlab), 
+        yaxis = list(title = ylab)
+      ) %>% 
+      layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
+             yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
+    
+    p4
+  })
   
   # ----------------------------------------------------------------------------
   # EVENTS

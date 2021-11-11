@@ -20,6 +20,6 @@ Plot function for COD data
 }
 \examples{
 D <- data_gbd2019_cod # cod data
-cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
+cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2019, ]
 plot_cod(cod)
 }

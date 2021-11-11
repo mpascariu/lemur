@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 27 12:04:49 2021
+# Last update: Thu Nov 11 20:16:32 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -17,6 +17,7 @@
 #' @import leaflet
 #' @import sf
 #' @import pals
+#' @import plotly
 #' 
 #' @importFrom reactable reactableOutput
 #' @importFrom shinyjs useShinyjs

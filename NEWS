@@ -1,3 +1,6 @@
+version 0.6.0
+- make the figures plotly.
+
 version 0.5.5
 - sdg mode working. Not with refrence to 2015 values, but working without errors.
 

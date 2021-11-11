@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Oct 26 11:03:13 2021
+# Last update: Fri Nov 12 00:26:45 2021
 # --------------------------------------------------- #
 
 # Hack CRAN check warnings related to tidyverse coding style
@@ -31,6 +31,12 @@ globalVariables(
     "x",
     "x.int",
     "data_sf",
-    "name"
+    "name",
+    "Life Expectancy Difference",
+    "Age",
+    "Age Interval",
+    "Deaths",
+    "COD",
+    "Change in LE"
     )
 )

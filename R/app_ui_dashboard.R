@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 19:19:20 2021
+# Last update: Thu Nov 11 23:42:40 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -340,9 +340,9 @@ main_panel <- function() {
             )
           ),
           
-          plotOutput(
+          plotlyOutput(
             outputId = "figure2",
-            height = 343*0.93
+            height = 350*0.955
           )
         )
       )
@@ -360,8 +360,7 @@ main_panel <- function() {
             radioGroupButtons(
               inputId = "fig3_chart_type",
               label = "View by:",
-              choices = c("Bar-plot" = "barplot", 
-                          "Pie-chart" = "piechart"),
+              choices = c("Bar-plot" = "barplot"),
               justified = TRUE,
               checkIcon = list(
                 yes = tags$i(class = "fa fa-circle", 
@@ -371,7 +370,7 @@ main_panel <- function() {
             )
           ),
           
-          plotOutput(
+          plotlyOutput(
             outputId = "figure3",
             height = 330
           )
@@ -401,7 +400,7 @@ main_panel <- function() {
             )
           ),
           
-          plotOutput(
+          plotlyOutput(
             outputId = "figure4",
             height = 330
           )
@@ -434,12 +433,12 @@ boxTitleInput <- function(title, db_style, ...) {
       title,
       style = "display: inline-block; font-weight: bold; padding:0px; margin: -20px 0px 0px 5px;",
       shinyWidgets::dropdownButton(
-        size = "xs",
-        label = "",
-        right = TRUE,
-        icon = icon("sliders"),
+        size   = "xs",
+        label  = "",
+        right  = TRUE,
+        icon   = icon("sliders"),
         inline = TRUE,
-        width = "50px",
+        width  = "50px",
         circle = FALSE,
         ...
       )

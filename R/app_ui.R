@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Jun 04 17:52:47 2021
+# Last update: Thu Nov 11 23:42:55 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -97,12 +97,12 @@ ui_dashbord <- function() {
   
   tagList(
     
-    # Disable the vertical scroll bar in shiny dashboard
-    tags$head(
-      tags$style(
-        "body {overflow-y: hidden;}"
-      )
-    ),
+    # # Disable the vertical scroll bar in shiny dashboard
+    # tags$head(
+    #   tags$style(
+    #     "body {overflow-y: hidden;}"
+    #   )
+    # ),
     
     tagList(
       column(

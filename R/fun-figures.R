@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 20 17:22:59 2021
+# Last update: Thu Nov 11 20:01:09 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -121,18 +121,25 @@ plot_change <- function(L1, L2,
   }
   
   dmax <- max(abs(d$value))
+  d <- d %>% 
+    mutate(
+      value = round(value, 3)) %>% 
+    rename(
+      `Life Expectancy Difference` = value,
+      Age = x) 
+    
   
   # Figure
-  p <- d %>%   
-    ggplot(aes(x = value, y = x, color = col)) + 
+  p <- d %>%
+    ggplot(aes(x = `Life Expectancy Difference`, y = Age, color = col)) + 
     geom_segment(
       xend = 0, 
-      yend = d$x,
+      yend = d$Age,
       linetype = 2,
       color = 1,
-      size = 0.5) +
+      size = 0.2) +
     geom_point(size = 6) +
-    geom_vline(xintercept = 0, size = 1) + 
+    geom_vline(xintercept = 0, size = 0.8) + 
     scale_x_continuous(
       limits = c(-dmax, dmax),
       labels = scales::label_number_si(accuracy = 0.01)) +
@@ -162,7 +169,7 @@ plot_change <- function(L1, L2,
 #' @param type Options: "barplot" or "piechart".
 #' @examples 
 #' D <- data_gbd2019_cod # cod data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 2019, ]
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2019, ]
 #' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
@@ -170,8 +177,10 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
   # Data preparation
   dt <- cod %>% 
     group_by(region, period, sex, cause_name, level) %>%
-    summarise(value = sum(deaths)) %>% 
-    arrange(value) %>% 
+    summarise(Deaths = sum(deaths)) %>% 
+    mutate(sex = toupper(sex)) %>% 
+    rename(COD = cause_name) %>% 
+    arrange(Deaths) %>% 
     ungroup()
   
   # compute percentages of each disease for
@@ -180,23 +189,30 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
     dt <- dt %>% 
       group_by(region, sex) %>% 
       mutate(
-        value = value / sum(value) * 100,
+        Deaths = Deaths / sum(Deaths) * 100,
+        Deaths = round(Deaths, 2)
       ) %>% 
       ungroup()
     
     x_lab <- "Proportion of the Total No. of Deaths\n[%]" 
     
   } else {
+    dt <- dt %>% mutate(
+      Deaths = round(Deaths, 0)
+      ) %>% 
+      ungroup()
+    
     x_lab <- "Number of Deaths\n"
     
   }
+  
   
   # Define the aesthetics
   
   if (type == "barplot") {
     p <- dt %>% 
       ggplot(
-        aes(x = value, y = cause_name, fill = cause_name)
+        aes(x = Deaths, y = COD, fill = COD)
       ) + 
       geom_bar(
         stat = "identity",
@@ -209,7 +225,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
     
   } else if (type == "piechart") {
     p <- dt %>% 
-      ggplot(aes(x = "", y = value, fill = cause_name)) +
+      ggplot(aes(x = "", y = Deaths, fill = COD)) +
       geom_bar(
         stat = "identity",
         width = 0.9, 
@@ -255,27 +271,33 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 #' @examples 
 #' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
 #' @export
-plot_decompose <- function(object, perc = FALSE, 
+plot_decompose <- function(object, perc = FALSE,
                            by = "both") {
   
   if (!("cause_name" %in% names(object))) {
     by = "age"
   }
   
+  object <- rename(object, `Age Interval` = x.int)
+  
   # input data
   if(by == "age") {
     object <- object %>% 
-      group_by(region, period, sex, level, x.int, x) %>% 
+      group_by(region, period, sex, level, `Age Interval`, x) %>% 
       summarise(decomposition = sum(decomposition)) %>% 
       ungroup()
-  } 
-  
-  if (by == "cod") {
+    
+  } else if (by == "cod") {
     object <- object %>% 
-      group_by(region, period, sex, level, cause_name) %>% 
+      rename(COD = cause_name) %>% 
+      group_by(region, period, sex, level, COD) %>% 
       summarise(decomposition = sum(decomposition)) %>% 
       ungroup()
-  } 
+    
+  } else {
+    object <- rename(object, COD = cause_name)
+    
+  }
   
   # compute % is necessary
   if (perc) {
@@ -283,28 +305,30 @@ plot_decompose <- function(object, perc = FALSE,
     d <- object %>%
       mutate(
         sign_ = sign(decomposition),
-        value = decomposition / sum(decomposition),
-        value = abs(value) * sign_
+        `Change in LE` = decomposition / sum(decomposition),
+        `Change in LE` = abs(`Change in LE`) * sign_,
+        `Change in LE` = round(`Change in LE`, 4)
       )
     
   } else {
     ylab <- "Change in Life Expectancy at Birth\n(Years)"
     d <- object %>%
-      rename(value = decomposition)
+      rename(`Change in LE` = decomposition) %>% 
+      mutate(`Change in LE` = round(`Change in LE`, 4))
     
   }
   
   # Define the aesthetics
   if(by == "both") {
-    aess <- aes(x = x.int, y = value, fill = cause_name)
+    aess <- aes(x = `Age Interval`, y = `Change in LE`, fill = COD)
     xlab <- "Age Group\n(Years)"
     
   } else if (by == "age") {
-    aess <- aes(x = x.int, y = value)
+    aess <- aes(x = `Age Interval`, y = `Change in LE`)
     xlab <- "Age Group\n(Years)"
     
   } else {
-    aess <- aes(x = cause_name, y = value, fill = cause_name)
+    aess <- aes(x = COD, y = `Change in LE`, fill = COD)
     xlab <- "Causes of Death"
   }
   
@@ -329,18 +353,18 @@ plot_decompose <- function(object, perc = FALSE,
       y = ylab
     ) +
     plot_theme()
-
   
   if (by == "cod") {
     p <- p + 
       coord_flip()
+    
   } else {
     p <- p + 
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
   }
-    
+  
   # Exit
   return(p)
 }
