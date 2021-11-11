@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 12:46:42 2021
+# Last update: Thu Nov 11 19:19:20 2021
 # --------------------------------------------------- #
 
 #' @keywords internal
@@ -214,74 +214,85 @@ side_panel <- function() {
     conditionalPanel(
       condition = "input.mode == 'mode_sdg'",
       
+      # sliderInput(
+      #   inputId = "goal_1_maternal",
+      #   label = "Maternal mortality ratio:",
+      #   post = " per 100k",
+      #   value = 80,
+      #   min = 0,
+      #   max = 200,
+      #   step = 1
+      # ),
+
       sliderInput(
-        inputId = "goal_1_maternal",
-        label = "Maternal mortality ratio:",
-        post = " per 100k",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
-      ),
-      
-      sliderInput(
-        inputId = "goal_2_underfive",
+        inputId = "sdg_1",
         label = "Under-five mortality rate:",
-        post = " per 1000 live births",
-        value = 80,
-        min = 0,
-        max = 200,
+        # post = " per 1000 live births",
+        post = "%",
+        value = 0,
+        min = -100,
+        max = 100,
         step = 1
       ),
+
+      # sliderInput( # goal 25
+      #   inputId = "goal_3_neonatal",
+      #   label = "Neonatal mortality rate:",
+      #   post = " per 1000 live births",
+      #   value = 80,
+      #   min = 0,
+      #   max = 200,
+      #   step = 1
+      # ),
       
-      sliderInput( # goal 25
-        inputId = "goal_3_neonatal",
-        label = "Neonatal mortality rate:",
-        post = " per 1000 live births",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
+      sliderInput(# End Epidemics. Goal: -100% relative to 2015 level
+        inputId = "sdg_3",
+        label   = "AIDS epidemic, tuberculosis, malaria and neglected tropical diseases:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 1
       ),
       
-      sliderInput( # goal 0
-        inputId = "goal_4_cardio",
-        label = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
-        post = " per 1,000 uninfected",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
+      sliderInput( #Goal: - 33.3% relative to 2015 level
+        inputId = "sdg_4",
+        label   = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 1
       ),
-      
-      sliderInput(
-        inputId = "goal_5_suicide",
-        label = "Suicide mortality rate:",
-        post = " ",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
+
+      sliderInput( # Goal: -50% relative to 2015 level
+        inputId = "sdg_5",
+        label   = "Suicide mortality rate:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 1
       ),
-      
-      sliderInput( # halve the number of global deaths on road traffic accidents
-        inputId = "goal_6_road",
-        label = "Death rate due to road traffic injuries:",
-        post = " per 100k",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
+
+      sliderInput( # Goal: -50% relative to 2015 level
+        inputId = "sdg_6",
+        label   = "Death rate due to road traffic injuries:",
+        post    = " %",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 1
       ),
-      
+
       sliderInput( # substantially reduce the number of deaths from pollution
-        inputId = "goal_7_road",
-        label = "Mortality due to air pollution:",
-        post = " per 100k",
-        value = 80,
-        min = 0,
-        max = 200,
-        step = 1
+        inputId = "sdg_7",
+        label   = "Mortality due to air pollution:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 1
       ),
     )
   )

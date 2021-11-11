@@ -1,3 +1,6 @@
+version 0.5.5
+- sdg mode working. Not with refrence to 2015 values, but working without errors.
+
 version 0.5.4
 - bug fixes;
 - sdg mode still not working.

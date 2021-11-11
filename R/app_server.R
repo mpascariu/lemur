@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 21:43:42 2021
+# Last update: Thu Nov 11 19:19:06 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -49,7 +49,6 @@ app_server <- function(input, output, session) {
   
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
-    print(input$mode)
     
     switch (input$mode,
             mode_cod  = prepare_data_mode_cod(
@@ -67,25 +66,37 @@ app_server <- function(input, output, session) {
               cod_target = input$cod_target,
               cod_change = data_cod_change()
               ),
-            mode_sex     = prepare_data_mode_sex(
+            mode_sex = prepare_data_mode_sex(
               region1    = input$region1, 
               cod_target = input$cod_target,
               cod_change = data_cod_change(),
               year       = input$time_slider
               ),
-            mode_sdg  = prepare_data_mode_cod(
+            mode_sdg = prepare_data_mode_sdg(
               cod        = data_sdg(), 
               lt         = data_lt(), 
               region1    = input$region1, 
               cod_target = input$cod_target,
-              cod_change = data_cod_change()
+              sdg_1      = input$sdg_1,
+              sdg_3      = input$sdg_3,
+              sdg_4      = input$sdg_4,
+              sdg_5      = input$sdg_5,
+              sdg_6      = input$sdg_6,
+              sdg_7      = input$sdg_7
               )
     )
   })
   
   # Decompose the difference in life expectancy at birth
-  decomp <- reactive({
-    with(data_fig(), decompose_by_cod(lt1, lt2, cod1, cod2))
+  data_decomp <- reactive({
+    with(data_fig(), 
+         decompose_by_cod(
+           lt_initial, 
+           lt_final, 
+           cod_initial, 
+           cod_final
+           )
+         )
   })
   
   # ----------------------------------------------------------------------------
@@ -101,8 +112,8 @@ app_server <- function(input, output, session) {
   # Figure 2 - The change
   output$figure2 <- renderPlot({
     plot_change(
-      L1 = data_fig()$lt2,
-      L2 = data_fig()$lt1,
+      L1 = data_fig()$lt_final,
+      L2 = data_fig()$lt_initial,
       age = input$fig2_x,
       perc = input$perc
     )
@@ -110,53 +121,51 @@ app_server <- function(input, output, session) {
   
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlot({
-    # print(data_fig())
     
-    if (input$mode == "mode_cntr") {
+    if (input$mode == "mode_cod") {
+      plot_cod(
+        cod  = data_fig()$cod_final, 
+        perc = input$perc, 
+        type = input$fig3_chart_type) 
+      
+    } else if (input$mode == "mode_cntr") {
       cod <- bind_rows(
-        data_fig()$cod1, 
-        data_fig()$cod2
+        data_fig()$cod_initial, 
+        data_fig()$cod_final
         )
       
       plot_cod(
-        cod = cod, 
+        cod  = cod, 
         perc = input$perc,
         type = input$fig3_chart_type) + 
         facet_wrap("region")
       
-    } else if (input$mode == "mode_cod") {
-      plot_cod(
-        cod = data_fig()$cod2, 
-        perc = input$perc, 
-        type = input$fig3_chart_type)
-      
     } else if (input$mode == "mode_sex") {
       cod <- bind_rows(
-        data_fig()$cod1, 
-        data_fig()$cod2
+        data_fig()$cod_initial, 
+        data_fig()$cod_final
         )
       
       plot_cod(
-        cod = cod, 
+        cod  = cod, 
         perc = input$perc, 
         type = input$fig3_chart_type) + 
         facet_wrap("sex")
       
     } else if (input$mode == "mode_sdg") {
       plot_cod(
-        cod  = data_fig()$cod2, 
+        cod  = data_fig()$cod_final, 
         perc = input$perc, 
         type = input$fig3_chart_type)
     }
-    
   })
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlot(
     plot_decompose(
-      decomp(), 
-      perc = input$perc,
-      by = input$fig4_dim)
+      object = data_decomp(), 
+      perc   = input$perc,
+      by     = input$fig4_dim)
   )
   
   # ----------------------------------------------------------------------------
