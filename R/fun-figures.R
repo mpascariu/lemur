@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 20:01:09 2021
+# Last update: Mon Nov 15 19:27:46 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -298,7 +298,6 @@ plot_decompose <- function(object, perc = FALSE,
     object <- rename(object, COD = cause_name)
     
   }
-  
   # compute % is necessary
   if (perc) {
     ylab <- "Change in Life Expectancy at Birth\n[%]"
@@ -328,21 +327,48 @@ plot_decompose <- function(object, perc = FALSE,
     xlab <- "Age Group\n(Years)"
     
   } else {
-    aess <- aes(x = COD, y = `Change in LE`, fill = COD)
-    xlab <- "Causes of Death"
+    # aess <- aes(x = COD, y = `Change in LE`, fill = COD)
+    aess <- aes(y = sex, x = `Change in LE`, fill = COD)
+    xlab <- "Causes of Death\nDecomposition"
   }
   
-  # Build the plot
-  p <- d %>% 
-    ggplot(aess) +
-    geom_bar(
-      stat = "identity",
-      width = 0.9,
-      position = position_stack(reverse = FALSE)) +
-    geom_hline(yintercept = 0) +
-    scale_y_continuous(
-      trans = "identity",
-      labels = scales::label_number_si(accuracy = 0.01)) +
+  if (by == "cod") {
+    p <- d %>% 
+      ggplot(aess) +
+      geom_bar(
+        position = "stack", 
+        stat = "identity" , 
+        width = 0.5) +
+      geom_vline(xintercept = 0) + 
+      scale_x_continuous(
+        trans = "identity",
+        labels = scales::label_number_si(accuracy = 0.01)) + 
+      plot_theme() + 
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        )
+    
+  } else {
+    
+    p <- d %>% 
+      ggplot(aess) +
+      geom_bar(
+        stat = "identity",
+        width = 0.9,
+        position = position_stack(reverse = FALSE)) + 
+      geom_hline(yintercept = 0) + 
+      scale_y_continuous(
+        trans = "identity",
+        labels = scales::label_number_si(accuracy = 0.01)) +
+      plot_theme() + 
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+    
+  }
+  
+  p <- p +
     scale_fill_manual(
       name = "",
       values = pals::glasbey(),
@@ -351,19 +377,7 @@ plot_decompose <- function(object, perc = FALSE,
     labs(
       x = xlab,
       y = ylab
-    ) +
-    plot_theme()
-  
-  if (by == "cod") {
-    p <- p + 
-      coord_flip()
-    
-  } else {
-    p <- p + 
-      theme(
-        axis.text.x = element_text(angle = 45, hjust = 1)
-      )
-  }
+    ) 
   
   # Exit
   return(p)
@@ -382,12 +396,12 @@ plot_decompose <- function(object, perc = FALSE,
 plot_theme <- function() {
   theme_light() + 
     theme(
-      axis.title = element_text(size = 12, colour = "black", face = "bold"),
-      axis.text = element_text(size = 12, colour = "black"),
-      plot.margin = margin(0, 5, 1, 10),
-      strip.text.x = element_text(size = 12, colour = "black", face = "bold"),
+      axis.title       = element_text(size = 12, colour = "black", face = "bold"),
+      axis.text        = element_text(size = 12, colour = "black"),
+      plot.margin      = margin(0, 5, 1, 10),
+      text             = element_text(size = 14),
+      legend.position  = "none",
+      strip.text.x     = element_text(size = 12, colour = "black", face = "bold"),
       strip.background = element_rect(fill = "gray87"),
-      text = element_text(size = 14),
-      legend.position = "none"
     )
 }

@@ -18,6 +18,7 @@
 #' @import sf
 #' @import pals
 #' @import plotly
+#' @import data.table
 #' 
 #' @importFrom reactable reactableOutput
 #' @importFrom shinyjs useShinyjs

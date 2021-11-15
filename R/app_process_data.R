@@ -145,15 +145,13 @@ prepare_data_mode_sdg <- function(cod,
   S6 = "Transport Injuries"
   S7 = "Exposure to Forces of Nature"
   
-  
+  M[S1,   ] <- sdg_1
   M[  , S3] <- sdg_3
   M[  , S4] <- sdg_4
   M[  , S5] <- sdg_5
   M[  , S6] <- sdg_6
   M[  , S7] <- sdg_7
-  M[S1,   ] <- sdg_1
   
-
   # --------------------------------------------
   
   # Select cod and lt for 1 region

@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 23:42:22 2021
+# Last update: Mon Nov 15 20:01:14 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -12,11 +12,18 @@ app_server <- function(input, output, session) {
   # INPUT DATA
   # cod data ---
   data_cod <- reactive({
+    
     MortalityCauses::data_gbd2019_cod %>%
       dplyr::filter(
         region %in% c(input$region1, input$region2),
         sex == input$sex,
         period == input$time_slider)
+    
+    # # we use data.table method to filter here because is faster
+    # # and we will do this all a lot
+    # dt <- as.data.table(MortalityCauses::data_gbd2019_cod)
+    # dt[region %in% c(input$region1, input$region2) & 
+    #      sex == input$sex & period == input$time_slider]
   })
   
   # sdg data ---
@@ -128,11 +135,10 @@ app_server <- function(input, output, session) {
         axis.text = element_text(size = 10)
       )
     
-    p2 <- ggplotly(p2, tooltip = c("x", "y"))%>% 
+    p2 <- ggplotly(p2, tooltip = c("x", "y")) %>% 
       layout(
         xaxis = list(title = xlab), 
-        yaxis = list(title = "Age (years)")
-      ) %>% 
+        yaxis = list(title = "Age (years)")) %>% 
       layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
              yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
     
@@ -195,8 +201,7 @@ app_server <- function(input, output, session) {
     p <- ggplotly(p, tooltip = c("fill", "x")) %>% 
       layout(
         xaxis = list(title = xlab), 
-        yaxis = list(title = 'Causes of Death')
-        ) %>% 
+        yaxis = list(title = 'Causes of Death')) %>% 
       layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
              yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
     
@@ -230,11 +235,10 @@ app_server <- function(input, output, session) {
       perc   = input$perc,
       by     = input$fig4_dim)
     
-    p4 <- ggplotly(p4, tooltip = c("fill", "y"))%>% 
+    p4 <- ggplotly(p4, tooltip = c("fill", "y")) %>% 
       layout(
         xaxis = list(title = xlab), 
-        yaxis = list(title = ylab)
-      ) %>% 
+        yaxis = list(title = ylab)) %>% 
       layout(xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
              yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
     

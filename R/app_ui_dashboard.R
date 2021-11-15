@@ -1,8 +1,9 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 23:42:40 2021
+# Last update: Mon Nov 15 17:24:13 2021
 # --------------------------------------------------- #
 
+#' TOP PANEL
 #' @keywords internal
 top_panel <- function() {
   fluidRow(
@@ -80,7 +81,7 @@ top_panel <- function() {
       ),
       switchInput(
         inputId = "perc",
-        value = TRUE,
+        value = FALSE,
         onStatus = "success", 
         offStatus = "danger",
         label = icon("percent"),
@@ -91,6 +92,7 @@ top_panel <- function() {
 }
 
 
+#' SIDE PANEL
 #' @keywords internal
 side_panel <- function() {
   tagList(
