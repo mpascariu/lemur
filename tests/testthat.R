@@ -1,4 +1,4 @@
 library(testthat)
-library(MortalityCauses)
+# library(MortalityCauses)
 
-test_check("MortalityCauses")
+# test_check("MortalityCauses")

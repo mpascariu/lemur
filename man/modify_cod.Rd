@@ -7,12 +7,12 @@
 modify_cod(cod, cod_change)
 }
 \arguments{
-\item{cod}{Causes of death matrix containing death counts corresponding 
+\item{cod}{Causes of death matrix containing death counts corresponding
 to the population and time period of the life table;}
 
-\item{cod_change}{Numerical scalar, vector or matrix. 
+\item{cod_change}{Numerical scalar, vector or matrix.
 The changes to be applied to the causes of death rate, m[c,x],
-in order to reduce or increase the mortality estimates given by the life 
+in order to reduce or increase the mortality estimates given by the life
 table. Accepted input: any value greater than -100. See examples.}
 }
 \value{

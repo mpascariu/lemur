@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun-decompose.R
 \name{decompose_by_cod}
 \alias{decompose_by_cod}
-\title{Perform decomposition of age- and cause-specific mortality contributions 
+\title{Perform decomposition of age- and cause-specific mortality contributions
 in life expectancy between any two regions/time periods}
 \source{
 The code of this function is based on the implementation of the
@@ -16,39 +16,39 @@ decompose_by_cod(L1, L2, C1, C2, symmetrical = TRUE, direction = "up")
 
 \item{L2}{Life table corresponding to the region/time period 2;}
 
-\item{C1}{Causes of death data containing death counts corresponding 
+\item{C1}{Causes of death data containing death counts corresponding
 to the region/time period 1. Format: long table;}
 
-\item{C2}{Causes of death data containing death counts corresponding 
+\item{C2}{Causes of death data containing death counts corresponding
 to the region/time period 2. Format: long table;}
 
 \item{symmetrical}{logical. default TRUE as recommended by authors. Shall
- we average the results of replacing 1 with 2 and 2 with 1? 
- The symmetrical argument toggles whether or not we replace cod1 with cod2 
-(FALSE), or take the arithmetic average or replacement in both directions. 
-Defaults are set to symmetrically replace from the bottom up, 
+ we average the results of replacing 1 with 2 and 2 with 1?
+ The symmetrical argument toggles whether or not we replace cod1 with cod2
+(FALSE), or take the arithmetic average or replacement in both directions.
+Defaults are set to symmetrically replace from the bottom up,
 per the authors' suggestion.}
 
-\item{direction}{character. One of "up", "down", or "both". Default "up", 
-as recommended by authors. It refers to whether we go from the bottom up or 
-top down, or take the arithmetic average of these when replacing vector 
-elements. Although the total difference will always sum correctly, 
-the calculated contribution from individual components can vary greatly 
+\item{direction}{character. One of "up", "down", or "both". Default "up",
+as recommended by authors. It refers to whether we go from the bottom up or
+top down, or take the arithmetic average of these when replacing vector
+elements. Although the total difference will always sum correctly,
+the calculated contribution from individual components can vary greatly
 depending on the order in general.}
 }
 \value{
-A long tibble in the same format as the cod input data. The output 
-containS the column \code{decomposition} that indicates the change in life 
+A long tibble in the same format as the cod input data. The output
+containS the column \code{decomposition} that indicates the change in life
 expectancy by age and/or cause of death between the two life tables provided
 as input. Measure unit: years.
 }
 \description{
-Perform decomposition of age- and cause-specific mortality contributions 
+Perform decomposition of age- and cause-specific mortality contributions
 in life expectancy between any two regions/time periods
 }
 \details{
-This implements the algorithm described in Andreev et al (2002), 
-with defaults set to approximate their recommendations for replacement 
+This implements the algorithm described in Andreev et al (2002),
+with defaults set to approximate their recommendations for replacement
 ordering and result averaging.
 }
 \examples{
@@ -56,8 +56,8 @@ L <- data_gbd2019_lt  # life tables
 D <- data_gbd2019_cod # cod data
 
 # Select two Life Tables
-region1 = "Romania"
-region2 = "Mexico"
+region1 = "ROMANIA"
+region2 = "MEXICO"
 sex     = "male"
 year    = 2019
 

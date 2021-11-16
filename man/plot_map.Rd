@@ -4,15 +4,19 @@
 \alias{plot_map}
 \title{Plot map}
 \usage{
-plot_map(location)
+plot_map(location, zoom = 5, data = data_sf)
 }
 \arguments{
 \item{location}{Geographical location}
+
+\item{zoom}{The zoom level}
+
+\item{data}{data}
 }
 \description{
 Plot map
 }
 \examples{
-plot_map(location = "Mexico")
+plot_map(location = "MEXICO")
 
 }

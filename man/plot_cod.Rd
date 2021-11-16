@@ -7,7 +7,7 @@
 plot_cod(cod, perc = FALSE, type = "barplot")
 }
 \arguments{
-\item{cod}{Causes of death matrix containing death counts corresponding 
+\item{cod}{Causes of death matrix containing death counts corresponding
 to the population and time period of the life table;}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
@@ -20,6 +20,6 @@ Plot function for COD data
 }
 \examples{
 D <- data_gbd2019_cod # cod data
-cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2019, ]
+cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
 plot_cod(cod)
 }

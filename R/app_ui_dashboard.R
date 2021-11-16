@@ -1,23 +1,23 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Mon Nov 15 17:24:13 2021
+# Last update: Tue Nov 16 23:56:02 2021
 # --------------------------------------------------- #
 
 #' TOP PANEL
 #' @keywords internal
 top_panel <- function() {
   fluidRow(
-    
+
     column(
       width = 3,
-      
+
       conditionalPanel(
         condition = "input.mode != 'mode_sex'",
         shinyWidgets::radioGroupButtons(
           inputId = "sex",
           label   = "Sex",
           choices = c(
-            "Female" = "female", 
+            "Female" = "female",
             "Male"   = "male",
             "Both"   = "both"),
           selected = "both",
@@ -26,14 +26,14 @@ top_panel <- function() {
           checkIcon = list(yes = icon("ok", lib = "glyphicon"))
         ),
       ),
-      
+
       conditionalPanel(
         condition = "input.mode == 'mode_sex'",
         shinyWidgets::checkboxGroupButtons(
           inputId = "sex",
           label   = "Sex",
           choices = c(
-            "Female" = "female", 
+            "Female" = "female",
             "Male"   = "male",
             "Both"   = "both"),
           selected = c("female", "male"),
@@ -43,20 +43,20 @@ top_panel <- function() {
         ),
       ),
       shinyBS::bsTooltip(
-        id = "sex", 
+        id = "sex",
         title = paste(
           "Select the female, male or entire population",
           "for which to display statistics."),
       ),
     ),
-    
+
     column(
       width = 4,
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
         label   = "Dashboard Mode",
         choices = c(
-          "COD Risk Change" = "mode_cod", 
+          "COD Risk Change" = "mode_cod",
           "Compare Regions" = "mode_cntr",
           "Sex Comparison"  = "mode_sex",
           "SDGs"            = "mode_sdg"),
@@ -66,23 +66,23 @@ top_panel <- function() {
         checkIcon = list(yes = icon("ok", lib = "glyphicon"))
       ),
       shinyBS::bsTooltip(
-        id = "mode", 
+        id = "mode",
         title = "Select the mode in which the dashboard to operate.",
         placement = "bottom"
       )
     ),
-    
+
     column(
       width = 1,
       style = 'padding-right:0px; margin-right: 0px;',
-      
+
       tags$div(
         style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
       ),
       switchInput(
         inputId = "perc",
         value = FALSE,
-        onStatus = "success", 
+        onStatus = "success",
         offStatus = "danger",
         label = icon("percent"),
         size = "small"
@@ -96,7 +96,7 @@ top_panel <- function() {
 #' @keywords internal
 side_panel <- function() {
   tagList(
-    
+
       fluidRow(
         column(
           width = 12,
@@ -104,9 +104,9 @@ side_panel <- function() {
             inputId  = "region1",
             label    = "Region",
             choices  = MortalityCauses::data_app_input$region,
-            selected = "France",
+            selected = "FRANCE",
             width    = "100%"
-          ) 
+          )
         ),
         conditionalPanel(
           condition = "input.mode == 'mode_cntr'",
@@ -116,13 +116,13 @@ side_panel <- function() {
               inputId  = "region2",
               label    = "Region 2",
               choices  = MortalityCauses::data_app_input$region,
-              selected = "Mexico",
+              selected = "MEXICO",
               width    = "100%",
             )
           )
       )
     ),
-    
+
     sliderTextInput(
       inputId = "time_slider",
       label = "Year",
@@ -131,13 +131,13 @@ side_panel <- function() {
       grid = TRUE
     ),
     shinyBS::bsTooltip(
-      id = "time_slider", 
+      id = "time_slider",
       title = "Select the year for which the data to correspond to",
     ),
-    
+
     chooseSliderSkin("Flat"),
     setSliderColor(rep("black", 10), c(1:10)),
-    
+
     conditionalPanel(
       condition = "input.mode != 'mode_sdg'",
       sliderInput(
@@ -150,12 +150,12 @@ side_panel <- function() {
         step = 5
       ),
       shinyBS::bsTooltip(
-        id = "cod_change", 
+        id = "cod_change",
         title = paste(
           "Apply a percentage increase or decrease (%)",
           " of the risk selected below"),
       ),
-      
+
       sliderTextInput(
         inputId = "age_change",
         label = "Age range:",
@@ -164,18 +164,18 @@ side_panel <- function() {
         grid = TRUE
       ),
       shinyBS::bsTooltip(
-        id = "age_change", 
+        id = "age_change",
         title = paste(
           "On which age interval to change the risks? ",
           "The ages outside the selected interval will not be affected."),
       ),
-      
+
       fluidRow(
         column(
           width = 10,
           prettyCheckboxGroup(
             inputId = "cod_target",
-            label = "Cause of death:", 
+            label = "Cause of death:",
             choices = sort(MortalityCauses::data_app_input$cause_name),
             selected = MortalityCauses::data_app_input$cause_name,
             icon = icon("check"),
@@ -185,7 +185,7 @@ side_panel <- function() {
             inline = FALSE
           ),
           shinyBS::bsTooltip(
-            id = "cod_target", 
+            id = "cod_target",
             title = paste(
               "Which causes of death to be affected? ",
               "The unchecked causes of death will maintain",
@@ -193,29 +193,29 @@ side_panel <- function() {
             placement = "top",
           ),
         ),
-        
+
         column(
           width = 2,
           style = 'padding:0px;',
           br(),
           actionButton(
-            inputId = "cod_target_all", 
+            inputId = "cod_target_all",
             label = "ALL",
             style = "width:100%;"
           ),
           actionButton(
-            inputId = "cod_target_none", 
+            inputId = "cod_target_none",
             label = "NONE",
             style = "width:100%;"
           )
         )
       )
     ),
-    
+
     # Side panel for sdg mode
     conditionalPanel(
       condition = "input.mode == 'mode_sdg'",
-      
+
       # sliderInput(
       #   inputId = "goal_1_maternal",
       #   label = "Maternal mortality ratio:",
@@ -246,7 +246,7 @@ side_panel <- function() {
       #   max = 200,
       #   step = 1
       # ),
-      
+
       sliderInput(# End Epidemics. Goal: -100% relative to 2015 level
         inputId = "sdg_3",
         label   = "AIDS epidemic, tuberculosis, malaria and neglected tropical diseases:",
@@ -256,7 +256,7 @@ side_panel <- function() {
         max     = 100,
         step    = 1
       ),
-      
+
       sliderInput( #Goal: - 33.3% relative to 2015 level
         inputId = "sdg_4",
         label   = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
@@ -308,7 +308,7 @@ main_panel <- function() {
       column(
         width = 7,
         style ='padding:0px 0px 0px 18px;',
-        
+
         boxFrame(
           style = 'padding:0px',
           title = tagList(
@@ -317,18 +317,18 @@ main_panel <- function() {
               style = "display: inline-block; font-weight: bold; padding:0px;"
             )
           ),
-          
+
           leafletOutput(
             outputId = "figure1",
             height = 381*0.93
           )
         )
       ),
-      
+
       column(
         width = 5,
         style='padding:0px;',
-        
+
         boxFrame(
           title = boxTitleInput(
             title = "Difference in Life Expectancy",
@@ -341,7 +341,7 @@ main_panel <- function() {
               multiple = TRUE
             )
           ),
-          
+
           plotlyOutput(
             outputId = "figure2",
             height = 350*0.955
@@ -349,12 +349,12 @@ main_panel <- function() {
         )
       )
     ),
-    
+
     fluidRow(
       column(
         width = 6,
         style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
-        
+
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death Distribution",
@@ -365,24 +365,24 @@ main_panel <- function() {
               choices = c("Bar-plot" = "barplot"),
               justified = TRUE,
               checkIcon = list(
-                yes = tags$i(class = "fa fa-circle", 
+                yes = tags$i(class = "fa fa-circle",
                              style = "color: black"),
                 no = tags$i(class = "fa fa-circle-o")),
               direction = "vertical"
             )
           ),
-          
+
           plotlyOutput(
             outputId = "figure3",
             height = 330
           )
         )
       ),
-      
+
       column(
         width = 6,
         style ='padding:0px;',
-        
+
         boxFrame(
           title = boxTitleInput(
             title = "Cause of Death / Age Decomposition",
@@ -390,18 +390,18 @@ main_panel <- function() {
             radioGroupButtons(
               inputId = "fig4_dim",
               label = "View by:",
-              choices = c("Age-and-COD" = "both", 
-                          "Age" = "age", 
+              choices = c("Age-and-COD" = "both",
+                          "Age" = "age",
                           "COD" = "cod"),
               justified = TRUE,
               checkIcon = list(
-                yes = tags$i(class = "fa fa-circle", 
+                yes = tags$i(class = "fa fa-circle",
                              style = "color: black"),
                 no = tags$i(class = "fa fa-circle-o")),
               direction = "vertical"
             )
           ),
-          
+
           plotlyOutput(
             outputId = "figure4",
             height = 330
@@ -414,12 +414,12 @@ main_panel <- function() {
 
 
 #' @keywords internal
-boxFrame <- function(..., 
-                     width = NULL, 
-                     solidHeader = TRUE, 
+boxFrame <- function(...,
+                     width = NULL,
+                     solidHeader = TRUE,
                      style = NULL) {
   shinydashboard::box(
-    width = width, 
+    width = width,
     solidHeader = solidHeader,
     style = style,
     ...
@@ -429,7 +429,7 @@ boxFrame <- function(...,
 
 #' @keywords internal
 boxTitleInput <- function(title, db_style, ...) {
-  
+
   tagList(
     tags$div(
       title,
@@ -445,7 +445,7 @@ boxTitleInput <- function(title, db_style, ...) {
         ...
       )
     ),
-    
+
     tags$div(
       # "subtitle....",
       style = "display: padding:0px; margin: 0px 0px -20px 5px; font-size: 12px;"

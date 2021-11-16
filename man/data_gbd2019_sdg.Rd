@@ -5,7 +5,7 @@
 \alias{data_gbd2019_sdg}
 \title{Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 2124864 rows and 7 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 2124864 rows and 6 columns.
 }
 \source{
 Global Burden of Disease Collaborative Network.
@@ -17,7 +17,7 @@ Available from http://ghdx.healthdata.org/gbd-results-tool.
 data_gbd2019_sdg
 }
 \description{
-In this data object the death count data (GBD2019) is grouped in such a way 
+In this data object the death count data (GBD2019) is grouped in such a way
 that make possible the tracking of the evolution of the UN's
 Sustainable Development Goals.
 }

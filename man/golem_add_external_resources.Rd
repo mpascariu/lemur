@@ -7,7 +7,7 @@
 golem_add_external_resources()
 }
 \description{
-This function is internally used to add external 
+This function is internally used to add external
 resources inside the Shiny application.
 }
 \keyword{internal}

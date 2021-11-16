@@ -1,3 +1,6 @@
+version 0.7.0
+- add data.table filtering - major update
+
 version 0.6.0
 - make the figures plotly.
 

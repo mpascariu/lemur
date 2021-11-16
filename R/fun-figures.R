@@ -7,18 +7,22 @@
 
 #' Plot map
 #' @param location Geographical location
-#' @examples 
-#' plot_map(location = "Mexico")
-#' 
-#' @export  
-plot_map <- function(location) {
-  
+#' @param zoom The zoom level
+#' @param data data
+#' @examples
+#' plot_map(location = "MEXICO")
+#'
+#' @export
+plot_map <- function(location,
+                     zoom = 5,
+                     data = data_sf) {
+
   tag.map.title <- tags$style(
     HTML("
-   .leaflet-control.map-title { 
+   .leaflet-control.map-title {
      text-align: left;
-     padding-left: 2px; 
-     padding-right: 2px; 
+     padding-left: 2px;
+     padding-right: 2px;
      color: rgba(85, 85, 85);
      font-size: 12px;
      font-family: Arial;
@@ -28,9 +32,9 @@ plot_map <- function(location) {
    }
   ")
   )
-  
+
   tooltip <- glue::glue_data(
-    data_sf,
+    data,
     "<strong>{name}</strong><br>
   Population: {scales::number(pop, accuracy = 1)}<br>
   Life Expectancy - Females: {scales::number(e0F, accuracy = 0.1)}<br>
@@ -39,48 +43,51 @@ plot_map <- function(location) {
   Sex Ratio: {scales::number(sexRatio, accuracy = 0.01)}<br>
   <i>(Source: WPP 2019)</i><br>
   "
-  ) %>% 
+  ) %>%
     purrr::map(htmltools::HTML)
-  
-  dt <- data_sf %>% 
-    filter(name == location)
-  
+
+  dt <- data[data$name == location, ]
+
   leaflet() %>%
     addTiles() %>%
     addMapPane(name = "choropleth", zIndex = 410) %>%
     addMapPane(name = "polygons", zIndex = 420) %>%
     addMapPane(name = "borders", zIndex = 430) %>%
     addMapPane(name = "place_labels", zIndex = 450) %>%
-    addProviderTiles("CartoDB.PositronOnlyLabels",
-                     group = "Place Labels",
-                     options = leafletOptions(pane = "place_labels")) %>%
+    addProviderTiles(
+      "CartoDB.PositronOnlyLabels",
+      group = "Place Labels",
+      options = leafletOptions(pane = "place_labels")) %>%
     addScaleBar(position = "bottomleft") %>%
     addControl(
       tags$div(tag.map.title, HTML("click country on<br>map to filter")),
-      position = "topright",
+      position  = "topright",
       className = "map-title",
-      layerId = "title") %>%
+      layerId   = "title") %>%
     leaflet.extras::addFullscreenControl(position = "topleft") %>%
     leaflet.extras::addResetMapButton() %>%
     addPolygons(
-      data = dt, 
-      weight = 2, 
-      fillColor = "yellow") %>% 
+      data      = dt,
+      weight    = 2,
+      fillColor = "yellow") %>%
     addPolygons(
-      data = data_sf,
-      label = tooltip,
-      color = "white",
-      weight = 0.1,
+      data         = data,
+      label        = tooltip,
+      color        = "white",
+      weight       = 0.1,
       smoothFactor = .1,
-      opacity = 1,
-      fillOpacity = .5,
-      fillColor = ~colorQuantile("YlOrRd", e0F)(e0F),
+      opacity      = 1,
+      fillOpacity  = .5,
+      fillColor    = ~ colorQuantile("YlOrRd", e0F)(e0F),
       highlightOptions = highlightOptions(
-        color = "white",
+        color  = "white",
         weight = 2,
         bringToFront = TRUE)) %>%
-    setView(lng = dt$lon, lat = dt$lat, zoom = 5)
-  
+    setView(
+      lng  = dt$lon,
+      lat  = dt$lat,
+      zoom = zoom)
+
 }
 
 
@@ -89,7 +96,7 @@ plot_map <- function(location) {
 # Figure 2.
 
 #' Plot the difference in life expectancy of two life tables
-#' 
+#'
 #' @inheritParams decompose_by_cod
 #' @inheritParams plot_cod
 #' @inheritParams ggplot2::labs
@@ -101,60 +108,68 @@ plot_change <- function(L1, L2,
                         title = NULL,
                         subtitle = NULL
                         ) {
-  
+
+  x = ex = value = `Life Expectancy Difference` = Age <- NULL
+
   # Data
   cols <- c("red", "green")
-  
-  d <- L1 %>% 
+
+  d <- L1 %>%
     mutate(
       value = ex - L2$ex,
-      col = factor(ifelse(value < 0, "red", "green"), cols)) %>% 
-    filter(x %in% age) 
-  
+      col = factor(ifelse(value < 0, "red", "green"), cols)) %>%
+    filter(x %in% age)
+
   if (perc) {
     d <- mutate(d, value = value/ex * 100)
     xlab <- "Difference in Life Expectancy\n[%]"
-    
+
   } else {
     xlab <- "Difference in Life Expectancy\n(Years)"
-    
+
   }
-  
+
   dmax <- max(abs(d$value))
-  d <- d %>% 
+  d <- d %>%
     mutate(
-      value = round(value, 3)) %>% 
+      value = round(value, 3)) %>%
     rename(
       `Life Expectancy Difference` = value,
-      Age = x) 
-    
-  
+      Age = x)
+
+
   # Figure
   p <- d %>%
-    ggplot(aes(x = `Life Expectancy Difference`, y = Age, color = col)) + 
+    ggplot(aes(
+      x     = `Life Expectancy Difference`,
+      y     = Age,
+      color = col)) +
     geom_segment(
-      xend = 0, 
-      yend = d$Age,
+      xend     = 0,
+      yend     = d$Age,
       linetype = 2,
-      color = 1,
-      size = 0.2) +
-    geom_point(size = 6) +
-    geom_vline(xintercept = 0, size = 0.8) + 
+      color    = 1,
+      size     = 0.2) +
+    geom_point(
+      size = 2) +
+    geom_vline(
+      xintercept = 0,
+      size       = 0.8) +
     scale_x_continuous(
       limits = c(-dmax, dmax),
       labels = scales::label_number_si(accuracy = 0.01)) +
     scale_color_manual(
-      name = "",
+      name   = "",
       values = pals::glasbey()[2:3],
-      drop = FALSE
+      drop   = FALSE
     ) +
     labs(
-      title = title,
+      title    = title,
       subtitle = subtitle,
-      x = xlab,
-      y = "Age\n(Years)") + 
+      x        = xlab,
+      y        = "Age\n(Years)") +
     plot_theme()
-  
+
   return(p)
 }
 
@@ -167,53 +182,62 @@ plot_change <- function(L1, L2,
 #' @param perc Logical. If TRUE data will be displayed as percentages else
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
-#' @examples 
+#' @examples
 #' D <- data_gbd2019_cod # cod data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2019, ]
+#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
 #' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
-  
+
+  region = period = sex = cause_name <- NULL
+  deaths = Deaths = COD <- NULL
+
   # Data preparation
-  dt <- cod %>% 
-    group_by(region, period, sex, cause_name, level) %>%
-    summarise(Deaths = sum(deaths)) %>% 
-    mutate(sex = toupper(sex)) %>% 
-    rename(COD = cause_name) %>% 
-    arrange(Deaths) %>% 
+  dt <- cod %>%
+    group_by(
+      region,
+      period,
+      sex,
+      cause_name) %>%
+    summarise(Deaths = sum(deaths)) %>%
+    mutate(sex = toupper(sex)) %>%
+    rename(COD = cause_name) %>%
+    arrange(Deaths) %>%
     ungroup()
-  
+
   # compute percentages of each disease for
   # given age-region-period-sex and across ages
   if (perc) {
-    dt <- dt %>% 
-      group_by(region, sex) %>% 
+    dt <- dt %>%
+      group_by(
+        region,
+        sex) %>%
       mutate(
         Deaths = Deaths / sum(Deaths) * 100,
         Deaths = round(Deaths, 2)
-      ) %>% 
+      ) %>%
       ungroup()
-    
-    x_lab <- "Proportion of the Total No. of Deaths\n[%]" 
-    
+
+    x_lab <- "Proportion of the Total No. of Deaths\n[%]"
+
   } else {
     dt <- dt %>% mutate(
       Deaths = round(Deaths, 0)
-      ) %>% 
+      ) %>%
       ungroup()
-    
+
     x_lab <- "Number of Deaths\n"
-    
+
   }
-  
-  
+
+
   # Define the aesthetics
-  
+
   if (type == "barplot") {
-    p <- dt %>% 
+    p <- dt %>%
       ggplot(
         aes(x = Deaths, y = COD, fill = COD)
-      ) + 
+      ) +
       geom_bar(
         stat = "identity",
         width = 0.9,
@@ -222,23 +246,23 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
         trans = "identity",
         labels = scales::label_number_si(accuracy = 1)) +
       plot_theme()
-    
+
   } else if (type == "piechart") {
-    p <- dt %>% 
+    p <- dt %>%
       ggplot(aes(x = "", y = Deaths, fill = COD)) +
       geom_bar(
         stat = "identity",
-        width = 0.9, 
+        width = 0.9,
         color = "white") +
-      coord_polar("y", start=0) + 
+      coord_polar("y", start=0) +
       scale_y_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 1)) + 
+        labels = scales::label_number_si(accuracy = 1)) +
       plot_theme() +
       theme(legend.position = "right")
-    
+
   }
-  
+
   # ggplot
   p <- p +
     scale_fill_manual(
@@ -249,7 +273,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
     labs(
       x = x_lab,
       y = "Cause of Death")
-  
+
   # exit
   return(p)
 }
@@ -260,43 +284,56 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 # Figure 4.
 
 #' Plot function for decompose
-#' 
+#'
 #' @param object An object of class decompose
-#' @param by dimensions on which to build the plot. 
-#' Options: "both", "age", "cod". 
+#' @param by dimensions on which to build the plot.
+#' Options: "both", "age", "cod".
 #' @inheritParams plot_cod
-#' @seealso 
+#' @seealso
 #' \code{\link{decompose_by_cod}}
 #' \code{\link{decompose_by_age}}
-#' @examples 
+#' @examples
 #' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
 #' @export
-plot_decompose <- function(object, perc = FALSE,
+plot_decompose <- function(object,
+                           perc = FALSE,
                            by = "both") {
-  
+
+  region = period = sex = COD = cause_name = sign_ <- NULL
+  x = x.int = `Age Interval` = `Change in LE` = decomposition <- NULL
+
   if (!("cause_name" %in% names(object))) {
     by = "age"
   }
-  
+
   object <- rename(object, `Age Interval` = x.int)
-  
+
   # input data
   if(by == "age") {
-    object <- object %>% 
-      group_by(region, period, sex, level, `Age Interval`, x) %>% 
-      summarise(decomposition = sum(decomposition)) %>% 
+    object <- object %>%
+      group_by(
+        region,
+        period,
+        sex,
+        `Age Interval`,
+        x) %>%
+      summarise(decomposition = sum(decomposition)) %>%
       ungroup()
-    
+
   } else if (by == "cod") {
-    object <- object %>% 
-      rename(COD = cause_name) %>% 
-      group_by(region, period, sex, level, COD) %>% 
-      summarise(decomposition = sum(decomposition)) %>% 
+    object <- object %>%
+      rename(COD = cause_name) %>%
+      group_by(
+        region,
+        period,
+        sex,
+        COD) %>%
+      summarise(decomposition = sum(decomposition)) %>%
       ungroup()
-    
+
   } else {
     object <- rename(object, COD = cause_name)
-    
+
   }
   # compute % is necessary
   if (perc) {
@@ -308,77 +345,77 @@ plot_decompose <- function(object, perc = FALSE,
         `Change in LE` = abs(`Change in LE`) * sign_,
         `Change in LE` = round(`Change in LE`, 4)
       )
-    
+
   } else {
     ylab <- "Change in Life Expectancy at Birth\n(Years)"
     d <- object %>%
-      rename(`Change in LE` = decomposition) %>% 
+      rename(`Change in LE` = decomposition) %>%
       mutate(`Change in LE` = round(`Change in LE`, 4))
-    
+
   }
-  
+
   # Define the aesthetics
   if(by == "both") {
     aess <- aes(x = `Age Interval`, y = `Change in LE`, fill = COD)
     xlab <- "Age Group\n(Years)"
-    
+
   } else if (by == "age") {
     aess <- aes(x = `Age Interval`, y = `Change in LE`)
     xlab <- "Age Group\n(Years)"
-    
+
   } else {
     # aess <- aes(x = COD, y = `Change in LE`, fill = COD)
     aess <- aes(y = sex, x = `Change in LE`, fill = COD)
     xlab <- "Causes of Death\nDecomposition"
   }
-  
+
   if (by == "cod") {
-    p <- d %>% 
+    p <- d %>%
       ggplot(aess) +
       geom_bar(
-        position = "stack", 
-        stat = "identity" , 
+        position = "stack",
+        stat = "identity" ,
         width = 0.5) +
-      geom_vline(xintercept = 0) + 
+      geom_vline(xintercept = 0) +
       scale_x_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 0.01)) + 
-      plot_theme() + 
+        labels = scales::label_number_si(accuracy = 0.01)) +
+      plot_theme() +
       theme(
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         )
-    
+
   } else {
-    
-    p <- d %>% 
+
+    p <- d %>%
       ggplot(aess) +
       geom_bar(
         stat = "identity",
         width = 0.9,
-        position = position_stack(reverse = FALSE)) + 
-      geom_hline(yintercept = 0) + 
+        position = position_stack(reverse = FALSE)) +
+      geom_hline(yintercept = 0) +
       scale_y_continuous(
         trans = "identity",
         labels = scales::label_number_si(accuracy = 0.01)) +
-      plot_theme() + 
+      plot_theme() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
-    
+
   }
-  
+
   p <- p +
     scale_fill_manual(
       name = "",
       values = pals::glasbey(),
       drop = FALSE
-    ) + 
+    ) +
     labs(
       x = xlab,
       y = ylab
-    ) 
-  
+    )
+
   # Exit
   return(p)
 }
@@ -392,9 +429,9 @@ plot_decompose <- function(object, perc = FALSE,
 
 #' Plot theme
 #' \code{ggplot2} custom theme used in the package.
-#' @export 
+#' @export
 plot_theme <- function() {
-  theme_light() + 
+  theme_light() +
     theme(
       axis.title       = element_text(size = 12, colour = "black", face = "bold"),
       axis.text        = element_text(size = 12, colour = "black"),

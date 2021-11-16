@@ -12,7 +12,7 @@ plot_decompose(object, perc = FALSE, by = "both")
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{by}{dimensions on which to build the plot. 
+\item{by}{dimensions on which to build the plot.
 Options: "both", "age", "cod".}
 }
 \description{

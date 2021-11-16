@@ -11,9 +11,9 @@ An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) w
 data_cod_mapping
 }
 \description{
-This table contains the cause of death list used in the package 
-mapped to International Classification of Diseases (ICD) codes: ICD-10, 
-ICD-10 used in hospital/claim analyses, ICD-9 and ICD-9 used in 
+This table contains the cause of death list used in the package
+mapped to International Classification of Diseases (ICD) codes: ICD-10,
+ICD-10 used in hospital/claim analyses, ICD-9 and ICD-9 used in
 hospital/claim analyses.
 }
 \examples{

@@ -4,18 +4,7 @@
 \alias{prepare_data_mode_sdg}
 \title{Prepare data for risk changes}
 \usage{
-prepare_data_mode_sdg(
-  cod,
-  lt,
-  region1,
-  cod_target,
-  sdg_1,
-  sdg_3,
-  sdg_4,
-  sdg_5,
-  sdg_6,
-  sdg_7
-)
+prepare_data_mode_sdg(cod, lt, region, cod_change)
 }
 \description{
 Prepare data for risk changes

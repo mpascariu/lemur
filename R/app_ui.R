@@ -4,21 +4,22 @@
 # --------------------------------------------------- #
 
 #' The application User-Interface
-#' 
-#' @noRd
+#'
+#' @keywords internal
+#' @export
 app_ui <- function() {
-  
+
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     ui_tabs()
-
   )
 }
 
 
-#' UI -  List the first level UI elements here 
+#' UI -  List the first level UI elements here
 #' @keywords internal
+#' @export
 ui_tabs <- function() {
   tagList(
     navbarPage(
@@ -26,33 +27,33 @@ ui_tabs <- function() {
       windowTitle = "Mortality Causes",
       position = "fixed-top",
       collapsible = TRUE,
-      
+
       # The 6 main tabs defined in 6 separate modules
       tabPanel( # Home page
-        title = icon("home"), 
+        title = icon("home"),
         ui_home()
-      ), 
-      
+      ),
+
       tabPanel( # Dashboard
-        title = icon("globe-africa"), 
+        title = icon("globe-africa"),
         ui_dashbord()
       ),
-      
+
       tab_md( # "Methods Protocol"
         title = icon("calculator"),
         file = 'app/www/doc_methods.md'
       ),
-      
+
       tab_md( # sources
         title = icon("database"),
         file = 'app/www/doc_sources.md'
       ),
-      
+
       tab_md( # About
         title = icon("info-circle"),
         file = 'app/www/doc_about.md'
       ),
-      
+
       tab_md( # Contact
         title = icon("address-book"),
         file = 'app/www/doc_contact.md'
@@ -64,13 +65,14 @@ ui_tabs <- function() {
 
 #' UI - home page
 #' @keywords internal
+#' @export
 ui_home <- function() {
 
   tagList(
-    
+
     div(
       style = '
-      height: 1200px; 
+      height: 1200px;
       width: 1920px;
       margin-top:-28px;
       margin-left:-18px;
@@ -78,38 +80,39 @@ ui_home <- function() {
       background: url(www/background_hands.jpg) no-repeat center center fixed;
       background-size:100% 100%;
       ',
-      
+
       HTML(r'(
-      <p class="my-class">  Infant mortality and life expectancy are reasonable 
+      <p class="my-class">  Infant mortality and life expectancy are reasonable
           indicators of general well-being in a society.</p>
       <p class="my-class">  P. J. O Rourke</p>
     )')
     )
 
   )
-  
+
 }
 
 
 #' UI - dashboard page
 #' @keywords internal
+#' @export
 ui_dashbord <- function() {
-  
+
   tagList(
-    
+
     # # Disable the vertical scroll bar in shiny dashboard
     # tags$head(
     #   tags$style(
     #     "body {overflow-y: hidden;}"
     #   )
     # ),
-    
+
     tagList(
       column(
         width = 2,
         side_panel()
       ),
-      
+
       column(
         width = 10,
         top_panel(),
@@ -122,8 +125,9 @@ ui_dashbord <- function() {
 
 #' UI - markdown pages
 #' @keywords internal
+#' @export
 tab_md <- function(title, file) {
-  
+
   tabPanel(
     title = title,
     column(
@@ -139,17 +143,18 @@ tab_md <- function(title, file) {
 
 
 #' Add external Resources to the Application
-#' 
-#' This function is internally used to add external 
-#' resources inside the Shiny application. 
-#' 
+#'
+#' This function is internally used to add external
+#' resources inside the Shiny application.
+#'
 #' @keywords internal
+#' @export
 golem_add_external_resources <- function(){
-  
+
   addResourcePath(
     'www', system.file('app/www', package = 'MortalityCauses')
   )
-  
+
   tags$head(
     metathis::meta() %>%
       metathis::meta_social(
@@ -160,15 +165,15 @@ golem_add_external_resources <- function(){
         image_alt = "MortalityCauses",
         twitter_card_type = "summary_large_image"
       ),
-    
+
     golem::activate_js(),
     tags$link(
-      href = "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap", 
+      href = "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap",
       rel = "stylesheet"),
     shinyjs::useShinyjs(),
     tags$link(
-      rel="stylesheet", 
-      type="text/css", 
+      rel="stylesheet",
+      type="text/css",
       href="www/styles.css"),
     tags$script(src="www/addNavLink.js"),
     shinyWidgets::useShinydashboard()

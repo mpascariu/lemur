@@ -13,14 +13,14 @@ build_cod_matrix(cod)
 A matrix with percentages.
 }
 \description{
-Transform the COD count data from a long table to a matrix 
+Transform the COD count data from a long table to a matrix
 containing percentages, with ages as rows and cod's as columns.
 }
 \examples{
 # cod data
 D <- data_gbd2019_cod
 # Select COD data for 1 region
-cod <- D[D$region == "Romania" & D$sex == "both" & D$level == "median" & D$period == 1990, ]
+cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 1990, ]
 # COD data in matrix format
 
 build_cod_matrix(cod)

@@ -5,10 +5,10 @@
 \alias{data_gbd2019_lt}
 \title{Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 103320 rows and 14 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 103320 rows and 13 columns.
 }
 \source{
-United Nations, Department of Economic and Social Affairs, 
+United Nations, Department of Economic and Social Affairs,
 Population Division (2019). World Population Prospects 2019,
 \href{http://ghdx.healthdata.org/record/ihme-data/gbd-2019-life-tables-1950-2019}{
  Online Edition. Rev. 1.}

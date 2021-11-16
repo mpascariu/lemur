@@ -10,70 +10,71 @@
 #' \code{browseVignettes(package = "MortalityCauses")}
 #'
 #' @import shiny
-#' @import shinyWidgets
 #' @import shinyBS
-#' @import ggplot2
+#' @import shinyWidgets
 #' @import golem
-#' @import leaflet
-#' @import sf
+#' @import ggplot2
 #' @import pals
-#' @import plotly
 #' @import data.table
-#' 
-#' @importFrom reactable reactableOutput
-#' @importFrom shinyjs useShinyjs
+#' @import sf
+#'
 #' @importFrom shinydashboard box
+#' @importFrom shinyjs useShinyjs
 #' @importFrom scales label_number_si
-#' @importFrom config get
-#' @importFrom rmarkdown render
-#' @importFrom markdown markdownToHTML
 #' @importFrom forcats as_factor
 #' @importFrom MortalityLaws LifeTable
-#' @importFrom magrittr %>%
 #' @importFrom glue glue_data
 #' @importFrom purrr map
-#' 
-#' @importFrom leaflet.extras 
-#' addFullscreenControl 
-#' addResetMapButton 
-#' 
-#' @importFrom dplyr 
-#' all_of 
-#' arrange 
-#' bind_rows 
-#' bind_cols 
-#' group_by 
-#' left_join 
-#' filter
-#' mutate 
-#' mutate_all
-#' rename 
-#' summarise
-#' select 
-#' ungroup 
-#' 
-#' @importFrom tidyr 
-#' pivot_wider 
-#' pivot_longer 
-#' replace_na
-#' 
-#' @importFrom tibble 
-#' column_to_rownames 
-#' rownames_to_column 
-#' new_tibble
-#' 
-#' @importFrom metathis 
-#' meta 
+#'
+#' @importFrom metathis
+#' meta
 #' meta_social
-#' 
-#' @importFrom htmltools 
-#' tags 
-#' tagList 
-#' tagAppendAttributes 
+#'
+#' @importFrom htmltools
+#' tags
+#' tagList
+#' tagAppendAttributes
 #' HTML
-#' 
-#' 
+#'
+#' @importFrom tibble
+#' column_to_rownames
+#' rownames_to_column
+#' new_tibble
+#' as_tibble
+#'
+#' @importFrom tidyr
+#' pivot_wider
+#' pivot_longer
+#' replace_na
+#'
+#' @importFrom dplyr
+#' all_of
+#' arrange
+#' bind_rows
+#' bind_cols
+#' group_by
+#' left_join
+#' filter
+#' mutate
+#' mutate_all
+#' rename
+#' summarise
+#' select
+#' ungroup
+#' %>%
+#'
+#' @importFrom plotly
+#' ggplotly
+#' layout
+#' renderPlotly
+#' plotlyOutput
+#'
+#' @import leaflet
+#' @importFrom leaflet.extras
+#' addFullscreenControl
+#' addResetMapButton
+#'
 #' @name MortalityCauses
 #' @docType package
 "_PACKAGE"
- 
+
