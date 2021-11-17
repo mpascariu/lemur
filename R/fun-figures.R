@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 09:51:09 2021
+# Last update: Wed Nov 17 21:14:22 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -36,7 +36,7 @@ plot_map <- function(location,
   tooltip <- glue::glue_data(
     data,
     "<strong>{name}</strong><br>
-  Population: {number(pop, accuracy = 1)}<br>
+  Population (2019): {number(pop_2019, accuracy = 1)}<br>
   Life Expectancy - Females: {number(e0F, accuracy = 0.1)}<br>
   Life Expectancy - Males: {number(e0M, accuracy = 0.1)}<br>
   Total Fertility Rate: {number(tfr, accuracy = 0.01)}<br>

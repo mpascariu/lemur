@@ -5,7 +5,7 @@
 \alias{data_gbd2019_lt}
 \title{Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 103320 rows and 13 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 102795 rows and 13 columns.
 }
 \source{
 United Nations, Department of Economic and Social Affairs,

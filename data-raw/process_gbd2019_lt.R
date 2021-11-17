@@ -1,12 +1,13 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Oct 20 16:29:33 2021
+# Last update: Wed Nov 17 19:11:24 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
 library(stringr)
 library(readxl)
 library(MortalityLaws)
+library(countrycode)
 
 # ------------------------------------------
 # Read GBD LIFE TABLE files
@@ -125,11 +126,19 @@ for(i in 1:n) {
   LTS <- rbind(LTS, lt) 
 }
 
-data_gbd2019_lt <- as_tibble(LTS)
 
+data_gbd2019_lt <- as_tibble(LTS) %>%
+  mutate(
+    region = toupper(countryname(region)),
+    region = factor(region)
+  ) %>% 
+  drop_na() %>% 
+  select(-level) 
 
 # ------------------------------------------
 # include data in the package
+dt <- format(Sys.Date(), '%Y%m%d')
+save(data_gbd2019_cod, file = paste0("data-raw/data_gbd2019_lt_", dt,".Rdata"))
 usethis::use_data(data_gbd2019_lt, overwrite = TRUE)
 
 

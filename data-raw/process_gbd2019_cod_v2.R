@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 20:01:27 2021
+# Last update: Wed Nov 17 19:11:36 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -9,6 +9,7 @@ library(readr)
 library(readxl)
 library(janitor)
 library(ungroup)
+library(countrycode)
 
 # # The data have been obtained form GBD tool:
 # # Global Burden of Disease Collaborative Network.
@@ -380,27 +381,19 @@ data_gbd2019_cod <- GBD %>%
   filter(level == "median") %>% 
   mutate(
     cause_name = factor(cause_name, levels = rank$cause_name),
+    region = toupper(countryname(region)),
     region = factor(region)
-  )
+  ) %>% 
+  drop_na() %>% 
+  select(-level) 
 
 
+dt <- format(Sys.Date(), '%Y%m%d')
+save(data_gbd2019_cod, file = paste0("data-raw/data_gbd2019_cod_", dt,".Rdata"))
 usethis::use_data(data_gbd2019_cod, overwrite = TRUE)
 
 # ----------------------------------------------------------------------------
 
-D <- data_gbd2019_cod
-
-data_app_input <- list(
-  region     = levels(D$region),
-  cause_name = levels(D$cause_name),
-  period = unique(D$period),
-  sex    = unique(D$sex),
-  x      = unique(D$x),
-  level  = unique(D$level)
-)
-
-
-usethis::use_data(data_app_input, overwrite = TRUE)
 
 
 

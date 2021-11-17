@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 20:02:52 2021
+# Last update: Wed Nov 17 19:11:30 2021
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -9,6 +9,7 @@ library(readr)
 library(readxl)
 library(janitor)
 library(ungroup)
+library(countrycode)
 
 # This script is similar with the "process_gbd2019_cod_v2.R".
 # Here we are creating a similar dataset but following a different
@@ -286,27 +287,17 @@ data_gbd2019_sdg <- GBD %>%
   filter(level == "median") %>% 
   mutate(
     cause_name = factor(cause_name, levels = rank$cause_name),
-    region = factor(region)
-  )
+    region = toupper(countryname(region)),
+    region = factor(region),
+  ) %>% 
+  drop_na() %>% 
+  select(-level) 
 
-# save(data_gbd2019_sdg, file = "data-raw/data_gbd2019_sdg.Rdata")
-# load("data-raw/data_gbd2019_sdg.Rdata")
+
+dt <- format(Sys.Date(), '%Y%m%d')
+save(data_gbd2019_sdg, file = paste0("data-raw/data_gbd2019_sdg_", dt,".Rdata"))
 
 usethis::use_data(data_gbd2019_sdg, overwrite = TRUE)
-
-# ----------------------------------------------------------------------------
-
-
-
-D <- data_gbd2019_sdg
-
-data_app_input <- MortalityCauses::data_app_input
-
-data_app_input$cause_name_sdg <- levels(D$cause_name)
-
-
-usethis::use_data(data_app_input, overwrite = TRUE)
-
 
 
 
