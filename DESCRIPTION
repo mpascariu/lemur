@@ -1,6 +1,6 @@
 Package: MortalityCauses
 Title: Caused Deleted Mortality Shiny App
-Version: 0.7.0
+Version: 0.7.1
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -10,15 +10,12 @@ Description: What the package does (one paragraph).
 License: GPL (>= 3) + file LICENSE
 Imports: 
   data.table,
-  forcats,
   glue,
   ggplot2,
   htmltools,
   leaflet,
   leaflet.extras,
-  pals,
   purrr,
-  scales,
   sf,
   MortalityLaws,
   dplyr,
@@ -27,10 +24,8 @@ Imports:
   shiny,
   shinyBS,
   shinyWidgets,
-  shinydashboard,
   shinyjs,
   plotly,
-  metathis,
   golem
 Encoding: UTF-8
 LazyData: true

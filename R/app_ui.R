@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 23:42:55 2021
+# Last update: Wed Nov 17 18:09:53 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -156,15 +156,15 @@ golem_add_external_resources <- function(){
   )
 
   tags$head(
-    metathis::meta() %>%
-      metathis::meta_social(
-        title = "MortalityCauses Dashboard",
-        description = "Developed by Pascariu et al.",
-        url = "https://github.com/mpascariu",  # to be updated
-        # image = "",
-        image_alt = "MortalityCauses",
-        twitter_card_type = "summary_large_image"
-      ),
+    # metathis::meta() %>%
+    #   metathis::meta_social(
+    #     title = "MortalityCauses Dashboard",
+    #     description = "Developed by Pascariu et al.",
+    #     url = "https://github.com/mpascariu",  # to be updated
+    #     # image = "",
+    #     image_alt = "MortalityCauses",
+    #     twitter_card_type = "summary_large_image"
+    #   ),
 
     golem::activate_js(),
     tags$link(

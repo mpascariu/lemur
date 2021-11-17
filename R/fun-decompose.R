@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 23:55:45 2021
+# Last update: Wed Nov 17 17:46:34 2021
 # --------------------------------------------------- #
 
 #' Perform decomposition of age-specific mortality contributions
@@ -67,7 +67,7 @@ decompose_by_age <- function(L1, L2){
       x
     ) %>%
     mutate(
-      x.int = forcats::as_factor(x.int),
+      x.int = factor(x.int, levels = unique(x.int)),
       decomposition = dec,
       region = ifelse(
         L1$region == L2$region,
@@ -263,7 +263,7 @@ matrix_to_long_table <- function(X, C1, C2){
       x      = as.numeric(x),
       x.int  = as.character(cut(x, breaks = c(unique(x), Inf), right = FALSE)),
       x.int  = ifelse(x.int == "[110,Inf)", "[110,+)", x.int),
-      x.int  = forcats::as_factor(x.int),
+      x.int  = factor(x.int, levels = unique(x.int)),
       cause_name = factor(cause_name, levels = levels(C1$cause_name)),
 
       r1     = unique(C1$region),

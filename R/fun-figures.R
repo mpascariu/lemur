@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Mon Nov 15 19:27:46 2021
+# Last update: Wed Nov 17 09:51:09 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -36,11 +36,11 @@ plot_map <- function(location,
   tooltip <- glue::glue_data(
     data,
     "<strong>{name}</strong><br>
-  Population: {scales::number(pop, accuracy = 1)}<br>
-  Life Expectancy - Females: {scales::number(e0F, accuracy = 0.1)}<br>
-  Life Expectancy - Males: {scales::number(e0M, accuracy = 0.1)}<br>
-  Total Fertility Rate: {scales::number(tfr, accuracy = 0.01)}<br>
-  Sex Ratio: {scales::number(sexRatio, accuracy = 0.01)}<br>
+  Population: {number(pop, accuracy = 1)}<br>
+  Life Expectancy - Females: {number(e0F, accuracy = 0.1)}<br>
+  Life Expectancy - Males: {number(e0M, accuracy = 0.1)}<br>
+  Total Fertility Rate: {number(tfr, accuracy = 0.01)}<br>
+  Sex Ratio: {number(sexRatio, accuracy = 0.01)}<br>
   <i>(Source: WPP 2019)</i><br>
   "
   ) %>%
@@ -157,10 +157,10 @@ plot_change <- function(L1, L2,
       size       = 0.8) +
     scale_x_continuous(
       limits = c(-dmax, dmax),
-      labels = scales::label_number_si(accuracy = 0.01)) +
+      labels = label_number_si(accuracy = 0.01)) +
     scale_color_manual(
       name   = "",
-      values = pals::glasbey()[2:3],
+      values = glasbey()[2:3],
       drop   = FALSE
     ) +
     labs(
@@ -244,7 +244,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
         position = position_stack(reverse = FALSE)) +
       scale_x_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 1)) +
+        labels = label_number_si(accuracy = 1)) +
       plot_theme()
 
   } else if (type == "piechart") {
@@ -257,7 +257,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
       coord_polar("y", start=0) +
       scale_y_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 1)) +
+        labels = label_number_si(accuracy = 1)) +
       plot_theme() +
       theme(legend.position = "right")
 
@@ -267,7 +267,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
   p <- p +
     scale_fill_manual(
       name = "",
-      values = pals::glasbey(),
+      values = glasbey(),
       drop = FALSE
     ) +
     labs(
@@ -379,7 +379,7 @@ plot_decompose <- function(object,
       geom_vline(xintercept = 0) +
       scale_x_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 0.01)) +
+        labels = label_number_si(accuracy = 0.01)) +
       plot_theme() +
       theme(
         axis.title.y = element_blank(),
@@ -397,7 +397,7 @@ plot_decompose <- function(object,
       geom_hline(yintercept = 0) +
       scale_y_continuous(
         trans = "identity",
-        labels = scales::label_number_si(accuracy = 0.01)) +
+        labels = label_number_si(accuracy = 0.01)) +
       plot_theme() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
@@ -408,7 +408,7 @@ plot_decompose <- function(object,
   p <- p +
     scale_fill_manual(
       name = "",
-      values = pals::glasbey(),
+      values = glasbey(),
       drop = FALSE
     ) +
     labs(
@@ -442,3 +442,17 @@ plot_theme <- function() {
       strip.background = element_rect(fill = "gray87"),
     )
 }
+
+#' glasbey color palette
+#' pals::glasbey()
+#' @keywords internal
+glasbey <- function() {
+  c("#0000FF", "#FF0000", "#00FF00", "#000033", "#FF00B6", "#005300", "#FFD300", 
+    "#009FFF", "#9A4D42", "#00FFBE", "#783FC1", "#1F9698", "#FFACFD", "#B1CC71", 
+    "#F1085C", "#FE8F42", "#DD00FF", "#201A01", "#720055", "#766C95", "#02AD24",
+    "#C8FF00", "#886C00", "#FFB79F", "#858567", "#A10300", "#14F9FF", "#00479E", 
+    "#DC5E93", "#93D4FF", "#004CFF", "#F2F318")
+}
+
+
+

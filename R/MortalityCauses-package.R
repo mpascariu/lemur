@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Nov 11 20:16:32 2021
+# Last update: Wed Nov 17 17:39:19 2021
 # --------------------------------------------------- #
 
 # MortalityCauses Package
@@ -14,21 +14,13 @@
 #' @import shinyWidgets
 #' @import golem
 #' @import ggplot2
-#' @import pals
 #' @import data.table
 #' @import sf
 #'
-#' @importFrom shinydashboard box
 #' @importFrom shinyjs useShinyjs
-#' @importFrom scales label_number_si
-#' @importFrom forcats as_factor
 #' @importFrom MortalityLaws LifeTable
 #' @importFrom glue glue_data
 #' @importFrom purrr map
-#'
-#' @importFrom metathis
-#' meta
-#' meta_social
 #'
 #' @importFrom htmltools
 #' tags

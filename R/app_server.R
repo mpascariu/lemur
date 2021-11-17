@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Nov 16 23:43:28 2021
+# Last update: Wed Nov 17 09:20:00 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -164,7 +164,7 @@ app_server <- function(input, output, session) {
       L2 = data_fig()$lt_initial,
       age = input$fig2_x,
       perc = input$perc) +
-      geom_point(size = 4) +
+      geom_point(size = 3) +
       labs(x = "", y = "") +
       theme(
         axis.text = element_text(size = 10)
@@ -297,6 +297,21 @@ app_server <- function(input, output, session) {
     )
   })
 
+  
+  observeEvent(input$mode, {
+    
+    # If we move into region or sex comparison mode we set the risk reduction
+    # slider to 0, since our main interest would be to see the differences 
+    # as is before playing with hypothetical reductions of the cod's.   
+    if (input$mode != "mode_cod") {
+      updateSliderInput(
+        session,
+        inputId = "cod_change",
+        value = 0
+      )
+    }
+  })
+
   observeEvent(input$cod_target_none, {
     updatePrettyCheckboxGroup(
       session,
@@ -316,7 +331,8 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
   # we use data.table method to filter here because is faster
   # and we will do this all a lot
   dt <- as.data.table(data)
-  dt <- dt[period == year & region %in% c(region1, region2)]
+  dt <- dt[period == year]
+  dt <- dt[region %in% c(region1, region2)]
 
   if (mode != "mode_sex") {
     dt <- dt[sex == gender]

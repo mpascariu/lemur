@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Nov 16 23:56:02 2021
+# Last update: Wed Nov 17 18:10:12 2021
 # --------------------------------------------------- #
 
 #' TOP PANEL
@@ -418,7 +418,7 @@ boxFrame <- function(...,
                      width = NULL,
                      solidHeader = TRUE,
                      style = NULL) {
-  shinydashboard::box(
+  box(
     width = width,
     solidHeader = solidHeader,
     style = style,
