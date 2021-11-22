@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 21:14:22 2021
+# Last update: Mon Nov 22 08:00:16 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -249,7 +249,8 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 
   } else if (type == "piechart") {
     p <- dt %>%
-      ggplot(aes(x = "", y = Deaths, fill = COD)) +
+      ggplot(
+        aes(x = "", y = Deaths, fill = COD)) +
       geom_bar(
         stat = "identity",
         width = 0.9,
@@ -272,7 +273,7 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
     ) +
     labs(
       x = x_lab,
-      y = "Cause of Death")
+      y = "")
 
   # exit
   return(p)

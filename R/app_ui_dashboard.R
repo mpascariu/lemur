@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 18:10:12 2021
+# Last update: Mon Nov 22 08:05:14 2021
 # --------------------------------------------------- #
 
 #' TOP PANEL
@@ -176,7 +176,7 @@ side_panel <- function() {
           prettyCheckboxGroup(
             inputId = "cod_target",
             label = "Cause of death:",
-            choices = sort(MortalityCauses::data_app_input$cause_name),
+            choices = rev(as.character(MortalityCauses::data_app_input$cause_name)),
             selected = MortalityCauses::data_app_input$cause_name,
             icon = icon("check"),
             status = "success",

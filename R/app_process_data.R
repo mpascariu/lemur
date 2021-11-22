@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Nov 16 23:41:50 2021
+# Last update: Mon Nov 22 08:32:23 2021
 # --------------------------------------------------- #
 
 # ----------------------------------------------------------------------------
@@ -48,6 +48,7 @@ prepare_data_mode_cntr <- function(cod,
                                    region1,
                                    region2,
                                    cod_change) {
+  region <- NULL
 
   # select cod and lt tables for 2 regions
   c1 <- cod[cod$region == region1, ]
@@ -65,7 +66,6 @@ prepare_data_mode_cntr <- function(cod,
     l2 <- modify_life_table(l2, c2, cod_change)
   }
 
-  region <- NULL
   c1 <- mutate(c1, region = factor(region, levels = c(region1, region2)))
   c2 <- mutate(c2, region = factor(region, levels = c(region1, region2)))
 
@@ -112,42 +112,6 @@ prepare_data_mode_sex <- function(cod,
   return(out)
 
 }
-
-
-#' Prepare data for risk changes
-#' @keywords internal
-#' @export
-prepare_data_mode_sdg <- function(cod,
-                                  lt,
-                                  region,
-                                  cod_change
-                                  ) {
-
-  # Select cod and lt for 1 region
-  # If no risk change is applied the tables before and after are the same
-  # not change in LE no decomposition
-  c1 <- cod[cod$region == region, ]
-  c2 <- c1
-  l1 <- lt[lt$region == region, ]
-  l2 <- l1
-
-  # IF there is a change applied we take the initial tables and
-  # we modify them
-  logic <- any(cod_change != 0) & !is.null(cod_change)
-  if(logic) {
-    c2 <- modify_cod_table(c1, cod_change)
-    l2 <- modify_life_table(l1, c1, cod_change)
-  }
-
-  out <- list(
-    cod_initial = c1,
-    cod_final   = c2,
-    lt_initial  = l1,
-    lt_final    = l2
-  )
-  return(out)
-}
-
 
 
 

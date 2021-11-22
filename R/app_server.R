@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 09:20:00 2021
+# Last update: Fri Nov 19 08:43:06 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -120,10 +120,10 @@ app_server <- function(input, output, session) {
         cod_change = data_cod_change()
         ),
 
-      mode_sdg = prepare_data_mode_sdg(
+      mode_sdg = prepare_data_mode_cod(
         cod        = data_sdg(),
         lt         = data_lt(),
-        region     = input$region1,
+        region1    = input$region1,
         cod_change = data_cod_change()
         )
     )
@@ -131,24 +131,43 @@ app_server <- function(input, output, session) {
 
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
-    with(data_fig(),
          decompose_by_cod(
-           lt_initial,
-           lt_final,
-           cod_initial,
-           cod_final
+           data_fig()$lt_initial,
+           data_fig()$lt_final,
+           data_fig()$cod_initial,
+           data_fig()$cod_final
            )
-         )
   })
 
   # ----------------------------------------------------------------------------
   # RENDER FIGURES
 
   # Figure 1 - The Map
-  output$figure1 <- renderLeaflet(
+  output$figure1 <- renderLeaflet({
+    
+    # We would like to zoom out if the region surface is large
+    large_regions <- c(
+      "ARGENTINA", 
+      "ALGERIA", 
+      "AUSTRALIA", 
+      "BRAZIL", 
+      "CANADA", 
+      "CHILE", 
+      "INDIA", 
+      "MOROCCO", 
+      "RUSSIA", 
+      "SWEDEN", 
+      "NORWAY", 
+      "FINLAND", 
+      "KAZAKHSTAN", 
+      "US")
+    
+    zoom <- if (input$region1 %in% large_regions) 4 else 5
+    
     suppressWarnings(
-      plot_map(location = input$region1)
-    )
+      plot_map(location = input$region1, zoom = zoom)
+      )
+    }
   )
 
   # Figure 2 - The change
@@ -185,12 +204,6 @@ app_server <- function(input, output, session) {
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlotly({
 
-    xlab <- if (input$perc) {
-      "Proportion of the Total No. of Deaths\n[%]"
-    } else {
-      "Number of Deaths\n"
-    }
-
     if (input$mode == "mode_cod") {
       p <- plot_cod(
         cod  = data_fig()$cod_final,
@@ -200,8 +213,7 @@ app_server <- function(input, output, session) {
     } else if (input$mode == "mode_cntr") {
       cod <- bind_rows(
         data_fig()$cod_initial,
-        data_fig()$cod_final
-        )
+        data_fig()$cod_final)
 
       p <- plot_cod(
         cod  = cod,
@@ -212,8 +224,7 @@ app_server <- function(input, output, session) {
     } else if (input$mode == "mode_sex") {
       cod <- bind_rows(
         data_fig()$cod_initial,
-        data_fig()$cod_final
-        )
+        data_fig()$cod_final)
 
       p <- plot_cod(
         cod  = cod,
@@ -233,11 +244,16 @@ app_server <- function(input, output, session) {
       theme(
         axis.text = element_text(size = 7)
       )
-
+    
+    xlab <- if (input$perc) {
+      "Proportion of the Total No. of Deaths\n[%]"
+    } else {
+      "Number of Deaths\n"
+    }
+    
     p <- ggplotly(p, tooltip = c("fill", "x")) %>%
       plotly::layout(
-        xaxis = list(title = xlab),
-        yaxis = list(title = 'Causes of Death')) %>%
+        xaxis = list(title = xlab)) %>%
       plotly::layout(
         xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
         yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
@@ -323,6 +339,7 @@ app_server <- function(input, output, session) {
 }
 
 
+#' Filter dataset using data.table methods
 #' @keywords internal
 dt_filter <- function(data, mode, region1, region2, gender, year) {
 
