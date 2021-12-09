@@ -1,4 +1,4 @@
 library(testthat)
-# library(MortalityCauses)
+# library(lemur)
 
-# test_check("MortalityCauses")
+# test_check("lemur")

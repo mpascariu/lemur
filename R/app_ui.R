@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 18:09:53 2021
+# Last update: Thu Dec 09 11:17:56 2021
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -23,8 +23,8 @@ app_ui <- function() {
 ui_tabs <- function() {
   tagList(
     navbarPage(
-      title = tagList("Mortality Causes"),
-      windowTitle = "Mortality Causes",
+      title = tagList("Life Expectancy Monitor"),
+      windowTitle = "Life Expectancy Monitor",
       position = "fixed-top",
       collapsible = TRUE,
 
@@ -134,7 +134,7 @@ tab_md <- function(title, file) {
       width = 10,
       offset = 1,
       includeMarkdown(
-        system.file(file, package = 'MortalityCauses')
+        system.file(file, package = 'lemur')
       )
     )
   )
@@ -152,17 +152,17 @@ tab_md <- function(title, file) {
 golem_add_external_resources <- function(){
 
   addResourcePath(
-    'www', system.file('app/www', package = 'MortalityCauses')
+    'www', system.file('app/www', package = 'lemur')
   )
 
   tags$head(
     # metathis::meta() %>%
     #   metathis::meta_social(
-    #     title = "MortalityCauses Dashboard",
+    #     title = "lemur Dashboard",
     #     description = "Developed by Pascariu et al.",
     #     url = "https://github.com/mpascariu",  # to be updated
     #     # image = "",
-    #     image_alt = "MortalityCauses",
+    #     image_alt = "lemur",
     #     twitter_card_type = "summary_large_image"
     #   ),
 

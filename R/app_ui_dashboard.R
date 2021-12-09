@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Mon Nov 22 08:05:14 2021
+# Last update: Thu Dec 09 11:16:47 2021
 # --------------------------------------------------- #
 
 #' TOP PANEL
@@ -103,7 +103,7 @@ side_panel <- function() {
           selectInput(
             inputId  = "region1",
             label    = "Region",
-            choices  = MortalityCauses::data_app_input$region,
+            choices  = lemur::data_app_input$region,
             selected = "FRANCE",
             width    = "100%"
           )
@@ -115,7 +115,7 @@ side_panel <- function() {
             selectInput(
               inputId  = "region2",
               label    = "Region 2",
-              choices  = MortalityCauses::data_app_input$region,
+              choices  = lemur::data_app_input$region,
               selected = "MEXICO",
               width    = "100%",
             )
@@ -126,7 +126,7 @@ side_panel <- function() {
     sliderTextInput(
       inputId = "time_slider",
       label = "Year",
-      choices = MortalityCauses::data_app_input$period,
+      choices = lemur::data_app_input$period,
       selected = 2019,
       grid = TRUE
     ),
@@ -159,7 +159,7 @@ side_panel <- function() {
       sliderTextInput(
         inputId = "age_change",
         label = "Age range:",
-        choices = MortalityCauses::data_app_input$x,
+        choices = lemur::data_app_input$x,
         selected = c(0, 110),
         grid = TRUE
       ),
@@ -176,8 +176,8 @@ side_panel <- function() {
           prettyCheckboxGroup(
             inputId = "cod_target",
             label = "Cause of death:",
-            choices = rev(as.character(MortalityCauses::data_app_input$cause_name)),
-            selected = MortalityCauses::data_app_input$cause_name,
+            choices = rev(as.character(lemur::data_app_input$cause_name)),
+            selected = lemur::data_app_input$cause_name,
             icon = icon("check"),
             status = "success",
             animation = "rotate",
@@ -336,7 +336,7 @@ main_panel <- function() {
             selectInput(
               inputId = "fig2_x",
               label = "Ages to be displayed",
-              choices = MortalityCauses::data_app_input$x,
+              choices = lemur::data_app_input$x,
               selected = seq(0, 100, 10),
               multiple = TRUE
             )

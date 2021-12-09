@@ -1,4 +1,7 @@
 version 0.7.0
+- rebrand the developing R package from MortalityCauses to lemur
+
+version 0.7.0
 - add data.table filtering - major update
 
 version 0.6.0

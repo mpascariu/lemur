@@ -1,12 +1,20 @@
-Package: MortalityCauses
-Title: Caused Deleted Mortality Shiny App
-Version: 0.7.4
+Package: lemur
+Title: Life expectancy monitor upscaled in R
+Version: 0.8.0
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
   person("Vladimir", "Canudas-Romo", role = "aut", comment = c(ORCID = "0000-0001-6532-0089"))
   )
-Description: What the package does (one paragraph).
+Description: The life expectancy monitoring tool allows the user to selected 
+  mortality changes over the entire lifespan or at specific ages, as well as 
+  for overall mortality or for specific causes of death. For example, how 
+  would life expectancy look if cardiovascular mortality were to be reduced 
+  by 50%? Or how would life expectancy look if infant mortality was eliminated? 
+  The tool facilitates assessing changes and comparisons in life expectancy 
+  under those selected scenarios of mortality change. Furthermore, the tool 
+  lets the user compare cause-of-death profiles and life expectancies across 
+  time, countries and sexes.
 License: GPL (>= 3) + file LICENSE
 Imports: 
   data.table,

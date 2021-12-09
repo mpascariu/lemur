@@ -3,11 +3,11 @@
 # Last update: Wed Nov 17 17:39:19 2021
 # --------------------------------------------------- #
 
-# MortalityCauses Package
+# lemur Package
 
 #' @details
 #' To learn more about the package, start with the vignettes:
-#' \code{browseVignettes(package = "MortalityCauses")}
+#' \code{browseVignettes(package = "lemur")}
 #'
 #' @import shiny
 #' @import shinyBS
