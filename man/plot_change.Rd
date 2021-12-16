@@ -7,10 +7,10 @@
 plot_change(
   L1,
   L2,
-  age = c(0, 40, 65),
+  age = seq(0, 110, by = 10),
   perc = FALSE,
   title = NULL,
-  subtitle = NULL
+  subtitle = ""
 )
 }
 \arguments{

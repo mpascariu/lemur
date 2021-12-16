@@ -12,9 +12,9 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.8.0
+**Monitor Version:** 0.8.1
 
-**Last Update:** 2021-12-09 17:25:13 CET
+**Last Update:** 2021-12-16 14:50:28 CET
 
 **News in previous versions:**
 - 2021-12-09 - v0.8.0 - Change the name of the R library from {MortalityCauses} to {lemur} and add dashboard documentation.
@@ -25,4 +25,4 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 - 2021-03-01 - v0.0.1 - Start of the project implementation.
 
 
-The source code and the development repository can be found on Github [@mpascariu/lemur](https://github.com/mpascariu/lemur).
+The source code and the development repository can be found on Github [@mpascariu/lemur](https://github.com/mpascariu/lemur) under the [GNU GPLv3](https://github.com/mpascariu/lemur/blob/main/LICENSE) license.

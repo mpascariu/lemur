@@ -1,4 +1,7 @@
-version 0.7.0
+version 0.8.1
+- bug fixes. Minor but important.
+
+version 0.8.0
 - rebrand the developing R package from MortalityCauses to lemur
 
 version 0.7.0

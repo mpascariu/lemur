@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Mon Nov 22 08:00:16 2021
+# Last update: Thu Dec 16 11:51:49 2021
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -59,11 +59,6 @@ plot_map <- function(location,
       group = "Place Labels",
       options = leafletOptions(pane = "place_labels")) %>%
     addScaleBar(position = "bottomleft") %>%
-    addControl(
-      tags$div(tag.map.title, HTML("click country on<br>map to filter")),
-      position  = "topright",
-      className = "map-title",
-      layerId   = "title") %>%
     leaflet.extras::addFullscreenControl(position = "topleft") %>%
     leaflet.extras::addResetMapButton() %>%
     addPolygons(
@@ -103,21 +98,25 @@ plot_map <- function(location,
 #' @param age Reference ages.
 #' @export
 plot_change <- function(L1, L2,
-                        age = c(0, 40, 65),
+                        age = seq(0, 110, by = 10),
                         perc = FALSE,
                         title = NULL,
-                        subtitle = NULL
+                        subtitle = ""
                         ) {
 
   x = ex = value = `Life Expectancy Difference` = Age <- NULL
 
-  # Data
-  cols <- c("red", "green")
+  # Data -------
+  cols <- c("black", "red", "green")
 
   d <- L1 %>%
     mutate(
       value = ex - L2$ex,
-      col = factor(ifelse(value < 0, "red", "green"), cols)) %>%
+      col = "black",
+      col = replace(col, value < -0.0001, "red"),
+      col = replace(col, value >  0.0001, "green"),
+      col = factor(col, cols),
+      ) %>%
     filter(x %in% age)
 
   if (perc) {
@@ -136,9 +135,10 @@ plot_change <- function(L1, L2,
     rename(
       `Life Expectancy Difference` = value,
       Age = x)
-
-
+  
+  # -------------
   # Figure
+  
   p <- d %>%
     ggplot(aes(
       x     = `Life Expectancy Difference`,
@@ -155,12 +155,22 @@ plot_change <- function(L1, L2,
     geom_vline(
       xintercept = 0,
       size       = 0.8) +
+    geom_text(
+      x = min(-0.01, (-dmax * 1.05)/2), 
+      y = 110, 
+      label = "<--- Loses",
+      color = "black") + 
+    geom_text(
+      x = max(0.01, (dmax * 1.05)/2), 
+      y = 110, 
+      label = "Gains --->",
+      color = "black") + 
     scale_x_continuous(
-      limits = c(-dmax, dmax),
+      limits = c(-dmax, dmax) * 1.05,
       labels = label_number_si(accuracy = 0.01)) +
     scale_color_manual(
       name   = "",
-      values = glasbey()[2:3],
+      values = cols,
       drop   = FALSE
     ) +
     labs(
@@ -306,8 +316,34 @@ plot_decompose <- function(object,
   if (!("cause_name" %in% names(object))) {
     by = "age"
   }
-
+  
   object <- rename(object, `Age Interval` = x.int)
+
+  levels(object$`Age Interval`) <- 
+    c("0", 
+      "1-4",
+      "5-9",
+      "10-14",
+      "15-19",
+      "20-24",
+      "25-29",
+      "30-34",
+      "35-39",
+      "40-44",
+      "45-49",
+      "50-54",
+      "55-59",
+      "60-64",
+      "65-69",
+      "70-74",
+      "75-79",
+      "80-84",
+      "85-89",
+      "90-94",
+      "95-99",
+      "100-104",
+      "105-109",
+      "+110")
 
   # input data
   if(by == "age") {

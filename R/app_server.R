@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Nov 19 08:43:06 2021
+# Last update: Thu Dec 16 14:22:43 2021
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -172,12 +172,34 @@ app_server <- function(input, output, session) {
 
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
+    
+    if (input$mode %in% c("mode_cod", "mode_sdg")) {
+      prefix1 <- "Before: "
+      prefix2 <- "After the changes: "
+    }
+    if (input$mode == "mode_sex") {
+      prefix1 <- "Males: "
+      prefix2 <- "Females: "
+    }
+    if (input$mode == "mode_cntr") {
+      prefix1 <- paste(input$region1, ": ")
+      prefix2 <- paste(input$region2, ": ")
+    }
+    
     xlab <- if (input$perc) {
       "Difference in Life Expectancy [%]"
     } else {
-      "Difference in Life Expectancy (years)"
+      paste0(
+        "Difference in Life Expectancy \n(",
+        prefix1, 
+        round(data_fig()$lt_initial$ex[1], 2), 
+        " vs. ", 
+        prefix2, 
+        round(data_fig()$lt_final$ex[1], 2),
+        " years at birth)"
+      )
     }
-
+    
     p2 <- plot_change(
       L1 = data_fig()$lt_final,
       L2 = data_fig()$lt_initial,
@@ -338,6 +360,8 @@ app_server <- function(input, output, session) {
 
 }
 
+
+# ----------------------------------------------------------------------------
 
 #' Filter dataset using data.table methods
 #' @keywords internal

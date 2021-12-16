@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 09 11:16:47 2021
+# Last update: Thu Dec 16 10:46:21 2021
 # --------------------------------------------------- #
 
 #' TOP PANEL
@@ -234,7 +234,7 @@ side_panel <- function() {
         value = 0,
         min = -100,
         max = 100,
-        step = 1
+        step = 3
       ),
 
       # sliderInput( # goal 25
@@ -254,7 +254,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 1
+        step    = 3
       ),
 
       sliderInput( #Goal: - 33.3% relative to 2015 level
@@ -264,7 +264,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 1
+        step    = 3
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -274,7 +274,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 1
+        step    = 3
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -284,7 +284,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 1
+        step    = 3
       ),
 
       sliderInput( # substantially reduce the number of deaths from pollution
@@ -294,7 +294,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 1
+        step    = 3
       ),
     )
   )
@@ -337,7 +337,7 @@ main_panel <- function() {
               inputId = "fig2_x",
               label = "Ages to be displayed",
               choices = lemur::data_app_input$x,
-              selected = seq(0, 100, 10),
+              selected = seq(0, 110, 10),
               multiple = TRUE
             )
           ),

@@ -5,7 +5,9 @@ run_app()
 
 
 
-library(MortalityCauses)
+
+
+library(lemur)
 run_app()
 plot_map("US")
 plot_map("US", zoom = 4)
