@@ -81,7 +81,7 @@ ui_home <- function() {
       background-size:100% 100%;
       ',
 
-      HTML(r'(
+      HTML('(
       <p class="my-class">  Infant mortality and life expectancy are reasonable
           indicators of general well-being in a society.</p>
       <p class="my-class">  P. J. O Rourke</p>

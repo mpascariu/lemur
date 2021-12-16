@@ -1,5 +1,5 @@
 default:
-  golem_name: MortalityCauses
+  golem_name: lemur
   golem_version: 0.0.1
   app_prod: no
 production:
