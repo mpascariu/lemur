@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 09 11:17:56 2021
+# Last update: Thu Feb 10 13:49:34 2022
 # --------------------------------------------------- #
 
 #' The application User-Interface
@@ -28,11 +28,7 @@ ui_tabs <- function() {
       position = "fixed-top",
       collapsible = TRUE,
 
-      # The 6 main tabs defined in 6 separate modules
-      tabPanel( # Home page
-        title = icon("home"),
-        ui_home()
-      ),
+      # The 5 main tabs defined in 5 separate modules
 
       tabPanel( # Dashboard
         title = icon("globe-africa"),
@@ -60,36 +56,6 @@ ui_tabs <- function() {
       )
     )
   )
-}
-
-
-#' UI - home page
-#' @keywords internal
-#' @export
-ui_home <- function() {
-
-  tagList(
-
-    div(
-      style = '
-      height: 1200px;
-      width: 1920px;
-      margin-top:-28px;
-      margin-left:-18px;
-      margin-right:-8px;
-      background: url(www/background_hands.jpg) no-repeat center center fixed;
-      background-size:100% 100%;
-      ',
-
-      HTML('(
-      <p class="my-class">  Infant mortality and life expectancy are reasonable
-          indicators of general well-being in a society.</p>
-      <p class="my-class">  P. J. O Rourke</p>
-    )')
-    )
-
-  )
-
 }
 
 

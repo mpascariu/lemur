@@ -12,9 +12,9 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.8.1
+**Monitor Version:** 0.8.2
 
-**Last Update:** 2021-12-16 14:50:28 CET
+**Last Update:** 2022-02-10 13:51:57 CET
 
 **News in previous versions:**
 - 2021-12-09 - v0.8.0 - Change the name of the R library from {MortalityCauses} to {lemur} and add dashboard documentation.
