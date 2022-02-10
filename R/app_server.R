@@ -146,6 +146,7 @@ app_server <- function(input, output, session) {
   output$figure1 <- renderLeaflet({
     
     # We would like to zoom out if the region surface is large
+    macro_region <- lemur::data_app_input$regions
     large_regions <- c(
       "ARGENTINA", 
       "ALGERIA", 
@@ -162,10 +163,24 @@ app_server <- function(input, output, session) {
       "KAZAKHSTAN", 
       "US")
     
-    zoom <- if (input$region1 %in% large_regions) 4 else 5
+    loc <- input$region1
+    if (input$region1 %in% large_regions) {
+      zoom = 4
+      
+    } else if (input$region1 %in% macro_region) {
+      zoom = 1
+      loc <- "TUNISIA" 
+      # Since we don't have the borders for the macro regions
+      # select a location in the middle of the map and zoom out
+      # just to display the map of the world
+      
+    } else {
+      zoom = 5
+      
+    }
     
     suppressWarnings(
-      plot_map(location = input$region1, zoom = zoom)
+      plot_map(location = loc, zoom = zoom)
       )
     }
   )

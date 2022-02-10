@@ -103,7 +103,8 @@ side_panel <- function() {
           selectInput(
             inputId  = "region1",
             label    = "Region",
-            choices  = lemur::data_app_input$region,
+            choices  = list(Regions = lemur::data_app_input$regions, 
+                            Countries = lemur::data_app_input$countries),
             selected = "FRANCE",
             width    = "100%"
           )
@@ -115,8 +116,9 @@ side_panel <- function() {
             selectInput(
               inputId  = "region2",
               label    = "Region 2",
-              choices  = lemur::data_app_input$region,
-              selected = "MEXICO",
+              choices  = list(Regions = lemur::data_app_input$regions, 
+                              Countries = lemur::data_app_input$countries),
+              selected = "GLOBAL",
               width    = "100%",
             )
           )
@@ -438,7 +440,7 @@ boxTitleInput <- function(title, db_style, ...) {
         size   = "xs",
         label  = "",
         right  = TRUE,
-        icon   = icon("sliders"),
+        icon   = icon("sliders-h"),
         inline = TRUE,
         width  = "50px",
         circle = FALSE,

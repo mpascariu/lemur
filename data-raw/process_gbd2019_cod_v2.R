@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 19:11:36 2021
+# Last update: Thu Feb 10 18:12:50 2022
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -82,6 +82,7 @@ library(countrycode)
 # files_zip      <- grep(".zip", files, value = TRUE)
 # files_level2   <- grep("_L2_", files, value = TRUE)
 # files_level3   <- grep("_L3_Selection_", files, value = TRUE)
+# files_super_regions <- grep("Super_Regions", files, value = TRUE)
 # path_files_zip <- paste0(path, files_zip)
 # 
 # # Level2 data
@@ -97,6 +98,11 @@ library(countrycode)
 #   map(read_csv) %>%
 #   reduce(rbind)
 # 
+# # Super Regions selected data
+# gbd_super_regions <- paste0(path, files_super_regions) %>%
+#   map(read_csv) %>%
+#   reduce(rbind)
+# 
 # 
 # # We could have done the read at once for all the files using
 # # path_files_zip, but we want to keep separate data objects
@@ -106,18 +112,20 @@ library(countrycode)
 # save(
 #   gbd_level2,
 #   gbd_level3,
-#   file = "data-raw/GBD_COD_Input_20211013.Rdata"
+#   gbd_super_regions,
+#   file = "data-raw/GBD_COD_Input_20220210.Rdata"
 # )
 
 
 
 # Load all datasets created above
-load("data-raw/GBD_COD_Input_20211013.Rdata")
+load("data-raw/GBD_COD_Input_20220210.Rdata")
 
 # Bind everything here
 gbd_cod <- bind_rows(
   gbd_level2,
-  gbd_level3
+  gbd_level3,
+  gbd_super_regions
 )
 
 # ------------------------------------------
@@ -203,15 +211,18 @@ gbd <- left_join(gbd_cod, cod_map, by = "cause_id") %>%
 # 1. The death counts in the processed file are the same with the 
 # counts in the Level2 files
 
-gbd_level2 %>% 
-  filter(age_name != "All Ages") %>% 
-  select(val) %>% 
-  sum()
+# THIS NO LONGER VERIFIES BECAUSE WE ADDED THE SUPER REGIONS SO NOW THE FILES
+# ARE A MIX 
 
-gbd %>% 
-  filter(level == "median") %>% 
-  select(deaths) %>% 
-  sum()
+# gbd_level2 %>% 
+#   filter(age_name != "All Ages") %>% 
+#   select(val) %>% 
+#   sum()
+# 
+# gbd %>% 
+#   filter(level == "median") %>% 
+#   select(deaths) %>% 
+#   sum()
 
 # Since all is good and we did not miss anything out in our 
 # COD selection/mapping we can move on and further process the data.
@@ -348,17 +359,17 @@ GBD <- bind_rows(gbd110, gbd_both) %>%
 # ------------------------------------------
 # CHECK POINT: 
 
-
-sum(gbd_level2$val)
-GBD %>% 
-  filter(level == "median") %>% 
-  select(deaths) %>% 
-  sum()/2
-# We can notice a small difference between the global data and the Level2 data
-# downloaded form GBD. However, this is a data provider issue.
 # 
-# We can notice a small difference between Level2 data and processed data
-# due to ungrouping residuals.
+# sum(gbd_level2$val)
+# GBD %>% 
+#   filter(level == "median") %>% 
+#   select(deaths) %>% 
+#   sum()/2
+# # We can notice a small difference between the global data and the Level2 data
+# # downloaded form GBD. However, this is a data provider issue.
+# # 
+# # We can notice a small difference between Level2 data and processed data
+# # due to ungrouping residuals.
 
 # ------------------------------------------
 # include data in the package
@@ -370,22 +381,17 @@ rank <- GBD %>%
   arrange(value)
 
 
-# data_gbd2019_cod <- data_gbd2019_cod %>%
-#   filter(level == "median") %>%
-#   mutate(
-#     cause_name = factor(cause_name, levels = rank$cause_name),
-#     region = factor(region)
-#     )
-
 data_gbd2019_cod <- GBD %>%
-  filter(level == "median") %>% 
+  filter(level == "median") %>%
   mutate(
     cause_name = factor(cause_name, levels = rank$cause_name),
-    region = toupper(countryname(region)),
-    region = factor(region)
+    region2 = countryname(region),
+    region2 = ifelse(is.na(region2), region, region2),
+    region2 = toupper(region2),
+    region = factor(region2)
   ) %>% 
-  drop_na() %>% 
-  select(-level) 
+  select(-level, -region2) %>%
+  drop_na()
 
 
 dt <- format(Sys.Date(), '%Y%m%d')

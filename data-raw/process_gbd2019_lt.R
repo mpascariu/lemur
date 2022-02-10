@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 19:11:24 2021
+# Last update: Thu Feb 10 18:12:41 2022
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -36,9 +36,8 @@ path_file_map <- paste0(path_map, file_map)
 
 location_map <- read_excel(
   path = path_file_map, 
-  sheet = "GBD 2019 Locations Hierarchy") %>% 
-  # for now we will be working with the 204 countries only 
-  filter(Level == 3)
+  sheet = "All Locations Hierarchies") %>% 
+  filter(Download == "yes")
 
 # ------------------------------------------
 # GBD Probability of death data (qxn)
@@ -129,11 +128,18 @@ for(i in 1:n) {
 
 data_gbd2019_lt <- as_tibble(LTS) %>%
   mutate(
-    region = toupper(countryname(region)),
-    region = factor(region)
+    region2 = countryname(region),
+    region2 = ifelse(is.na(region2), region, region2),
+    region2 = toupper(region2),
+    region = factor(region2)
   ) %>% 
-  drop_na() %>% 
-  select(-level) 
+  select(-level, -region2) %>%  
+  drop_na()
+
+data_gbd2019_lt %>% 
+  select(region) %>% 
+  distinct() %>% 
+  print(n = Inf)
 
 # ------------------------------------------
 # include data in the package

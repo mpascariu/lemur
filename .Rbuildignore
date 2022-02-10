@@ -4,6 +4,7 @@
 ^sources$
 ^dev$
 ^docs$
+^.github$
 dev_history.R
 $run_dev.*
 ^LICENSE\.md$

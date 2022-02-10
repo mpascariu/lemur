@@ -5,7 +5,7 @@
 \alias{data_app_input}
 \title{Input data for the shiny app}
 \format{
-An object of class \code{list} of length 6.
+An object of class \code{list} of length 7.
 }
 \usage{
 data_app_input
