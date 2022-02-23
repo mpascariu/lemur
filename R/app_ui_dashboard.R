@@ -1,7 +1,39 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 10:46:21 2021
+# Last update: Wed Feb 23 15:09:22 2022
 # --------------------------------------------------- #
+
+
+
+#' UI - dashboard page
+#' @keywords internal
+#' @export
+ui_dashbord <- function() {
+  
+  tagList(
+    
+    # # Disable the vertical scroll bar in shiny dashboard
+    # tags$head(
+    #   tags$style(
+    #     "body {overflow-y: hidden;}"
+    #   )
+    # ),
+    
+    tagList(
+      column(
+        width = 2,
+        side_panel()
+      ),
+      
+      column(
+        width = 10,
+        top_panel(),
+        main_panel()
+      )
+    )
+  )
+}
+
 
 #' TOP PANEL
 #' @keywords internal
@@ -54,12 +86,12 @@ top_panel <- function() {
       width = 4,
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
-        label   = "Dashboard Mode",
+        label   = "Life Expectancy Comparisons",
         choices = c(
-          "COD Risk Change" = "mode_cod",
-          "Compare Regions" = "mode_cntr",
-          "Sex Comparison"  = "mode_sex",
-          "SDGs"            = "mode_sdg"),
+          "WITHIN REGION" = "mode_cod",
+          "BETWEEN REGIONS" = "mode_cntr",
+          "BETWEEN GENDERS"  = "mode_sex",
+          "SDG"            = "mode_sdg"),
         selected = "mode_cod",
         justified = TRUE,
         size = "sm",
@@ -71,7 +103,7 @@ top_panel <- function() {
         placement = "bottom"
       )
     ),
-
+    
     column(
       width = 1,
       style = 'padding-right:0px; margin-right: 0px;',
@@ -87,7 +119,19 @@ top_panel <- function() {
         label = icon("percent"),
         size = "small"
       )
-    )
+    ),
+
+    column(
+      width = 1,
+      style = 'padding-right:0px; margin-right: 0px;',
+      tags$div(
+        style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
+      ),
+      bookmarkButton(
+        id = "bookmark",
+        label = "Bookmark"
+      )
+    ),
   )
 }
 
@@ -144,7 +188,7 @@ side_panel <- function() {
       condition = "input.mode != 'mode_sdg'",
       sliderInput(
         inputId = "cod_change",
-        label = "Modify the case-specific risk of dying:",
+        label = "Modify the cause-specific risk of dying:",
         post = "%",
         value = -10,
         min = -100,
@@ -333,7 +377,7 @@ main_panel <- function() {
 
         boxFrame(
           title = boxTitleInput(
-            title = "Difference in Life Expectancy",
+            title = "Difference in Life Expectancy at various ages",
             db_style = "padding: 0px 0px 0px 340px;",
             selectInput(
               inputId = "fig2_x",

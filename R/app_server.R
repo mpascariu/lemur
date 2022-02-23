@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 14:22:43 2021
+# Last update: Wed Feb 23 14:57:21 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -14,38 +14,41 @@ app_server <- function(input, output, session) {
   # cod data ---
   data_cod <- reactive({
     if (input$mode != "mode_sdg") {
-      dt_filter(data_gbd2019_cod,
-                input$mode,
-                input$region1,
-                input$region2,
-                input$sex,
-                input$time_slider
-                )
+      dt_filter(
+        lemur::data_gbd2019_cod,
+        input$mode,
+        input$region1,
+        input$region2,
+        input$sex,
+        input$time_slider
+        )
     }
   })
 
   # sdg data ---
   data_sdg <- reactive({
     if (input$mode == "mode_sdg") {
-      dt_filter(data_gbd2019_sdg,
-                input$mode,
-                input$region1,
-                input$region2,
-                input$sex,
-                input$time_slider
-                )
+      dt_filter(
+        lemur::data_gbd2019_sdg,
+        input$mode,
+        input$region1,
+        input$region2,
+        input$sex,
+        input$time_slider
+        )
     }
   })
 
   # life tables data
   data_lt  <- reactive({
-    dt_filter(data_gbd2019_lt,
-              input$mode,
-              input$region1,
-              input$region2,
-              input$sex,
-              input$time_slider
-              )
+    dt_filter(
+      lemur::data_gbd2019_lt,
+      input$mode,
+      input$region1,
+      input$region2,
+      input$sex,
+      input$time_slider
+      )
     })
 
   # Reduction matrix
@@ -188,6 +191,37 @@ app_server <- function(input, output, session) {
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
     
+    # Build a dynamic x-axis title to help with interpretability
+    # Part 1 - absolute or relative values?
+    x_min      <- min(as.numeric(input$fig2_x))
+    x_min_text <- if (x_min == 0) " at birth" else paste(" at age", x_min)
+    l0         <- data_fig()$lt_initial
+    l1         <- data_fig()$lt_final
+    
+    
+    suffix <- if (input$cod_change == 0) "in life expectancy" else ""
+    xlab_part1 <- ifelse(
+      input$perc, 
+      paste0("Relative difference ", suffix),
+      paste0("Difference ", suffix)
+    )
+    
+    # Part 2 - increase, decrease how much, where? 
+    xlab_part2 <- if(all(!is.null(input$cod_target)) & input$cod_change != 0) {
+      paste0(
+        " following a ", abs(input$cod_change), "%",
+        ifelse(sign(input$cod_change) == -1, " reduction", " increase"),
+        " in ",
+        ifelse(length(input$cod_target) == 1,
+               paste(input$cod_target, "related deaths"),
+                     "multiple causes of death")
+        )
+      
+    } else {
+      ""
+    }
+    
+    # Part 3 - Life expectancy before and after
     if (input$mode %in% c("mode_cod", "mode_sdg")) {
       prefix1 <- "Before: "
       prefix2 <- "After the changes: "
@@ -197,24 +231,21 @@ app_server <- function(input, output, session) {
       prefix2 <- "Females: "
     }
     if (input$mode == "mode_cntr") {
-      prefix1 <- paste(input$region1, ": ")
-      prefix2 <- paste(input$region2, ": ")
+      prefix1 <- paste0(input$region1, ": ")
+      prefix2 <- paste0(input$region2, ": ")
     }
     
-    xlab <- if (input$perc) {
-      "Difference in Life Expectancy [%]"
-    } else {
-      paste0(
-        "Difference in Life Expectancy \n(",
-        prefix1, 
-        round(data_fig()$lt_initial$ex[1], 2), 
-        " vs. ", 
-        prefix2, 
-        round(data_fig()$lt_final$ex[1], 2),
-        " years at birth)"
-      )
-    }
+    xlab_part3 <- paste0(
+      "\n[",
+      prefix1, 
+      round(l0$ex[l0$x == x_min], 2), 
+      " vs. ", 
+      prefix2, 
+      round(l1$ex[l1$x == x_min], 2),
+      " years", x_min_text, "]"
+    )
     
+    # create ggplot
     p2 <- plot_change(
       L1 = data_fig()$lt_final,
       L2 = data_fig()$lt_initial,
@@ -226,13 +257,15 @@ app_server <- function(input, output, session) {
         axis.text = element_text(size = 10)
       )
 
+    # ggplot -> ggplotly
     p2 <- ggplotly(p2, tooltip = c("x", "y")) %>%
       plotly::layout(
-        xaxis = list(title = xlab),
+        xaxis = list(title = paste0(xlab_part1, xlab_part2, xlab_part3)),
         yaxis = list(title = "Age (years)")) %>%
       plotly::layout(
-        xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
-        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
+        xaxis = list(titlefont = list(size = 13), tickfont = list(size = 11)),
+        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11))
+        )
 
     p2
 

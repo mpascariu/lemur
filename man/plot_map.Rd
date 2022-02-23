@@ -4,7 +4,7 @@
 \alias{plot_map}
 \title{Plot map}
 \usage{
-plot_map(location, zoom = 5, data = data_sf)
+plot_map(location, zoom = 5, data = lemur::data_sf)
 }
 \arguments{
 \item{location}{Geographical location}

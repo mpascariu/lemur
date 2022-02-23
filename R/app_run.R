@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Oct 28 20:17:18 2021
+# Last update: Wed Feb 23 13:14:33 2022
 # --------------------------------------------------- #
 
 #' Run the Shiny Application
@@ -17,7 +17,9 @@ run_app <- function(..., lb = TRUE) {
     app = shinyApp(
       ui = app_ui, 
       server = app_server, 
-      options = list("launch.browser" = lb)), 
+      options = list("launch.browser" = lb),
+      enableBookmarking = "server"
+      ), 
     golem_opts = list(...)
   )
 }

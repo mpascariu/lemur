@@ -4,6 +4,7 @@
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
+library(readxl)
 
 load("data-raw/data_gbd2019_cod_20220210.Rdata")
 load("data-raw/data_gbd2019_sdg_20220210.Rdata")

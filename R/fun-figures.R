@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 11:51:49 2021
+# Last update: Fri Feb 18 09:52:16 2022
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -15,7 +15,7 @@
 #' @export
 plot_map <- function(location,
                      zoom = 5,
-                     data = data_sf) {
+                     data = lemur::data_sf) {
 
   tag.map.title <- tags$style(
     HTML("
