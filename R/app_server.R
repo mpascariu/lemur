@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Feb 23 14:57:21 2022
+# Last update: Wed Feb 23 15:29:14 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -131,17 +131,203 @@ app_server <- function(input, output, session) {
         )
     )
   })
-
+  
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
-         decompose_by_cod(
-           data_fig()$lt_initial,
-           data_fig()$lt_final,
-           data_fig()$cod_initial,
-           data_fig()$cod_final
-           )
+    decompose_by_cod(
+      data_fig()$lt_initial,
+      data_fig()$lt_final,
+      data_fig()$cod_initial,
+      data_fig()$cod_final
+    )
   })
 
+  # ----------------------------------------------------------------------------
+  # RENDER datatables
+  # Prepare data tables to and in the data tab
+  
+  # First compose captions for our tables:
+  # We have 2 lifetables, 2 COD distribution tables and 1 decompposition table
+  # Depending on what selection is performed on the dashboard we would need
+  # to adjust the information in the caption of each table so that we 
+  # keep the app intuitive.
+  # 
+  table_captions <- reactive({
+    lt_initial = "NO CAPTION FOR THIS TABLE GIVEN THE CURRENT SELECTION. SUGGEST ONE, PLEASE!"
+    lt_final = cod_initial = cod_final  = decomposition <- lt_initial
+
+      part1 <- paste0(
+        ifelse(input$sex == "both", "total ", input$sex), 
+        " population, ", input$region1, " (", input$time_slider, ")"
+        )
+      part1.2 <- paste0(
+        ifelse(input$sex == "both", "total ", input$sex), 
+        " population, ", input$region2, " (", input$time_slider, ")"
+        )
+
+      part2 <- paste0(
+        "The values in the table are not affected by changes ",
+        "in mortality risks as applied in the dashboard."
+        )
+      
+      part3 <- ifelse(
+        input$cod_change != 0, 
+        paste0(
+          "The values are resulted from a change of ", 
+          input$cod_change, "% applied to one or more risks factors ",
+          "as specified in the dashboard."), 
+        "")
+      
+      part4 <- paste0(
+        "The values are resulted from various changes to the ", 
+        "SDG accomplishment levels applied to one or more risks factors ",
+        "as specified in the dashboard.") 
+      
+      
+    if (input$mode %in% c("mode_cod", "mode_sdg")) {
+      lt_initial <- paste0(
+        "TABLE 1 -- Life table for ", part1, ". ", part2,
+        " TABLE 2 below includes such alterations."
+        )
+      
+      lt_final <- paste0(
+        "TABLE 2 -- Hypothetical life table for ", part1, ". ", part3
+        )
+      cod_initial <- paste0(
+        "TABLE 3 -- Distribution of deaths by cause for ", part1, ". ", part2,
+        " TABLE 4 below includes such alterations."
+        )
+      cod_final <- paste0(
+        "TABLE 4 -- Hypothetical distribution of deaths by cause for ", 
+        part1, ". ", part3
+        )
+      decomposition <- paste0(
+        "TABLE 5 -- Differences in life expectancy at birth attributable to ",
+        "each cause of death for ", part1, ". ", part3
+        )
+    }
+      
+    if (input$mode == "mode_sdg") {
+
+      lt_final <- paste0(
+        "TABLE 2 -- Hypothetical life table for ", part1, ". ", part4
+      )
+      cod_final <- paste0(
+        "TABLE 4 -- Hypothetical distribution of deaths by cause for ", 
+        part1, ". ", part4
+      )
+      decomposition <- paste0(
+        "TABLE 5 -- Differences in life expectancy at birth attributable to ",
+        "each cause of death for ", part1, ". ", part4
+      )
+    }
+      
+    if (input$mode == "mode_cntr") {
+      lt_initial <- paste0(
+        "TABLE 1 -- Life table for ", part1, ". ", part3
+      )
+      lt_final <- paste0(
+        "TABLE 2 -- Life table for ", part1.2, ". ", part3
+      )
+      cod_initial <- paste0(
+        "TABLE 3 -- Distribution of deaths by cause for ", part1, ". ", part3
+      )
+      cod_final <- paste0(
+        "TABLE 4 -- Distribution of deaths by cause for ", part1.2, ". ", part3
+      )
+      decomposition <- paste0(
+        "TABLE 5 -- Differences in life expectancy at birth attributable to ",
+        "each cause of death between ", input$region1, " and ", input$region2,
+        " in ", input$time_slider, ". ",
+        ifelse(input$cod_change != 0, paste0("In addition ", tolower(part3)), "")
+      )
+    }
+    
+    if (input$mode == "mode_sex") {
+      lt_initial <- paste0(
+        "TABLE 1 -- Life table for male population, ", 
+        input$region1, " (", input$time_slider, "). ", part3
+      )
+      lt_final <- paste0(
+        "TABLE 2 -- Life table for female population, ", 
+        input$region1, " (", input$time_slider, "). ", part3
+      )
+      cod_initial <- paste0(
+        "TABLE 3 -- Distribution of deaths by cause for male population, ",
+        input$region1, " (", input$time_slider, "). ", part3
+      )
+      cod_final <- paste0(
+        "TABLE 4 -- Distribution of deaths by cause for female population, ", 
+        input$region1, " (", input$time_slider, "). ", part3
+      )
+      decomposition <- paste0(
+        "TABLE 5 -- Sex-gap in life expectancy at birth attributable to ",
+        "each cause of death, ", 
+        input$region1, " (", input$time_slider, "). ",
+        ifelse(input$cod_change != 0, paste0("In addition ", tolower(part3)), "")
+      )
+    }
+      
+    captions <- c(lt_initial, lt_final, cod_initial, cod_final, decomposition)
+    captions
+  })
+  
+  output$lt_initial  = DT::renderDataTable({
+    data_fig()$lt_initial %>% 
+      select(-region, -period, -sex) %>% 
+      rename(
+        `Age Interval` = x.int,
+        `Age (x)` = x) %>% 
+      format_datatable(
+        caption = table_captions()[1]
+      )
+  })
+  
+  output$lt_final = DT::renderDataTable({
+    data_fig()$lt_final %>% 
+      select(-region, -period, -sex) %>% 
+      rename(
+        `Age Interval` = x.int,
+        `Age (x)` = x) %>% 
+      format_datatable(
+        caption = table_captions()[2]
+      )
+  })
+  
+  output$cod_initial = DT::renderDataTable({
+    data_fig()$cod_initial %>% 
+      select(-region, -period, -sex) %>% 
+      pivot_wider(names_from = cause_name,
+                  values_from = deaths) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[3]
+      )
+  })
+  
+  output$cod_final = DT::renderDataTable({
+    data_fig()$cod_final %>% 
+      select(-region, -period, -sex) %>% 
+      pivot_wider(names_from = cause_name,
+                  values_from = deaths) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[4]
+      )
+  })
+  
+  output$decomposition_data <- DT::renderDataTable({
+    data_decomp() %>% 
+      select(-region, -period, -sex, -x.int) %>% 
+      mutate(decomposition = round(decomposition, 6)) %>% 
+      pivot_wider(names_from = cause_name,
+                  values_from = decomposition) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[5]
+      )
+      
+  })
   # ----------------------------------------------------------------------------
   # RENDER FIGURES
 
@@ -428,4 +614,25 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
   }
 
   return(as_tibble(dt))
+}
+
+
+#' @keywords internal
+format_datatable <- function(data, caption){
+  DT::datatable(
+    data = format(
+      x = as.data.frame(data),
+      big.mark = ",",
+      scientific = FALSE,
+      digits = 2
+    ),
+    caption = caption,
+    rownames= FALSE,
+    # filter = 'top',
+    options = list(
+      # dom = 't',
+      pageLength = 25,
+      autoWidth = TRUE
+    )
+  )
 }

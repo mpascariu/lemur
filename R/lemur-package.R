@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 17:39:19 2021
+# Last update: Wed Feb 23 15:30:30 2022
 # --------------------------------------------------- #
 
 # lemur Package
@@ -16,6 +16,7 @@
 #' @import ggplot2
 #' @import data.table
 #' @import sf
+#' @import DT
 #'
 #' @importFrom shinyjs useShinyjs
 #' @importFrom MortalityLaws LifeTable

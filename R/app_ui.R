@@ -34,6 +34,11 @@ ui_tabs <- function() {
         title = icon("globe-africa"),
         ui_dashbord()
       ),
+      
+      tabPanel( # Dashboard
+        title = icon("database"),
+        ui_datatab()
+      ),
 
       tab_md( # "Methods Protocol"
         title = icon("calculator"),
@@ -41,7 +46,7 @@ ui_tabs <- function() {
       ),
 
       tab_md( # sources
-        title = icon("database"),
+        title = icon("book"),
         file = 'app/www/doc_sources.md'
       ),
 

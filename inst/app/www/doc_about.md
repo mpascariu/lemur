@@ -12,11 +12,12 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.9.1
+**Monitor Version:** 0.10.0
 
-**Last Update:** "2022-02-23 15:02:09 CET"
+**Last Update:** "2022-02-23 22:12:13 CET"
 
 **News in previous versions:**
+- 2022-02-23 - v0.10.0 - Create datatab corresponding to dashboard figures (lifetables, cod distributions and decomposition values); 
 - 2022-02-10 - v0.9.0 - Update database by adding macro-regions; 
 - 2021-12-09 - v0.8.0 - Change the name of the R library from {MortalityCauses} to {lemur} and add dashboard documentation.
 - 2021-06-03 - v0.4.0 - Important advance in app functionality and figure coordination.

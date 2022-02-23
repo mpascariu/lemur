@@ -88,10 +88,10 @@ top_panel <- function() {
         inputId = "mode",
         label   = "Life Expectancy Comparisons",
         choices = c(
-          "WITHIN REGION" = "mode_cod",
+          "WITHIN REGION"   = "mode_cod",
           "BETWEEN REGIONS" = "mode_cntr",
-          "BETWEEN GENDERS"  = "mode_sex",
-          "SDG"            = "mode_sdg"),
+          "SEX-GAP"         = "mode_sex",
+          "SDG"             = "mode_sdg"),
         selected = "mode_cod",
         justified = TRUE,
         size = "sm",
