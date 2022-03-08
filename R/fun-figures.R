@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Fri Feb 18 09:52:16 2022
+# Last update: Tue Mar 08 15:59:11 2022
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -158,7 +158,7 @@ plot_change <- function(L1, L2,
     geom_text(
       x = min(-0.01, (-dmax * 1.05)/2), 
       y = 110, 
-      label = "<--- Loses",
+      label = "<--- Losses",
       color = "black") + 
     geom_text(
       x = max(0.01, (dmax * 1.05)/2), 

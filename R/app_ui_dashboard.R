@@ -1,9 +1,7 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Feb 23 15:09:22 2022
+# Last update: Tue Mar 08 16:02:08 2022
 # --------------------------------------------------- #
-
-
 
 #' UI - dashboard page
 #' @keywords internal
@@ -280,7 +278,7 @@ side_panel <- function() {
         value = 0,
         min = -100,
         max = 100,
-        step = 3
+        step = 5
       ),
 
       # sliderInput( # goal 25
@@ -300,7 +298,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( #Goal: - 33.3% relative to 2015 level
@@ -310,7 +308,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -320,7 +318,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -330,7 +328,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # substantially reduce the number of deaths from pollution
@@ -340,7 +338,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
     )
   )
@@ -431,7 +429,7 @@ main_panel <- function() {
 
         boxFrame(
           title = boxTitleInput(
-            title = "Cause of Death / Age Decomposition",
+            title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
             db_style = "padding: 0px 0px 0px 410px;",
             radioGroupButtons(
               inputId = "fig4_dim",
