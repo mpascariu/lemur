@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 15 12:57:21 2022
+# Last update: Tue Mar 15 15:45:34 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -396,7 +396,6 @@ app_server <- function(input, output, session) {
       selected = levels(data_cod()$cause_name)
     )
   })
-
   
   observeEvent(input$mode, {
     
@@ -418,6 +417,26 @@ app_server <- function(input, output, session) {
       inputId = "cod_target",
       selected = "none"
     )
+  })
+  
+  # THE RESER EVENT
+  observeEvent(input$reset, {
+    updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
+    updateRadioGroupButtons(session, 'sex', selected = "both")
+    updateSwitchInput(session, 'perc', value = FALSE)
+    # updateSelectInput(session, 'region1', selected = "GLOBAL")
+    # updateSelectInput(session, 'region2', selected = "EUROPE")
+    updateSelectInput(session, 'fig2_x', selected = seq(0, 110, 10))
+    updateSliderTextInput(session, 'time_slider', selected = 2019)
+    updateSliderTextInput(session, 'age_change', selected = c(0, 110))
+    updateSliderInput(session, 'cod_change', value = 0)
+    updateSliderInput(session, 'sdg_1', value = 0)
+    updateSliderInput(session, 'sdg_3', value = 0)
+    updateSliderInput(session, 'sdg_4', value = 0)
+    updateSliderInput(session, 'sdg_5', value = 0)
+    updateSliderInput(session, 'sdg_6', value = 0)
+    updateSliderInput(session, 'sdg_7', value = 0)
+    updatePrettyCheckboxGroup(session, 'cod_target', selected = lemur::data_app_input$cause_name)
   })
 
 }

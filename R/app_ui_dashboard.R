@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 08 16:02:08 2022
+# Last update: Tue Mar 15 15:25:42 2022
 # --------------------------------------------------- #
 
 #' UI - dashboard page
@@ -120,7 +120,7 @@ top_panel <- function() {
     ),
 
     column(
-      width = 1,
+      width = 4,
       style = 'padding-right:0px; margin-right: 0px;',
       tags$div(
         style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
@@ -128,7 +128,12 @@ top_panel <- function() {
       bookmarkButton(
         id = "bookmark",
         label = "Bookmark"
-      )
+      ),
+      actionButton(
+        inputId = "reset",
+        icon = icon("recycle"),
+        label = "Reset Selection"
+      ),
     ),
   )
 }
@@ -147,7 +152,7 @@ side_panel <- function() {
             label    = "Region",
             choices  = list(Regions = lemur::data_app_input$regions, 
                             Countries = lemur::data_app_input$countries),
-            selected = "FRANCE",
+            selected = "GLOBAL",
             width    = "100%"
           )
         ),
@@ -160,7 +165,7 @@ side_panel <- function() {
               label    = "Region 2",
               choices  = list(Regions = lemur::data_app_input$regions, 
                               Countries = lemur::data_app_input$countries),
-              selected = "GLOBAL",
+              selected = "EUROPE",
               width    = "100%",
             )
           )
