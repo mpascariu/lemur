@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 08 16:05:11 2022
+# Last update: Tue Mar 15 15:11:26 2022
 # --------------------------------------------------- #
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
@@ -67,7 +67,7 @@ generate_table_captions <- function(mode,
       "TABLE 2 -- Hypothetical life table for ", part1, ". ", part3
     )
     cod_initial <- paste0(
-      "TABLE 3 -- Distribution of deaths by cause for ", part1, ". ", part2,
+      "TABLE 3 -- Distribution of death counts by cause for ", part1, ". ", part2,
       " TABLE 4 below includes such alterations."
     )
     cod_final <- paste0(
@@ -86,7 +86,7 @@ generate_table_captions <- function(mode,
       "TABLE 2 -- Hypothetical life table for ", part1, ". ", part4
     )
     cod_final <- paste0(
-      "TABLE 4 -- Hypothetical distribution of deaths by cause for ", 
+      "TABLE 4 -- Hypothetical distribution of death counts by cause for ", 
       part1, ". ", part4
     )
     decomposition <- paste0(
@@ -167,7 +167,7 @@ generate_fig2_captions <- function(mode,
   l1         <- lt_final
   
   
-  suffix <- if (cod_change == 0) "in life expectancy" else ""
+  suffix <- if (cod_change == 0) " in life expectancy" else ""
   xlab_part1 <- ifelse(perc, 
     paste0("Relative difference", suffix),
     paste0("Difference", suffix)

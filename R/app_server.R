@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 08 16:04:52 2022
+# Last update: Tue Mar 15 12:57:21 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -54,23 +54,14 @@ app_server <- function(input, output, session) {
   # Reduction matrix
   data_cod_change <- reactive({
 
-    if (input$mode != "mode_sdg") {
-
+    if (input$mode == "mode_sdg") {
       M <- build_reduction_matrix(
-        data = data_cod(),
-        select_cod = input$cod_target,
-        select_x   = input$age_change,
-        cod_change = input$cod_change
+        data       = data_sdg(),
+        select_cod = as.character(unique(data_sdg()$cause_name)),
+        select_x   = 0:110,
+        cod_change = 0
       )
-
-    } else {
-      M <- build_reduction_matrix(
-            data       = data_sdg(),
-            select_cod = as.character(unique(data_sdg()$cause_name)),
-            select_x   = 0:110,
-            cod_change = 0
-          )
-
+      
       S1 = paste(0:1)
       S3 = c("HIV/ AIDS / STD",
              "Tuberculosis",
@@ -83,13 +74,22 @@ app_server <- function(input, output, session) {
       S5 = "Self-Harm"
       S6 = "Transport Injuries"
       S7 = "Exposure to Forces of Nature"
-
-      M[S1,   ] <- input$sdg_1
+      
       M[  , S3] <- input$sdg_3
       M[  , S4] <- input$sdg_4
       M[  , S5] <- input$sdg_5
       M[  , S6] <- input$sdg_6
       M[  , S7] <- input$sdg_7
+      # M[S1,   ] <- input$sdg_1
+      M[S1,   ] <- input$sdg_1 + M[S1, ] * abs(input$sdg_1)/100
+      
+    } else {
+      M <- build_reduction_matrix(
+        data = data_cod(),
+        select_cod = input$cod_target,
+        select_x   = input$age_change,
+        cod_change = input$cod_change
+      )
     }
 
     M
@@ -162,7 +162,8 @@ app_server <- function(input, output, session) {
       select(-region, -period, -sex) %>% 
       rename(
         `Age Interval` = x.int,
-        `Age (x)` = x) %>% 
+        `Age, (x)` = x
+        ) %>% 
       format_datatable(
         caption = table_captions()[1]
       )
@@ -182,8 +183,9 @@ app_server <- function(input, output, session) {
   output$cod_initial = DT::renderDataTable({
     data_fig()$cod_initial %>% 
       select(-region, -period, -sex) %>% 
-      pivot_wider(names_from = cause_name,
-                  values_from = deaths) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = deaths) %>% 
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[3]
@@ -193,8 +195,9 @@ app_server <- function(input, output, session) {
   output$cod_final = DT::renderDataTable({
     data_fig()$cod_final %>% 
       select(-region, -period, -sex) %>% 
-      pivot_wider(names_from = cause_name,
-                  values_from = deaths) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = deaths) %>% 
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[4]
@@ -205,8 +208,9 @@ app_server <- function(input, output, session) {
     data_decomp() %>% 
       select(-region, -period, -sex, -x.int) %>% 
       mutate(decomposition = round(decomposition, 6)) %>% 
-      pivot_wider(names_from = cause_name,
-                  values_from = decomposition) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = decomposition) %>% 
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[5]
