@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 15 15:25:42 2022
+# Last update: Thu Mar 17 18:15:40 2022
 # --------------------------------------------------- #
 
 #' UI - dashboard page
@@ -225,7 +225,7 @@ side_panel <- function() {
           prettyCheckboxGroup(
             inputId = "cod_target",
             label = "Cause of death:",
-            choices = rev(as.character(lemur::data_app_input$cause_name)),
+            choices = as.character(lemur::data_app_input$cause_name),
             selected = lemur::data_app_input$cause_name,
             icon = icon("check"),
             status = "success",

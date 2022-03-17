@@ -2,13 +2,13 @@
 % Please edit documentation in R/fun-figures.R
 \name{glasbey}
 \alias{glasbey}
-\title{glasbey color palette
+\title{glasbey color palette - rearranged
 pals::glasbey()}
 \usage{
 glasbey()
 }
 \description{
-glasbey color palette
+glasbey color palette - rearranged
 pals::glasbey()
 }
 \keyword{internal}

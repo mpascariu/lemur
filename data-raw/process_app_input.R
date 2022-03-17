@@ -1,13 +1,13 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Feb 10 20:15:34 2022
+# Last update: Thu Mar 17 17:33:46 2022
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
 library(readxl)
 
-load("data-raw/data_gbd2019_cod_20220210.Rdata")
-load("data-raw/data_gbd2019_sdg_20220210.Rdata")
+load("data-raw/data_gbd2019_cod_20220317.Rdata")
+load("data-raw/data_gbd2019_sdg_20220317.Rdata")
 
 path_map   <- paste0(getwd(),"/data-raw/GBD_2019_Data_Tools_Guide/")
 file_map   <- "IHME_GBD_2019_A1_HIERARCHIES_Y2020M10D15.XLSX"

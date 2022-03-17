@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 15 15:45:34 2022
+# Last update: Thu Mar 17 18:15:18 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -346,6 +346,7 @@ app_server <- function(input, output, session) {
 
     p <- p +
       labs(x = "", y = "") +
+      scale_y_discrete(limits = rev) + 
       theme(
         axis.text = element_text(size = 7)
       )
