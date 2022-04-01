@@ -3,11 +3,6 @@ proxy:
   port: 8080
   authentication: none
   hide-navbar: true
-  admin-groups: admins
-  users:
-  - name: doug
-    password: pass
-    groups: admins
   docker:
       internal-networking: true
       container-protocol: http
