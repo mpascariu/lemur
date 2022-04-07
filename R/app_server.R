@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 14:22:43 2021
+# Last update: Thu Mar 17 18:15:18 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -14,60 +14,54 @@ app_server <- function(input, output, session) {
   # cod data ---
   data_cod <- reactive({
     if (input$mode != "mode_sdg") {
-      dt_filter(data_gbd2019_cod,
-                input$mode,
-                input$region1,
-                input$region2,
-                input$sex,
-                input$time_slider
-                )
+      dt_filter(
+        lemur::data_gbd2019_cod,
+        input$mode,
+        input$region1,
+        input$region2,
+        input$sex,
+        input$time_slider
+        )
     }
   })
 
   # sdg data ---
   data_sdg <- reactive({
     if (input$mode == "mode_sdg") {
-      dt_filter(data_gbd2019_sdg,
-                input$mode,
-                input$region1,
-                input$region2,
-                input$sex,
-                input$time_slider
-                )
+      dt_filter(
+        lemur::data_gbd2019_sdg,
+        input$mode,
+        input$region1,
+        input$region2,
+        input$sex,
+        input$time_slider
+        )
     }
   })
 
   # life tables data
   data_lt  <- reactive({
-    dt_filter(data_gbd2019_lt,
-              input$mode,
-              input$region1,
-              input$region2,
-              input$sex,
-              input$time_slider
-              )
+    dt_filter(
+      lemur::data_gbd2019_lt,
+      input$mode,
+      input$region1,
+      input$region2,
+      input$sex,
+      input$time_slider
+      )
     })
 
   # Reduction matrix
   data_cod_change <- reactive({
 
-    if (input$mode != "mode_sdg") {
-
+    if (input$mode == "mode_sdg") {
       M <- build_reduction_matrix(
-        data = data_cod(),
-        select_cod = input$cod_target,
-        select_x   = input$age_change,
-        cod_change = input$cod_change
+        data       = data_sdg(),
+        select_cod = as.character(unique(data_sdg()$cause_name)),
+        select_x   = 0:110,
+        cod_change = 0
       )
-
-    } else {
-      M <- build_reduction_matrix(
-            data       = data_sdg(),
-            select_cod = as.character(unique(data_sdg()$cause_name)),
-            select_x   = 0:110,
-            cod_change = 0
-          )
-
+      
       S1 = paste(0:1)
       S3 = c("HIV/ AIDS / STD",
              "Tuberculosis",
@@ -80,13 +74,22 @@ app_server <- function(input, output, session) {
       S5 = "Self-Harm"
       S6 = "Transport Injuries"
       S7 = "Exposure to Forces of Nature"
-
-      M[S1,   ] <- input$sdg_1
+      
       M[  , S3] <- input$sdg_3
       M[  , S4] <- input$sdg_4
       M[  , S5] <- input$sdg_5
       M[  , S6] <- input$sdg_6
       M[  , S7] <- input$sdg_7
+      # M[S1,   ] <- input$sdg_1
+      M[S1,   ] <- input$sdg_1 + M[S1, ] * abs(input$sdg_1)/100
+      
+    } else {
+      M <- build_reduction_matrix(
+        data = data_cod(),
+        select_cod = input$cod_target,
+        select_x   = input$age_change,
+        cod_change = input$cod_change
+      )
     }
 
     M
@@ -128,17 +131,92 @@ app_server <- function(input, output, session) {
         )
     )
   })
-
+  
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
-         decompose_by_cod(
-           data_fig()$lt_initial,
-           data_fig()$lt_final,
-           data_fig()$cod_initial,
-           data_fig()$cod_final
-           )
+    decompose_by_cod(
+      data_fig()$lt_initial,
+      data_fig()$lt_final,
+      data_fig()$cod_initial,
+      data_fig()$cod_final
+    )
   })
 
+  # ----------------------------------------------------------------------------
+  # RENDER datatables
+  # Prepare data tables to add in the data tab
+  
+  table_captions <- reactive({
+    generate_table_captions(
+      input$mode,
+      input$region1,
+      input$region2,
+      input$time_slider,
+      input$sex,
+      input$cod_change
+      )
+  })
+  
+  output$lt_initial  = DT::renderDataTable({
+    data_fig()$lt_initial %>% 
+      select(-region, -period, -sex) %>% 
+      rename(
+        `Age Interval` = x.int,
+        `Age, (x)` = x
+        ) %>% 
+      format_datatable(
+        caption = table_captions()[1]
+      )
+  })
+  
+  output$lt_final = DT::renderDataTable({
+    data_fig()$lt_final %>% 
+      select(-region, -period, -sex) %>% 
+      rename(
+        `Age Interval` = x.int,
+        `Age (x)` = x) %>% 
+      format_datatable(
+        caption = table_captions()[2]
+      )
+  })
+  
+  output$cod_initial = DT::renderDataTable({
+    data_fig()$cod_initial %>% 
+      select(-region, -period, -sex) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = deaths) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[3]
+      )
+  })
+  
+  output$cod_final = DT::renderDataTable({
+    data_fig()$cod_final %>% 
+      select(-region, -period, -sex) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = deaths) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[4]
+      )
+  })
+  
+  output$decomposition_data <- DT::renderDataTable({
+    data_decomp() %>% 
+      select(-region, -period, -sex, -x.int) %>% 
+      mutate(decomposition = round(decomposition, 6)) %>% 
+      pivot_wider(
+        names_from = cause_name,
+        values_from = decomposition) %>% 
+      rename(`Age (x)` = x,) %>% 
+      format_datatable(
+        caption = table_captions()[5]
+      )
+      
+  })
   # ----------------------------------------------------------------------------
   # RENDER FIGURES
 
@@ -155,6 +233,7 @@ app_server <- function(input, output, session) {
       "CANADA", 
       "CHILE", 
       "INDIA", 
+      "JAPAN", 
       "MOROCCO", 
       "RUSSIA", 
       "SWEDEN", 
@@ -188,33 +267,20 @@ app_server <- function(input, output, session) {
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
     
-    if (input$mode %in% c("mode_cod", "mode_sdg")) {
-      prefix1 <- "Before: "
-      prefix2 <- "After the changes: "
-    }
-    if (input$mode == "mode_sex") {
-      prefix1 <- "Males: "
-      prefix2 <- "Females: "
-    }
-    if (input$mode == "mode_cntr") {
-      prefix1 <- paste(input$region1, ": ")
-      prefix2 <- paste(input$region2, ": ")
-    }
-    
-    xlab <- if (input$perc) {
-      "Difference in Life Expectancy [%]"
-    } else {
-      paste0(
-        "Difference in Life Expectancy \n(",
-        prefix1, 
-        round(data_fig()$lt_initial$ex[1], 2), 
-        " vs. ", 
-        prefix2, 
-        round(data_fig()$lt_final$ex[1], 2),
-        " years at birth)"
+    # create figure caption
+    fig2_caption <- generate_fig2_captions(
+      input$mode,
+      input$region1,
+      input$region2,
+      input$fig2_x,
+      input$perc,
+      input$cod_change,
+      input$cod_target,
+      data_fig()$lt_initial,
+      data_fig()$lt_final
       )
-    }
-    
+      
+    # create ggplot
     p2 <- plot_change(
       L1 = data_fig()$lt_final,
       L2 = data_fig()$lt_initial,
@@ -226,13 +292,15 @@ app_server <- function(input, output, session) {
         axis.text = element_text(size = 10)
       )
 
+    # ggplot -> ggplotly
     p2 <- ggplotly(p2, tooltip = c("x", "y")) %>%
       plotly::layout(
-        xaxis = list(title = xlab),
+        xaxis = list(title = fig2_caption),
         yaxis = list(title = "Age (years)")) %>%
       plotly::layout(
-        xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
-        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
+        xaxis = list(titlefont = list(size = 13), tickfont = list(size = 11)),
+        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11))
+        )
 
     p2
 
@@ -278,16 +346,13 @@ app_server <- function(input, output, session) {
 
     p <- p +
       labs(x = "", y = "") +
+      scale_y_discrete(limits = rev) + 
       theme(
         axis.text = element_text(size = 7)
       )
     
-    xlab <- if (input$perc) {
-      "Proportion of the Total No. of Deaths\n[%]"
-    } else {
-      "Number of Deaths\n"
-    }
-    
+    xlab <- generate_fig3_captions(input$perc)
+
     p <- ggplotly(p, tooltip = c("fill", "x")) %>%
       plotly::layout(
         xaxis = list(title = xlab)) %>%
@@ -301,38 +366,21 @@ app_server <- function(input, output, session) {
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlotly({
 
-    # compute % is necessary
-    if (input$perc & input$fig4_dim != "cod") {
-      ttip <- c("fill", "y")
-      ylab <- "Change in Life Expectancy at Birth\n[%]"
-      xlab <- "Age Group (years)"
-
-    } else if (!input$perc & input$fig4_dim != "cod"){
-      ttip <- c("fill", "y")
-      ylab <- "Change in Life Expectancy at Birth\n(years)"
-      xlab <- "Age Group (years)"
-
-    } else if (input$perc & input$fig4_dim == "cod"){
-      ttip = c("fill", "x")
-      ylab <- "Causes of Death"
-      xlab <- "Change in Life Expectancy at Birth [%]"
-
-    } else if (!input$perc & input$fig4_dim == "cod"){
-      ttip = c("fill", "x")
-      ylab <- "Causes of Death"
-      xlab <- "Change in Life Expectancy at Birth [years]"
-    }
-
+    fig4_captions <- generate_fig4_captions(
+      input$perc,
+      input$fig4_dim
+    )
 
     p4 <- plot_decompose(
       object = data_decomp(),
       perc   = input$perc,
-      by     = input$fig4_dim)
+      by     = input$fig4_dim
+      )
 
-    p4 <- ggplotly(p4, tooltip = ttip) %>%
+    p4 <- ggplotly(p4, tooltip = fig4_captions$ttip) %>%
       plotly::layout(
-        xaxis = list(title = xlab),
-        yaxis = list(title = ylab)) %>%
+        xaxis = list(title = fig4_captions$xlab),
+        yaxis = list(title = fig4_captions$ylab)) %>%
       plotly::layout(
         xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
         yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
@@ -349,7 +397,6 @@ app_server <- function(input, output, session) {
       selected = levels(data_cod()$cause_name)
     )
   })
-
   
   observeEvent(input$mode, {
     
@@ -371,6 +418,26 @@ app_server <- function(input, output, session) {
       inputId = "cod_target",
       selected = "none"
     )
+  })
+  
+  # THE RESER EVENT
+  observeEvent(input$reset, {
+    updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
+    updateRadioGroupButtons(session, 'sex', selected = "both")
+    updateSwitchInput(session, 'perc', value = FALSE)
+    # updateSelectInput(session, 'region1', selected = "GLOBAL")
+    # updateSelectInput(session, 'region2', selected = "EUROPE")
+    updateSelectInput(session, 'fig2_x', selected = seq(0, 110, 10))
+    updateSliderTextInput(session, 'time_slider', selected = 2019)
+    updateSliderTextInput(session, 'age_change', selected = c(0, 110))
+    updateSliderInput(session, 'cod_change', value = 0)
+    updateSliderInput(session, 'sdg_1', value = 0)
+    updateSliderInput(session, 'sdg_3', value = 0)
+    updateSliderInput(session, 'sdg_4', value = 0)
+    updateSliderInput(session, 'sdg_5', value = 0)
+    updateSliderInput(session, 'sdg_6', value = 0)
+    updateSliderInput(session, 'sdg_7', value = 0)
+    updatePrettyCheckboxGroup(session, 'cod_target', selected = lemur::data_app_input$cause_name)
   })
 
 }
@@ -395,4 +462,25 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
   }
 
   return(as_tibble(dt))
+}
+
+
+#' @keywords internal
+format_datatable <- function(data, caption){
+  DT::datatable(
+    data = format(
+      x = as.data.frame(data),
+      big.mark = ",",
+      scientific = FALSE,
+      digits = 2
+    ),
+    caption = caption,
+    rownames= FALSE,
+    # filter = 'top',
+    options = list(
+      # dom = 't',
+      pageLength = 25,
+      autoWidth = TRUE
+    )
+  )
 }

@@ -44,7 +44,7 @@ lemur::run_app()
 ```
 
 [![App
-Screenshot](inst/app/www/app_lemur_20211209.png)](https://github.com/mpascariu/lemur)
+Screenshot](inst/app/www/app_lemur_20220315.png)](https://github.com/mpascariu/lemur)
 
 All the simulations done in the monitor can be executed using the `R`
 syntax directly in the R/Rstudio console. See the available data object

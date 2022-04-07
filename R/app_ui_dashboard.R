@@ -1,7 +1,37 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 10:46:21 2021
+# Last update: Thu Mar 17 18:15:40 2022
 # --------------------------------------------------- #
+
+#' UI - dashboard page
+#' @keywords internal
+#' @export
+ui_dashbord <- function() {
+  
+  tagList(
+    
+    # # Disable the vertical scroll bar in shiny dashboard
+    # tags$head(
+    #   tags$style(
+    #     "body {overflow-y: hidden;}"
+    #   )
+    # ),
+    
+    tagList(
+      column(
+        width = 2,
+        side_panel()
+      ),
+      
+      column(
+        width = 10,
+        top_panel(),
+        main_panel()
+      )
+    )
+  )
+}
+
 
 #' TOP PANEL
 #' @keywords internal
@@ -54,12 +84,12 @@ top_panel <- function() {
       width = 4,
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
-        label   = "Dashboard Mode",
+        label   = "Life Expectancy Comparisons",
         choices = c(
-          "COD Risk Change" = "mode_cod",
-          "Compare Regions" = "mode_cntr",
-          "Sex Comparison"  = "mode_sex",
-          "SDGs"            = "mode_sdg"),
+          "WITHIN REGION"   = "mode_cod",
+          "BETWEEN REGIONS" = "mode_cntr",
+          "SEX-GAP"         = "mode_sex",
+          "SDG"             = "mode_sdg"),
         selected = "mode_cod",
         justified = TRUE,
         size = "sm",
@@ -71,7 +101,7 @@ top_panel <- function() {
         placement = "bottom"
       )
     ),
-
+    
     column(
       width = 1,
       style = 'padding-right:0px; margin-right: 0px;',
@@ -87,7 +117,24 @@ top_panel <- function() {
         label = icon("percent"),
         size = "small"
       )
-    )
+    ),
+
+    column(
+      width = 4,
+      style = 'padding-right:0px; margin-right: 0px;',
+      tags$div(
+        style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
+      ),
+      bookmarkButton(
+        id = "bookmark",
+        label = "Bookmark"
+      ),
+      actionButton(
+        inputId = "reset",
+        icon = icon("recycle"),
+        label = "Reset Selection"
+      ),
+    ),
   )
 }
 
@@ -105,7 +152,7 @@ side_panel <- function() {
             label    = "Region",
             choices  = list(Regions = lemur::data_app_input$regions, 
                             Countries = lemur::data_app_input$countries),
-            selected = "FRANCE",
+            selected = "GLOBAL",
             width    = "100%"
           )
         ),
@@ -118,7 +165,7 @@ side_panel <- function() {
               label    = "Region 2",
               choices  = list(Regions = lemur::data_app_input$regions, 
                               Countries = lemur::data_app_input$countries),
-              selected = "GLOBAL",
+              selected = "EUROPE",
               width    = "100%",
             )
           )
@@ -144,7 +191,7 @@ side_panel <- function() {
       condition = "input.mode != 'mode_sdg'",
       sliderInput(
         inputId = "cod_change",
-        label = "Modify the case-specific risk of dying:",
+        label = "Modify the cause-specific risk of dying:",
         post = "%",
         value = -10,
         min = -100,
@@ -178,7 +225,7 @@ side_panel <- function() {
           prettyCheckboxGroup(
             inputId = "cod_target",
             label = "Cause of death:",
-            choices = rev(as.character(lemur::data_app_input$cause_name)),
+            choices = as.character(lemur::data_app_input$cause_name),
             selected = lemur::data_app_input$cause_name,
             icon = icon("check"),
             status = "success",
@@ -236,7 +283,7 @@ side_panel <- function() {
         value = 0,
         min = -100,
         max = 100,
-        step = 3
+        step = 5
       ),
 
       # sliderInput( # goal 25
@@ -256,7 +303,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( #Goal: - 33.3% relative to 2015 level
@@ -266,7 +313,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -276,7 +323,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -286,7 +333,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
 
       sliderInput( # substantially reduce the number of deaths from pollution
@@ -296,7 +343,7 @@ side_panel <- function() {
         value   = 0,
         min     = -100,
         max     = 100,
-        step    = 3
+        step    = 5
       ),
     )
   )
@@ -333,7 +380,7 @@ main_panel <- function() {
 
         boxFrame(
           title = boxTitleInput(
-            title = "Difference in Life Expectancy",
+            title = "Difference in Life Expectancy at various ages",
             db_style = "padding: 0px 0px 0px 340px;",
             selectInput(
               inputId = "fig2_x",
@@ -387,7 +434,7 @@ main_panel <- function() {
 
         boxFrame(
           title = boxTitleInput(
-            title = "Cause of Death / Age Decomposition",
+            title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
             db_style = "padding: 0px 0px 0px 410px;",
             radioGroupButtons(
               inputId = "fig4_dim",

@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Feb 10 18:36:53 2022
+# Last update: Thu Mar 17 17:32:16 2022
 # --------------------------------------------------- #
 remove(list = ls())
 library(tidyverse)
@@ -276,18 +276,23 @@ GBD <- bind_rows(gbd110, gbd_both) %>%
 
 # ------------------------------------------
 # include data in the package
-rank <- GBD %>%
-  filter(sex == "both",
-         level == "median") %>% 
-  group_by(cause_name) %>% 
-  summarise(value = sum(deaths)) %>% 
-  arrange(value)
+rank <- read_excel(
+  path = path_file_map,
+  sheet = "Cause Hierarchy") %>%
+  clean_names() %>%
+  filter(
+    sdg_selection != "no") %>%
+  arrange(sdg_order) %>% 
+  select(sdg_selection) %>% 
+  unlist() %>% 
+  unique()
+
 
 
 data_gbd2019_sdg <- GBD %>%
   filter(level == "median") %>% 
   mutate(
-    cause_name = factor(cause_name, levels = rank$cause_name),
+    cause_name = factor(cause_name, levels = rank),
     region2 = countryname(region),
     region2 = ifelse(is.na(region2), region, region2),
     region2 = toupper(region2),
@@ -299,7 +304,6 @@ data_gbd2019_sdg <- GBD %>%
 
 dt <- format(Sys.Date(), '%Y%m%d')
 save(data_gbd2019_sdg, file = paste0("data-raw/data_gbd2019_sdg_", dt,".Rdata"))
-
 usethis::use_data(data_gbd2019_sdg, overwrite = TRUE)
 
 

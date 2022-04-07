@@ -4,6 +4,7 @@
 ^sources$
 ^dev$
 ^docs$
+^builds$
 ^.github$
 dev_history.R
 $run_dev.*

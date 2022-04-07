@@ -34,6 +34,11 @@ ui_tabs <- function() {
         title = icon("globe-africa"),
         ui_dashbord()
       ),
+      
+      tabPanel( # Dashboard
+        title = icon("database"),
+        ui_datatab()
+      ),
 
       tab_md( # "Methods Protocol"
         title = icon("calculator"),
@@ -41,7 +46,7 @@ ui_tabs <- function() {
       ),
 
       tab_md( # sources
-        title = icon("database"),
+        title = icon("book"),
         file = 'app/www/doc_sources.md'
       ),
 
@@ -57,37 +62,6 @@ ui_tabs <- function() {
     )
   )
 }
-
-
-#' UI - dashboard page
-#' @keywords internal
-#' @export
-ui_dashbord <- function() {
-
-  tagList(
-
-    # # Disable the vertical scroll bar in shiny dashboard
-    # tags$head(
-    #   tags$style(
-    #     "body {overflow-y: hidden;}"
-    #   )
-    # ),
-
-    tagList(
-      column(
-        width = 2,
-        side_panel()
-      ),
-
-      column(
-        width = 10,
-        top_panel(),
-        main_panel()
-      )
-    )
-  )
-}
-
 
 #' UI - markdown pages
 #' @keywords internal

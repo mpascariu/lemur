@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Dec 16 11:51:49 2021
+# Last update: Thu Mar 17 18:14:49 2022
 # --------------------------------------------------- #
 
 # Figure 1.
@@ -15,7 +15,7 @@
 #' @export
 plot_map <- function(location,
                      zoom = 5,
-                     data = data_sf) {
+                     data = lemur::data_sf) {
 
   tag.map.title <- tags$style(
     HTML("
@@ -158,7 +158,7 @@ plot_change <- function(L1, L2,
     geom_text(
       x = min(-0.01, (-dmax * 1.05)/2), 
       y = 110, 
-      label = "<--- Loses",
+      label = "<--- Losses",
       color = "black") + 
     geom_text(
       x = max(0.01, (dmax * 1.05)/2), 
@@ -480,15 +480,42 @@ plot_theme <- function() {
     )
 }
 
-#' glasbey color palette
+#' glasbey color palette - rearranged
 #' pals::glasbey()
 #' @keywords internal
 glasbey <- function() {
-  c("#0000FF", "#FF0000", "#00FF00", "#000033", "#FF00B6", "#005300", "#FFD300", 
-    "#009FFF", "#9A4D42", "#00FFBE", "#783FC1", "#1F9698", "#FFACFD", "#B1CC71", 
-    "#F1085C", "#FE8F42", "#DD00FF", "#201A01", "#720055", "#766C95", "#02AD24",
-    "#C8FF00", "#886C00", "#FFB79F", "#858567", "#A10300", "#14F9FF", "#00479E", 
-    "#DC5E93", "#93D4FF", "#004CFF", "#F2F318")
+  c(
+    "#000033", 
+    "#0000FF",
+    "#FF0000", 
+    "#FF00B6",
+    "#A10300",
+    "#FFD300",
+    "#783FC1",
+    "#005300",
+    "#00FF00",
+    "#02AD24",
+    "#14F9FF",
+    "#1F9698",
+    "#201A01",
+    "#720055",
+    "#766C95",
+    "#FE8F42",
+    "#858567",
+    "#886C00",
+    "#93D4FF",
+    "#9A4D42",
+    "#B1CC71",
+    "#C8FF00",
+    "#DC5E93",
+    "#DD00FF",
+    "#F1085C",
+    "#F2F318",
+    "#FFACFD",
+    "#FFB79F",
+    "#00479E",
+    "#004CFF"
+  )
 }
 
 
