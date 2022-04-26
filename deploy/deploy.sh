@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # nginx
-sudo cp -a $HOME/git/lemur/deploy/apps.conf /etc/nginx/sites-available/apps.conf
+sudo cp -a $HOME/git/lemur/deploy/nginx/lemur.conf /etc/nginx/sites-available/apps.conf
 sudo systemctl reload nginx
 
 # shinyproxy
