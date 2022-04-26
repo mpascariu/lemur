@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Thu Mar 17 18:15:18 2022
+# Author: Marius D. PASCARIU <mpascariu@scor.com>
+# Last update: Tue Apr 26 17:00:23 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -14,41 +14,76 @@ app_server <- function(input, output, session) {
   # cod data ---
   data_cod <- reactive({
     if (input$mode != "mode_sdg") {
-      dt_filter(
-        lemur::data_gbd2019_cod,
+      # dt_filter(
+      #   lemur::data_gbd2019_cod,
+      #   input$mode,
+      #   input$region1,
+      #   input$region2,
+      #   input$sex,
+      #   input$time_slider
+      #   ) %>%
+      #   print()
+      
+      query_postgres_sql(
+        data = "cod",
         input$mode,
         input$region1,
         input$region2,
         input$sex,
-        input$time_slider
-        )
+        input$time_slider) %>%
+        mutate(
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) 
     }
   })
 
   # sdg data ---
   data_sdg <- reactive({
     if (input$mode == "mode_sdg") {
-      dt_filter(
-        lemur::data_gbd2019_sdg,
+      # dt_filter(
+      #   lemur::data_gbd2019_sdg,
+      #   input$mode,
+      #   input$region1,
+      #   input$region2,
+      #   input$sex,
+      #   input$time_slider
+      #   )
+      
+      query_postgres_sql(
+        data = "sdg",
         input$mode,
         input$region1,
         input$region2,
         input$sex,
         input$time_slider
-        )
+      ) %>%  
+        mutate(
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
     }
   })
 
   # life tables data
   data_lt  <- reactive({
-    dt_filter(
-      lemur::data_gbd2019_lt,
+    # dt_filter(
+    #   lemur::data_gbd2019_lt,
+    #   input$mode,
+    #   input$region1,
+    #   input$region2,
+    #   input$sex,
+    #   input$time_slider
+    #   )
+    
+    query_postgres_sql(
+      data = "lt",
       input$mode,
       input$region1,
       input$region2,
       input$sex,
       input$time_slider
-      )
+    ) %>%
+      rename(x.int = x_int,
+             Lx = llx,
+             Tx = ttx)
+    
     })
 
   # Reduction matrix
@@ -98,7 +133,8 @@ app_server <- function(input, output, session) {
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
 
-    switch (
+    # print(data_lt())
+    switch(
       input$mode,
 
       mode_cod  = prepare_data_mode_cod(
@@ -226,25 +262,26 @@ app_server <- function(input, output, session) {
     # We would like to zoom out if the region surface is large
     macro_region <- lemur::data_app_input$regions
     large_regions <- c(
-      "ARGENTINA", 
       "ALGERIA", 
       "AUSTRALIA", 
-      "BRAZIL", 
       "CANADA", 
       "CHILE", 
       "INDIA", 
       "JAPAN", 
       "MOROCCO", 
-      "RUSSIA", 
       "SWEDEN", 
       "NORWAY", 
       "FINLAND", 
-      "KAZAKHSTAN", 
-      "US")
+      "KAZAKHSTAN")
+    
+    larger_regions <- c("ARGENTINA", "BRAZIL", "CHINA", "RUSSIA", "US")
     
     loc <- input$region1
     if (input$region1 %in% large_regions) {
       zoom = 4
+    
+    } else if (input$region1 %in% larger_regions) {
+      zoom = 3
       
     } else if (input$region1 %in% macro_region) {
       zoom = 1
@@ -461,6 +498,33 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
     dt <- dt[sex == gender]
   }
 
+  return(as_tibble(dt))
+}
+
+# Query data from a PostgresSQL. This would replace the local data and  the 
+# dt_filter() function 
+query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
+  con <- dbConnect(
+    RPostgres::Postgres(),
+    host     = "3.10.114.240",
+    dbname   = "gbd2019",
+    user     = "lemur",
+    # password = Sys.getenv(c('SQL_PASS')),
+    password = "tx*Oj3HjwAlNbNY0XrY3288E#",
+    port     = 5432)
+  
+  query <- paste0("SELECT * FROM ", data, 
+                  " WHERE period = '", year, 
+                  "' AND (region = '", region1,
+                  "' OR region = '", region2, "')")
+  
+  if (mode != "mode_sex") {
+    query <- paste0(query, " AND sex = '", gender, "'")
+  }
+  
+  dt  <- dbFetch(dbSendQuery(con, query))
+  dbDisconnect(con)
+  
   return(as_tibble(dt))
 }
 
