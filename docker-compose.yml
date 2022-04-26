@@ -1,0 +1,56 @@
+# docker compose containers for nginx reverse proxy, shinyproxy, shiny app, flask api, and postgresql database.
+version: '3.3'
+
+services:
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    volumes:
+      - type: bind
+        source: ./deploy/nginx/lemur.conf
+        target: /etc/nginx/sites-enabled/lemur.conf
+    ports:
+      - 80:80
+
+  shinyproxy:
+    image: openanalytics/shinyproxy:2.6.0
+    container_name: shinyproxy
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: ./deploy/shinyproxy/application.yml
+        target: /opt/shinyproxy/application.yml
+    ports:
+      - 8080:8080
+    networks:
+      - net
+
+  lemur:
+    container_name: lemur
+    command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');lemur::run_app()"]
+    env_file: .env
+    build: ./deploy/lemur/
+    ports:
+      - 3838:3838
+    networks:
+      - net
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    env_file: .env
+    volumes:
+      - /db-data/:/var/lib/postgresql/data/
+      - ./deploy/postgresql/:/data/
+      - type: bind
+        source: ./deploy/postgresql/init-db.sh
+        target: /docker-entrypoint-initdb.d/init-db.sh
+    ports: 
+      - 5432:5432
+
+networks:
+  net:
