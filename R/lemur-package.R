@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Tue Mar 08 16:58:45 2022
+# Author: Marius D. PASCARIU <mpascariu@scor.com>
+# Last update: Tue Apr 26 16:26:21 2022
 # --------------------------------------------------- #
 
 # lemur Package
@@ -17,6 +17,8 @@
 #' @import data.table
 #' @import sf
 #'
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbDisconnect
+#' @importFrom RPostgres Postgres
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shinyjs useShinyjs
 #' @importFrom MortalityLaws LifeTable
