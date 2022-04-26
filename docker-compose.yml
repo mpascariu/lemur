@@ -9,8 +9,8 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./deploy/nginx/lemur.conf
-        target: /etc/nginx/sites-enabled/lemur.conf
+        source: ./deploy/nginx/nginx.conf
+        target: /etc/nginx/sites-enabled/nginx.conf
     ports:
       - 80:80
 
@@ -28,11 +28,10 @@ services:
     networks:
       - net
 
-  lemur:
-    container_name: lemur
-    command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');lemur::run_app()"]
+  shiny:
+    container_name: shiny
     env_file: .env
-    build: ./deploy/lemur/
+    build: ./deploy/shiny/
     ports:
       - 3838:3838
     networks:

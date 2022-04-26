@@ -11,8 +11,8 @@ proxy:
     display-name: Life Expectancy Monitor
     description: Life Expectancy Monitor
     container-cmd: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
-    container-image: lemur
-    container-network: shiny-net
+    container-image: lemur_lemur
+    container-network: lemur_net
     container-log-path: ./container-logs
 logging:
   file:
