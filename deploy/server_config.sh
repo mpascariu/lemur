@@ -7,7 +7,6 @@ sudo apt-get upgrade
 
 # packages
 sudo apt install git
-sudo apt install nginx
 sudo apt-get install ca-certificates curl gnupg lsb-release
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 sudo apt-get install docker-compose
@@ -30,14 +29,11 @@ sudo nano /etc/sysctl.conf
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow from 163.1.150.0/24 proto tcp to any port 22
-sudo ufw allow 'Nginx Full'
+sudo ufw allow http
+sudo ufw allow https
 
 sudo ufw enable
 
-#---- nginx ----#
-sudo systemctl start nginx
-sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/apps.conf
-sudo ln -s /etc/nginx/sites-available/apps.conf /etc/nginx/sites-enabled/apps.conf
 
 #---- docker ----#
 
@@ -61,14 +57,10 @@ sudo systemctl edit docker
 # ExecStart=
 # ExecStart=/usr/bin/dockerd -H unix:// -D -H tcp://127.0.0.1:2375
 
+sudo chmod a+rw /var/run/docker.sock
+
 sudo systemctl daemon-reload
 sudo systemctl restart docker
-
-# # pull example dockerized shiny app
-# docker pull openanalytics/docker-example
-
-# create docker network for shinyproxy
-sudo docker network create shiny-net
 
 
 #---- lemur app ----#
@@ -78,6 +70,10 @@ sudo docker network create shiny-net
 mkdir ~/git
 cd ~/git
 git clone git@github.com:doug-leasure/lemur
+
+# deploy
+cd ~/git/lemur
+docker-compose up -d
 
 
 
