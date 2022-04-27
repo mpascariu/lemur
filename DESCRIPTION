@@ -1,10 +1,10 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 0.11.0
+Version: 0.12.0
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
-  person("Doug", "Leasure", role = "ctb"),
+  person("Douglas R.", "Leasure", role = "ctb", comment = c(ORCID = "0000-0002-8768-2811")),
   person("Vladimir", "Canudas-Romo", role = "aut", comment = c(ORCID = "0000-0001-6532-0089"))
   )
 Description: The life expectancy monitoring tool allows the user to selected 
@@ -37,7 +37,9 @@ Imports:
   shinyWidgets,
   shinyjs,
   plotly,
-  golem
+  golem,
+  DBI,
+  RPostgres
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
@@ -45,3 +47,4 @@ Suggests:
   testthat (>= 3.0.0)
 Depends: 
   R (>= 2.10)
+

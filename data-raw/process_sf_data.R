@@ -16,8 +16,6 @@ data(e0M)
 data(tfr)
 data(sexRatio)
 
-
-
 data_wpp <- pop %>% 
   select(name) %>% 
   mutate(
@@ -33,10 +31,11 @@ data_wpp <- pop %>%
     e0M = e0M$`2015-2020`,
     sexRatio = sexRatio$`2015-2020`,
     tfr = tfr$`2015-2020`,
-  ) %>% 
-  select(-name) 
+  ) %>%
+  filter(name != "Less developed regions, excluding China") %>% 
+  select(-name)
 
-data_wpp
+data_wpp 
 
 data_sf <- rnaturalearth::ne_countries(
   scale = "small", 

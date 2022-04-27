@@ -1,0 +1,64 @@
+# docker compose containers for nginx reverse proxy, shinyproxy, shiny app, flask api, and postgresql database.
+version: '3.3'
+
+services:
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    volumes:
+      - type: bind
+        source: ./deploy/nginx/apps.conf
+        target: /etc/nginx/conf.d/apps.conf
+    ports:
+      - 80:80
+    network_mode: 'host'
+
+  shinyproxy:
+    image: openanalytics/shinyproxy:2.6.0
+    container_name: shinyproxy
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: ./deploy/shinyproxy/application.yml
+        target: /opt/shinyproxy/application.yml
+    ports:
+      - 8080:8080
+    networks:
+      - net
+
+  shiny:
+    container_name: shiny
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
+    ports:
+      - 3838:3838
+    networks:
+      - net
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    env_file: .env
+    volumes:
+      - /db-data/:/var/lib/postgresql/data/
+      - ./deploy/postgresql/:/data/
+      - type: bind
+        source: ./deploy/postgresql/init-db.sh
+        target: /docker-entrypoint-initdb.d/init-db.sh
+      - type: bind
+        source: ./deploy/postgresql/postgresql.conf
+        target: /etc/postpgreql/postgresql.conf
+
+    ports: 
+      - 5432:5432
+    networks:
+      - net
+
+networks:
+  net:
