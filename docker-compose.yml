@@ -9,12 +9,11 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./deploy/nginx/nginx.conf
-        target: /etc/nginx/sites-enabled/nginx.conf
+        source: ./deploy/nginx/apps.conf
+        target: /etc/nginx/conf.d/apps.conf
     ports:
       - 80:80
-    networks:
-      - net
+    network_mode: 'host'
 
   shinyproxy:
     image: openanalytics/shinyproxy:2.6.0
