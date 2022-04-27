@@ -51,6 +51,10 @@ services:
       - type: bind
         source: ./deploy/postgresql/init-db.sh
         target: /docker-entrypoint-initdb.d/init-db.sh
+      - type: bind
+        source: ./deploy/postgresql/postgresql.conf
+        target: /etc/postpgreql/postgresql.conf
+
     ports: 
       - 5432:5432
     networks:
