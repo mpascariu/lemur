@@ -4,8 +4,6 @@ import datetime
 import json
 from ast import literal_eval
 
-language_map = {"ukrainian": 52, "russian": 17}
-
 
 def timestr():
     return (

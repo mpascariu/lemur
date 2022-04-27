@@ -31,9 +31,7 @@ services:
 
   shiny:
     container_name: shiny
-    build: 
-      context: ./
-      dockerfile: Dockerfile
+    build: ./
     # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
     ports:
       - 3838:3838
@@ -56,6 +54,17 @@ services:
         target: /etc/postpgreql/postgresql.conf
     ports: 
       - 5432:5432
+    networks:
+      - net
+    
+  api:
+    container_name: api
+    restart: always
+    env_file: .env
+    command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+    build: ./deploy/api/
+    ports:
+      - 5000:5000
     networks:
       - net
 

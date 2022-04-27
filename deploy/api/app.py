@@ -27,7 +27,7 @@ def page_not_found(e):
 
 
 @app.route("/cause_of_death", methods=["GET"])
-def query():
+def cod():
     """API endpoint to select data from the 'cod' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
@@ -40,7 +40,7 @@ def query():
         )
 
 @app.route("/life_table", methods=["GET"])
-def query():
+def lt():
     """API endpoint to select data from the 'lt' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
@@ -53,7 +53,7 @@ def query():
         )
 
 @app.route("/sdg", methods=["GET"])
-def query():
+def sdg():
     """API endpoint to select data from the 'sdg' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:

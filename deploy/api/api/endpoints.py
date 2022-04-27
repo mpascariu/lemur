@@ -47,57 +47,18 @@ def cod_fun(args):
 
     if status == 200:
 
-        # list query columns
-        cols = []
-
         # create sql query
-        sql_query = f"SELECT {', '.join(cols)}\nFROM {args['table']}\nWHERE "
-
-        where_clauses = []
-        for col in [
-            "contributor_id",
-            "country",
-            "gender",
-            "age_min",
-            "age_max",
-        ]:
-            if col in args:
-                where_clauses.append(f"{col} = {args[col]}")
-        if "date_start" in args:
-            where_clauses.append(f"timestamp_iso::date >= {args['date_start']}")
-        if "date_end" in args:
-            where_clauses.append(f"timestamp_iso::date <= {args['date_end']}")
-        for col in ["home", "recent", "travel_in"]:
-            if col in args:
-                where_clauses.append(
-                    f"(geo_locations #>'{{location_types}}' ? '{col}') = {str(args[col]).lower()}"
-                )
-        if "geo_scale" in args:
-            where_clauses.append(f"(geo_locations ->> 'name') = {args['geo_scale']}")
-        if platform == "facebook" and "language" in args:
-            if args["language"] == "all":
-                # no language targeted at all
-                where_clauses.append("(all_fields -> 'languages' -> 'values') is null")
-            else:
-                # only a *single* language targeted
-                where_clauses.append(
-                    "jsonb_array_length(all_fields -> 'languages' -> 'values') = 1"
-                )
-                # specify that language
-                lang = language_map[args["language"]]
-                where_clauses.append(
-                    f"(all_fields #>'{{languages, values}}') @> '[{lang}]'"
-                )
-
-        sql_query = sql_query + " AND\n ".join(where_clauses)
+        # regions = str(args['region']).replace('[', '(').replace(']', ')')
+        # sql_query = 'SELECT * FROM cod WHERE region IN {};'.format(regions)
+        sql_query = "SELECT * FROM cod WHERE region = '{}';".format(args['region'])
 
         # query database
         try:
             conn = psycopg2.connect(
                 host='postgres',
                 database="gbd2019",
-                user=os.environ.get("POSTGRES_USER"),
-                password=os.environ.get("POSTGRES_PASSWORD"),
+                user='lemur',
+                password='tx*Oj3HjwAlNbNY0XrY3288E#',
             )
             df = pd.read_sql(sql_query, conn)
             conn.close()
@@ -132,3 +93,50 @@ def cod_fun(args):
     }
 
 
+def lt_fun(args):
+    """Process requests to API endpoint '/life_table' by selecting queried data from a PostgreSQL table.
+    Args:
+        args (dict): Arguments of GET request passed from request.args
+    Returns:
+        dict: http response compatible with json format
+    """
+    time_start = datetime.datetime.now()
+
+    status = 200
+    message = 'OK'
+    data = None
+
+    time_end = datetime.datetime.now()
+    delta = time_end - time_start
+
+    return {
+        "status": status,
+        "message": message,
+        "timestamp": timestr(),
+        "data": data,
+        "duration": delta.total_seconds(),
+    }
+
+def sdg_fun(args):
+    """Process requests to API endpoint '/sdg' by selecting queried data from a PostgreSQL table.
+    Args:
+        args (dict): Arguments of GET request passed from request.args
+    Returns:
+        dict: http response compatible with json format
+    """
+    time_start = datetime.datetime.now()
+
+    status = 200
+    message = 'OK'
+    data = None
+
+    time_end = datetime.datetime.now()
+    delta = time_end - time_start
+
+    return {
+        "status": status,
+        "message": message,
+        "timestamp": timestr(),
+        "data": data,
+        "duration": delta.total_seconds(),
+    }
