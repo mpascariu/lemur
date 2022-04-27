@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Wed Feb 23 13:14:33 2022
+# Author: Marius D. PASCARIU <mpascariu@scor.com>
+# Last update: Wed Apr 27 15:19:32 2022
 # --------------------------------------------------- #
 
 #' Run the Shiny Application
@@ -18,7 +18,8 @@ run_app <- function(..., lb = TRUE) {
       ui = app_ui, 
       server = app_server, 
       options = list("launch.browser" = lb),
-      enableBookmarking = "server"
+      enableBookmarking = "server",
+      uiPattern = "/"
       ), 
     golem_opts = list(...)
   )

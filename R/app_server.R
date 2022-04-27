@@ -21,8 +21,7 @@ app_server <- function(input, output, session) {
       #   input$region2,
       #   input$sex,
       #   input$time_slider
-      #   ) %>%
-      #   print()
+      #   )
       
       query_postgres_sql(
         data = "cod",
@@ -32,7 +31,7 @@ app_server <- function(input, output, session) {
         input$sex,
         input$time_slider) %>%
         mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) 
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name))
     }
   })
 
@@ -55,7 +54,7 @@ app_server <- function(input, output, session) {
         input$region2,
         input$sex,
         input$time_slider
-      ) %>%  
+      ) %>%
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
     }
@@ -506,7 +505,7 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
 query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
   con <- dbConnect(
     RPostgres::Postgres(),
-    host     = "3.10.114.240",
+    host     = 'postgres', #"3.10.114.240",
     dbname   = "gbd2019",
     user     = "lemur",
     # password = Sys.getenv(c('SQL_PASS')),
@@ -538,9 +537,9 @@ format_datatable <- function(data, caption){
       scientific = FALSE,
       digits = 2
     ),
-    caption = caption,
-    rownames= FALSE,
-    # filter = 'top',
+    caption  = caption,
+    rownames = FALSE,
+    # filter  = 'top',
     options = list(
       # dom = 't',
       pageLength = 25,

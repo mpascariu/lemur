@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Thu Mar 17 18:15:40 2022
+# Author: Marius D. PASCARIU <mpascariu@scor.com>
+# Last update: Wed Apr 27 15:19:47 2022
 # --------------------------------------------------- #
 
 #' UI - dashboard page
@@ -125,10 +125,7 @@ top_panel <- function() {
       tags$div(
         style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
       ),
-      bookmarkButton(
-        id = "bookmark",
-        label = "Bookmark"
-      ),
+      bookmarkButton(),
       actionButton(
         inputId = "reset",
         icon = icon("recycle"),
@@ -356,7 +353,7 @@ main_panel <- function() {
     fluidRow(
       column(
         width = 7,
-        style ='padding:0px 0px 0px 18px;',
+        style = 'padding:0px 0px 0px 18px;',
 
         boxFrame(
           style = 'padding:0px',
@@ -376,7 +373,7 @@ main_panel <- function() {
 
       column(
         width = 5,
-        style='padding:0px;',
+        style = 'padding:0px;',
 
         boxFrame(
           title = boxTitleInput(
@@ -430,7 +427,7 @@ main_panel <- function() {
 
       column(
         width = 6,
-        style ='padding:0px;',
+        style = 'padding:0px;',
 
         boxFrame(
           title = boxTitleInput(
@@ -501,33 +498,6 @@ boxTitleInput <- function(title, db_style, ...) {
     ),
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
