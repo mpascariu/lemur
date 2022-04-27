@@ -504,9 +504,9 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
 # Query data from a PostgresSQL. This would replace the local data and  the 
 # dt_filter() function 
 query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
-  con <- dbConnect(
+  con <- DBI::dbConnect(
     RPostgres::Postgres(),
-    host     = "3.10.114.240",
+    host     = "postgres", # "3.10.114.240",
     dbname   = "gbd2019",
     user     = "lemur",
     # password = Sys.getenv(c('SQL_PASS')),
@@ -522,7 +522,7 @@ query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
     query <- paste0(query, " AND sex = '", gender, "'")
   }
   
-  dt  <- dbFetch(dbSendQuery(con, query))
+  dt  <- DBI::dbFetch(DBI::dbSendQuery(con, query))
   dbDisconnect(con)
   
   return(as_tibble(dt))
