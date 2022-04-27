@@ -13,6 +13,8 @@ services:
         target: /etc/nginx/sites-enabled/nginx.conf
     ports:
       - 80:80
+    networks:
+      - net
 
   shinyproxy:
     image: openanalytics/shinyproxy:2.6.0
@@ -30,8 +32,10 @@ services:
 
   shiny:
     container_name: shiny
-    env_file: .env
-    build: ./deploy/shiny/
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
     ports:
       - 3838:3838
     networks:
@@ -50,6 +54,8 @@ services:
         target: /docker-entrypoint-initdb.d/init-db.sh
     ports: 
       - 5432:5432
+    networks:
+      - net
 
 networks:
   net:
