@@ -6,12 +6,20 @@
 #' Run the Shiny Application
 #'
 #' @param lb Launch browser. Default: TRUE. 
+#' @param serverMode If TRUE the app will use data stored on the server, 
+#' otherwise the datsets saved in the package. Default: FALSE.
 #' @param ... A series of options to be used inside the app.
+#' @examples 
+#' \dontrun{
+#' run_app()
+#' }
 #' @export
-run_app <- function(..., lb = TRUE) {
+run_app <- function(..., lb = TRUE, serverMode = FALSE) {
   
   # requireNamespace("shinyBS", quietly=TRUE)
   library("shinyBS")
+  
+  shinyOptions(serverMode = serverMode)
   
   with_golem_options(
     app = shinyApp(

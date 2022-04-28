@@ -1,3 +1,7 @@
+version 0.12.2
+- Add the servedMode argument in the run_app() function that would allow the user
+to select the datasource at the launch of the application.
+
 version 0.10.0
 - Create datatab corresponding to dashboard figures (lifetables, cod distributions and decomposition values)
 

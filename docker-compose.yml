@@ -11,6 +11,7 @@ services:
       - type: bind
         source: ./deploy/nginx/apps.conf
         target: /etc/nginx/conf.d/apps.conf
+
     ports:
       - 80:80
     network_mode: 'host'
@@ -31,9 +32,7 @@ services:
 
   shiny:
     container_name: shiny
-    build: 
-      context: ./
-      dockerfile: Dockerfile
+    build: ./
     # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
     ports:
       - 3838:3838
@@ -54,9 +53,23 @@ services:
       - type: bind
         source: ./deploy/postgresql/postgresql.conf
         target: /etc/postpgreql/postgresql.conf
-
     ports: 
       - 5432:5432
+    networks:
+      - net
+    
+  api:
+    container_name: api
+    restart: always
+    env_file: .env
+    command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+    build: ./deploy/api/
+    volumes:
+      - type: bind
+        source: ./deploy/api/docs.html
+        target: /app/static/docs.html
+    ports:
+      - 5000:5000
     networks:
       - net
 
