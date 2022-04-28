@@ -25,10 +25,10 @@ The other endpoints will all accept the arguments described below.
 
 Argument | Description
 |:-- |:-----------
-region | Region or country name. Use the 'regions' endpoint for a complete list of acceptable values.
+region | Region or country names as a list enclosed in square brackets (e.g. ['US'] or ['US', 'AFRICA']). Use the 'regions' endpoint for a complete list of acceptable values.
 year | Accepts only one of the following values: 1990, 1995, 2000, 2010, 2015, 2019
 age | Accepts only one of the following values: 0, 1, 5, 10, 15, ... , 100, 105, 110
-sex | Accepts only of the following values: female, male, both
+sex | Accepts only of the following values: 'female', 'male', 'both'
 
 ## API Response
 The API will return a json response with five elements:

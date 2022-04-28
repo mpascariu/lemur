@@ -16,42 +16,34 @@ def timestr():
 def query(sql_query):
 
     status = 200
-    message = ''
-    data = None
 
     # query database
     try:
         conn = psycopg2.connect(
             database='gbd2019',
-            host='postgres', # localhost
+            host='postgres',
+            # host='localhost',
             user='lemur',
             password='tx*Oj3HjwAlNbNY0XrY3288E#',
         )
         df = pd.read_sql(sql_query, conn)
         conn.close()
     except:
-        return {
-            "status": 500,
-            "message": "Internal Server Error: Error returned from PostgreSQL server on SELECT.",
-            "timestamp": timestr(),
-            "data": None
-        }
+        status = 500
+        message = "Internal Server Error: Error returned from PostgreSQL server on SELECT."
 
     if status == 200:
         if df.shape[0] == 0:
-            return {
-                "status": status,
-                "message": "OK: No data match this query.",
-                "timestamp": timestr(),
-                "data": None,
-            }
+            message = "OK: No data match this query."
         else:
-            return {
-                "status": status,
-                "message": "OK: Data successfully selected from database.",
-                "timestamp": timestr(),
-                "data": df.to_json()
-            }
+            message = "OK: Data successfully selected from database."
+
+    return {
+        "status": status,
+        "message": message,
+        "timestamp": timestr(),
+        "data": df.to_json()
+    }
 
 
 def check_args(args, required=[], required_oneof=[], optional=[]):

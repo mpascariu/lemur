@@ -4,6 +4,7 @@ import datetime
 from api.utils import check_args, query
 
 
+
 # query cause_of_death endpoint
 def api_fun(args, table):
     """Process requests to API endpoint '/cause_of_death' by selecting queried data from a PostgreSQL table.
@@ -13,14 +14,14 @@ def api_fun(args, table):
     Returns:
         dict: http response compatible with json format
     """
-    time_start = datetime.datetime.now()
+    # time_start = datetime.datetime.now()
 
     # check arguments
     result = check_args(
         args,
         required=[],
-        required_oneof=[],
-        optional=['region', 'age', 'sex', 'year'],
+        required_oneof=['region', 'age', 'sex', 'year'],
+        optional=[],
     )
     args = result.get("args")
     status = result.get("status")
@@ -64,6 +65,9 @@ def api_fun(args, table):
 
         # query database
         result = query(sql_query)
+
+        # return sql query (for testing)
+        # result['sql_query'] = sql_query
 
     # time elapsed
     # result['duration'] = (datetime.datetime.now() - time_start).total_seconds()
