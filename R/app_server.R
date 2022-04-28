@@ -10,83 +10,92 @@
 #' @export
 app_server <- function(input, output, session) {
 
-  # INPUT DATA
-  # cod data ---
+  # INPUT DATA selection
+  # The source of data can be the local datasets saved in the package or the 
+  # datasets saved in a postgresSQL and hosted externally on a server. The 
+  # code below may apear a bit complex but it's main purpose is to select the
+  # indicared source and to query the data according to input in the dashboard.
+  # If serverMode = TRUE, we read the postgresSQL data otherwise the local data.
+  
+  serverMode    <- reactive(getShinyOption("serverMode"))
+  queryFunction <- reactive(ifelse(serverMode(), "dt_filter_sql", "dt_filter_local"))
+
+  # 1) cod data ---
   data_cod <- reactive({
     if (input$mode != "mode_sdg") {
-      # dt_filter(
-      #   lemur::data_gbd2019_cod,
-      #   input$mode,
-      #   input$region1,
-      #   input$region2,
-      #   input$sex,
-      #   input$time_slider
-      #   ) %>%
-      #   print()
       
-      query_postgres_sql(
-        data = "cod",
-        input$mode,
-        input$region1,
-        input$region2,
-        input$sex,
-        input$time_slider) %>%
+      dataSource <- if (serverMode()) "cod" else lemur::data_gbd2019_cod
+      
+      eval(
+        call(
+          name    = queryFunction(), 
+          data    = dataSource,
+          mode    = input$mode,
+          region1 = input$region1,
+          region2 = input$region2,
+          gender  = input$sex,
+          year    = input$time_slider
+          )
+        ) %>%
         mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) 
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name))
+      
     }
   })
 
-  # sdg data ---
+  # 2) sdg data ---
   data_sdg <- reactive({
     if (input$mode == "mode_sdg") {
-      # dt_filter(
-      #   lemur::data_gbd2019_sdg,
-      #   input$mode,
-      #   input$region1,
-      #   input$region2,
-      #   input$sex,
-      #   input$time_slider
-      #   )
       
-      query_postgres_sql(
-        data = "sdg",
-        input$mode,
-        input$region1,
-        input$region2,
-        input$sex,
-        input$time_slider
-      ) %>%  
+      dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2019_sdg
+      
+      eval(
+        call(
+          name    = queryFunction(), 
+          data    = dataSource,
+          mode    = input$mode,
+          region1 = input$region1,
+          region2 = input$region2,
+          gender  = input$sex,
+          year    = input$time_slider
+        )
+      ) %>%
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
+      
     }
   })
 
-  # life tables data
+  # 3) life tables data
   data_lt  <- reactive({
-    # dt_filter(
-    #   lemur::data_gbd2019_lt,
-    #   input$mode,
-    #   input$region1,
-    #   input$region2,
-    #   input$sex,
-    #   input$time_slider
-    #   )
     
-    query_postgres_sql(
-      data = "lt",
-      input$mode,
-      input$region1,
-      input$region2,
-      input$sex,
-      input$time_slider
-    ) %>%
-      rename(x.int = x_int,
-             Lx = llx,
-             Tx = ttx)
+    dataSource <- if (serverMode()) "lt" else lemur::data_gbd2019_lt
+    
+    lt <- eval(
+      call(
+        name    = queryFunction(), 
+        data    = dataSource,
+        mode    = input$mode,
+        region1 = input$region1,
+        region2 = input$region2,
+        gender  = input$sex,
+        year    = input$time_slider
+      )
+    ) 
+    
+    if (serverMode()) {
+      lt <- lt %>%  
+        rename(
+          x.int = x_int,
+          Lx = llx,
+          Tx = ttx)
+    }
+    
+    lt
     
     })
 
-  # Reduction matrix
+  # Reduction matrix -----------------------------
   data_cod_change <- reactive({
 
     if (input$mode == "mode_sdg") {
@@ -457,7 +466,17 @@ app_server <- function(input, output, session) {
     )
   })
   
-  # THE RESER EVENT
+  observeEvent(input$region2, {
+    if (input$region1 == input$region2) {
+      showNotification(
+        ui = "Select two distinct regions to allow for comparisons!",
+        duration = 10,
+        type = "error"
+        )
+    }
+  })
+  
+  # THE RESET EVENT
   observeEvent(input$reset, {
     updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
     updateRadioGroupButtons(session, 'sex', selected = "both")
@@ -481,12 +500,11 @@ app_server <- function(input, output, session) {
 
 
 # ----------------------------------------------------------------------------
+# FUNCTIONS used in the Server
 
 #' Filter dataset using data.table methods
 #' @keywords internal
-dt_filter <- function(data, mode, region1, region2, gender, year) {
-
-  region = period = sex <- NULL
+dt_filter_local <- function(data, mode, region1, region2, gender, year) {
 
   # we use data.table method to filter here because is faster
   # and we will do this all a lot
@@ -503,10 +521,10 @@ dt_filter <- function(data, mode, region1, region2, gender, year) {
 
 # Query data from a PostgresSQL. This would replace the local data and  the 
 # dt_filter() function 
-query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
+dt_filter_sql <- function(data, mode, region1, region2, gender, year) {
   con <- DBI::dbConnect(
     RPostgres::Postgres(),
-    host     = "postgres", # "3.10.114.240",
+    host     = 'postgres', #"3.10.114.240",
     dbname   = "gbd2019",
     user     = "lemur",
     # password = Sys.getenv(c('SQL_PASS')),
@@ -523,7 +541,7 @@ query_postgres_sql <- function(data, mode, region1, region2, gender, year) {
   }
   
   dt  <- DBI::dbFetch(DBI::dbSendQuery(con, query))
-  dbDisconnect(con)
+  DBI::dbDisconnect(con)
   
   return(as_tibble(dt))
 }
@@ -538,9 +556,9 @@ format_datatable <- function(data, caption){
       scientific = FALSE,
       digits = 2
     ),
-    caption = caption,
-    rownames= FALSE,
-    # filter = 'top',
+    caption  = caption,
+    rownames = FALSE,
+    # filter  = 'top',
     options = list(
       # dom = 't',
       pageLength = 25,
@@ -548,3 +566,4 @@ format_datatable <- function(data, caption){
     )
   )
 }
+

@@ -25,7 +25,7 @@ prepare_data_mode_cod <- function(cod,
   # IF there is a change applied we take the initial tables and
   # we modify them
   logic <- any(cod_change != 0)
-  if(logic) {
+  if (logic) {
     c2 <- modify_cod_table(c1, cod_change)
     l2 <- modify_life_table(l1, c1, cod_change)
   }
@@ -59,15 +59,16 @@ prepare_data_mode_cntr <- function(cod,
   # IF we look at 2 regions and we change the risks
   # we need to adjust the cod and lt tables for both regions
   logic <- any(cod_change != 0)
-  if(logic) {
+  if (logic) {
     c1 <- modify_cod_table(c1, cod_change)
     c2 <- modify_cod_table(c2, cod_change)
     l1 <- modify_life_table(l1, c1, cod_change)
     l2 <- modify_life_table(l2, c2, cod_change)
   }
 
-  c1 <- mutate(c1, region = factor(region, levels = c(region1, region2)))
-  c2 <- mutate(c2, region = factor(region, levels = c(region1, region2)))
+  lv <- if (region1 == region2) region1 else c(region1, region2) 
+  c1 <- mutate(c1, region = factor(region, levels = lv))
+  c2 <- mutate(c2, region = factor(region, levels = lv))
 
   out <- list(
     cod_initial = c1,
@@ -96,7 +97,7 @@ prepare_data_mode_sex <- function(cod,
   # IF we look at 2 gender and we change the risks
   # we need to adjust the cod and lt tables for both populations
   logic <- any(cod_change != 0)
-  if(logic) {
+  if (logic) {
     c1 <- modify_cod_table(c1, cod_change)
     c2 <- modify_cod_table(c2, cod_change)
     l1 <- modify_life_table(l1, c1, cod_change)

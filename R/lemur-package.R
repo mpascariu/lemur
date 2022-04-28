@@ -9,7 +9,6 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "lemur")}
 #'
-#' @import shiny
 #' @import shinyBS
 #' @import shinyWidgets
 #' @import golem
@@ -17,6 +16,34 @@
 #' @import data.table
 #' @import sf
 #'
+#' @importFrom shiny 
+#' actionButton 
+#' addResourcePath 
+#' bookmarkButton 
+#' br
+#' column
+#' conditionalPanel 
+#' div 
+#' fluidPage 
+#' fluidRow 
+#' h3 
+#' icon
+#' includeMarkdown 
+#' navbarPage 
+#' observeEvent 
+#' reactive
+#' selectInput 
+#' shinyApp 
+#' sliderInput 
+#' shinyOptions
+#' showNotification
+#' getShinyOption
+#' tabPanel 
+#' tabsetPanel
+#' updateSelectInput 
+#' updateSliderInput 
+#' validateCssUnit
+#' 
 #' @importFrom DBI dbConnect dbSendQuery dbFetch dbDisconnect
 #' @importFrom RPostgres Postgres
 #' @importFrom DT dataTableOutput renderDataTable
