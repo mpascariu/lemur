@@ -35,6 +35,9 @@
 #' selectInput 
 #' shinyApp 
 #' sliderInput 
+#' shinyOptions
+#' showNotification
+#' getShinyOption
 #' tabPanel 
 #' tabsetPanel
 #' updateSelectInput 

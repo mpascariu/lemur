@@ -108,10 +108,13 @@ globalVariables(
     "cause_name", 
     "deaths", 
     "decomposition", 
+    "llx",
     "period", 
     "region", 
-    "sex", 
+    "sex",
+    "ttx",
     "x", 
-    "x.int"
+    "x.int",
+    "x_int"
   )
 )
