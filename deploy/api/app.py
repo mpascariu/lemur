@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-from flask import Flask, request, jsonify
-from api.endpoints import cod_fun, lt_fun, sdg_fun
+
+from flask import Flask, request, jsonify, current_app
+from api.endpoints import api_fun
+from api.utils import query
 
 
 def create_app():
@@ -14,8 +16,7 @@ app = create_app()
 
 @app.route("/", methods=["GET"])
 def home():
-    return """<h1>lemur: Life Expectancy Monitor</h1>
-<p>Monitor life expectancy and causes of mortality for specific demographic groups in every country globally.</p>"""
+    return current_app.send_static_file('docs.html')
 
 
 @app.errorhandler(404)
@@ -31,7 +32,7 @@ def cod():
     """API endpoint to select data from the 'cod' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = cod_fun(args)
+        result = api_fun(args, table='cod')
         return jsonify(result), result.get("status")
     else:
         return (
@@ -44,7 +45,7 @@ def lt():
     """API endpoint to select data from the 'lt' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = lt_fun(args)
+        result = api_fun(args, table='lt')
         return jsonify(result), result.get("status")
     else:
         return (
@@ -57,7 +58,7 @@ def sdg():
     """API endpoint to select data from the 'sdg' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = sdg_fun(args)
+        result = api_fun(args, table='sdg')
         return jsonify(result), result.get("status")
     else:
         return (
@@ -65,6 +66,11 @@ def sdg():
             400,
         )
 
+@app.route("/regions", methods=["GET"])
+def regions():
+    """API endpoint to return full list of regions from the `gbd2019` database."""
+    result = query('select distinct(region) from cod;')
+    return jsonify(result), result.get("status")
 
 if __name__ == "__main__":
     app.run()

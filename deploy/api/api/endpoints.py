@@ -1,38 +1,30 @@
 #!/usr/bin/python3
 
-import os
 import datetime
-import psycopg2
-import pandas as pd
-from api.utils import timestr, check_args, validate_token
-
+from api.utils import check_args, query
 
 
 # query cause_of_death endpoint
-def cod_fun(args):
+def api_fun(args, table):
     """Process requests to API endpoint '/cause_of_death' by selecting queried data from a PostgreSQL table.
     Args:
         args (dict): Arguments of GET request passed from request.args
+        table (str): Name of table to query
     Returns:
         dict: http response compatible with json format
     """
     time_start = datetime.datetime.now()
 
-    status = 200
-    data = None
+    # check arguments
+    result = check_args(
+        args,
+        required=[],
+        required_oneof=[],
+        optional=['region', 'age', 'sex', 'year'],
+    )
+    args = result.get("args")
+    status = result.get("status")
 
-    # # check arguments
-    # result = check_args(
-    #     args,
-    #     required=[],
-    #     required_oneof=[],
-    #     optional=[],
-    # )
-    # args = result.get("args")
-    # status = result.get("status")
-    # message = result.get("message")
-    # data = None
-    #
     # if status == 200:
     #
     #     # validate token
@@ -47,96 +39,36 @@ def cod_fun(args):
 
     if status == 200:
 
+        # key to column name
+        col = {'region': 'region',
+               'age': 'x',
+               'sex': 'sex',
+               'year': 'period'}
+
         # create sql query
-        # regions = str(args['region']).replace('[', '(').replace(']', ')')
-        # sql_query = 'SELECT * FROM cod WHERE region IN {};'.format(regions)
-        sql_query = "SELECT * FROM cod WHERE region = '{}';".format(args['region'])
+        sql_query = 'SELECT * FROM ' + table
+
+        # where statements
+        where_statements = []
+        for key in list(args.keys()):
+            if key == 'region':
+                where_statements.append(col[key] + ' IN ' + str(args[key]).replace('[', '(').replace(']', ')'))
+            else:
+                where_statements.append(col[key] + ' = ' + str(args[key]))
+        if len(where_statements) > 0:
+            sql_query = sql_query + ' WHERE {}'.format(' AND '.join(where_statements))
+
+        # finish query
+        sql_query = sql_query + ';'
+        print(sql_query)
 
         # query database
-        try:
-            conn = psycopg2.connect(
-                host='postgres',
-                database="gbd2019",
-                user='lemur',
-                password='tx*Oj3HjwAlNbNY0XrY3288E#',
-            )
-            df = pd.read_sql(sql_query, conn)
-            conn.close()
-        except:
-            status = 500
-            message = "Internal Server Error: Error returned from PostgreSQL server on SELECT."
+        result = query(sql_query)
 
-        if status == 200:
-            if df.shape[0] == 0:
-                return {
-                    "status": status,
-                    "message": "OK: No data match this query.",
-                    "timestamp": timestr(),
-                    "data": None,
-                }
-
-            data = {
-                "values": df.to_json(orient="values"),
-                "columns": list(df.columns),
-            }
-            message = "OK: Data successfully selected from database."
+    # time elapsed
+    # result['duration'] = (datetime.datetime.now() - time_start).total_seconds()
 
     # return result
-    time_end = datetime.datetime.now()
-    delta = time_end - time_start
-    return {
-        "status": status,
-        "message": message,
-        "timestamp": timestr(),
-        "data": data,
-        "duration": delta.total_seconds(),
-    }
+    return result
 
 
-def lt_fun(args):
-    """Process requests to API endpoint '/life_table' by selecting queried data from a PostgreSQL table.
-    Args:
-        args (dict): Arguments of GET request passed from request.args
-    Returns:
-        dict: http response compatible with json format
-    """
-    time_start = datetime.datetime.now()
-
-    status = 200
-    message = 'OK'
-    data = None
-
-    time_end = datetime.datetime.now()
-    delta = time_end - time_start
-
-    return {
-        "status": status,
-        "message": message,
-        "timestamp": timestr(),
-        "data": data,
-        "duration": delta.total_seconds(),
-    }
-
-def sdg_fun(args):
-    """Process requests to API endpoint '/sdg' by selecting queried data from a PostgreSQL table.
-    Args:
-        args (dict): Arguments of GET request passed from request.args
-    Returns:
-        dict: http response compatible with json format
-    """
-    time_start = datetime.datetime.now()
-
-    status = 200
-    message = 'OK'
-    data = None
-
-    time_end = datetime.datetime.now()
-    delta = time_end - time_start
-
-    return {
-        "status": status,
-        "message": message,
-        "timestamp": timestr(),
-        "data": data,
-        "duration": delta.total_seconds(),
-    }

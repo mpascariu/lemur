@@ -11,6 +11,7 @@ services:
       - type: bind
         source: ./deploy/nginx/apps.conf
         target: /etc/nginx/conf.d/apps.conf
+
     ports:
       - 80:80
     network_mode: 'host'
@@ -63,6 +64,10 @@ services:
     env_file: .env
     command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
     build: ./deploy/api/
+    volumes:
+      - type: bind
+        source: ./deploy/api/docs.html
+        target: /app/static/docs.html
     ports:
       - 5000:5000
     networks:
