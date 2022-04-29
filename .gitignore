@@ -1,5 +1,6 @@
-.env
-lemur.tar
+*.env
+/deploy/*.tar
+/deploy/*.csv
 
 # History files
 .Rhistory
