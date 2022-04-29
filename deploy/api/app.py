@@ -89,8 +89,7 @@ def regions():
 def requests():
     """API endpoint to return counts of API requests to `gbd2019` database."""
     args = dict(request.args)
-    result = requests_fun(date=args.get('date'),
-                          ip=str(request.remote_addr))
+    result = requests_fun(date=args.get('date'))
     return result.get('html'), result.get("status")
 
 
