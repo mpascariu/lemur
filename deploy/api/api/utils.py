@@ -164,7 +164,8 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
 
 def validate(ip):
 
-    daily_limit = 10000
+    rpm = 30
+    daily_limit = rpm * 60 * 24
 
     conn = psycopg2.connect(
         database='gbd2019',

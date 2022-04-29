@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
-import datetime
 from api.utils import check_args, validate, query
-
+from pandas import read_json
 
 
 # query cause_of_death endpoint
@@ -84,4 +83,28 @@ def regions_fun(ip):
     return result
 
 
+# query regions endpoint
+def requests_fun(ip, date=None):
+    """Return counts of API requests.
+    Args:
+    Returns:
+        pandas: Data frame.
+    """
 
+    # validate token
+    result = validate(ip)
+    status = result.get("status")
+
+    result['html'] = None
+
+    if status == 200:
+        if date is None:
+            sql_query = 'select date, sum(requests) as requests from api_requests group by date order by date desc;'
+        else:
+            sql_query = 'select ip,date,requests from api_requests where date = {} order by date desc;'.format(date)
+
+        result = query(sql_query)
+        result['html'] = read_json(result.get('data')).to_html()
+
+    # return result
+    return result
