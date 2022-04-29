@@ -11,7 +11,6 @@ services:
       - type: bind
         source: ./deploy/nginx/apps.conf
         target: /etc/nginx/conf.d/apps.conf
-
     ports:
       - 80:80
     network_mode: 'host'

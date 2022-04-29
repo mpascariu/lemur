@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from flask import Flask, request, jsonify, current_app
-from api.endpoints import api_fun
+from api.endpoints import api_fun, regions_fun
 from api.utils import query
 
 
@@ -26,13 +26,12 @@ def page_not_found(e):
 
 # ---- ENDPOINTS ----#
 
-
 @app.route("/cause_of_death", methods=["GET"])
 def cod():
     """API endpoint to select data from the 'cod' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = api_fun(args, table='cod')
+        result = api_fun(args, table='cod', ip=str(request.remote_addr))
         return jsonify(result), result.get("status")
     else:
         return (
@@ -45,7 +44,7 @@ def lt():
     """API endpoint to select data from the 'lt' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = api_fun(args, table='lt')
+        result = api_fun(args, table='lt', ip=str(request.remote_addr))
         return jsonify(result), result.get("status")
     else:
         return (
@@ -58,7 +57,7 @@ def sdg():
     """API endpoint to select data from the 'sdg' table of the `gbd2019` database."""
     args = dict(request.args)
     if len(args) > 0:
-        result = api_fun(args, table='sdg')
+        result = api_fun(args, table='sdg', ip=str(request.remote_addr))
         return jsonify(result), result.get("status")
     else:
         return (
@@ -69,7 +68,8 @@ def sdg():
 @app.route("/regions", methods=["GET"])
 def regions():
     """API endpoint to return full list of regions from the `gbd2019` database."""
-    result = query('select distinct(region) from cod;')
+    result = regions_fun(ip=str(request.remote_addr))
+
     return jsonify(result), result.get("status")
 
 if __name__ == "__main__":

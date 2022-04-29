@@ -1,6 +1,16 @@
 #!/bin/bash
 
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
+"CREATE TABLE api_requests (
+	id SERIAL PRIMARY KEY,
+  ip INET NOT NULL,
+	date DATE NOT NULL DEFAULT CURRENT_DATE,
+	requests INT NOT NULL DEFAULT 1,
+	UNIQUE(date, ip)
+);
+"
+
+psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 "CREATE TABLE cod (
   x SMALLINT,
   region VARCHAR,

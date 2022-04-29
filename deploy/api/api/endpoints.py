@@ -1,20 +1,20 @@
 #!/usr/bin/python3
 
 import datetime
-from api.utils import check_args, query
+from api.utils import check_args, validate, query
 
 
 
 # query cause_of_death endpoint
-def api_fun(args, table):
+def api_fun(args, table, ip):
     """Process requests to API endpoint '/cause_of_death' by selecting queried data from a PostgreSQL table.
     Args:
         args (dict): Arguments of GET request passed from request.args
         table (str): Name of table to query
+        ip (str): Requesting IP address
     Returns:
         dict: http response compatible with json format
     """
-    # time_start = datetime.datetime.now()
 
     # check arguments
     result = check_args(
@@ -26,17 +26,11 @@ def api_fun(args, table):
     args = result.get("args")
     status = result.get("status")
 
-    # if status == 200:
-    #
-    #     # validate token
-    #     result = validate_token(token=args.get("token"), access="read")
-    #
-    #     status = result.get("status")
-    #     if status == 200:
-    #         # args['user_id'] = result.get('user_id')
-    #         args.pop("token")
-    #     else:
-    #         message = result.get("message")
+    if status == 200:
+
+        # validate token
+        result = validate(ip)
+        status = result.get("status")
 
     if status == 200:
 
@@ -66,13 +60,28 @@ def api_fun(args, table):
         # query database
         result = query(sql_query)
 
-        # return sql query (for testing)
-        # result['sql_query'] = sql_query
+    # return result
+    return result
 
-    # time elapsed
-    # result['duration'] = (datetime.datetime.now() - time_start).total_seconds()
+
+# query regions endpoint
+def regions_fun(ip):
+    """Process requests to API endpoint '/regions' by selecting queried data from a PostgreSQL table.
+    Args:
+        ip (str): Requesting IP address
+    Returns:
+        dict: http response compatible with json format
+    """
+
+    # validate token
+    result = validate(ip)
+    status = result.get("status")
+
+    if status == 200:
+        result = query('select distinct(region) from cod;')
 
     # return result
     return result
+
 
 

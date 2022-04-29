@@ -1,9 +1,10 @@
-import os
 import psycopg2
 import datetime
 import pandas as pd
 from ast import literal_eval
 
+# sql_host = 'localhost'
+sql_host = 'postgres'
 
 def timestr():
     return (
@@ -21,8 +22,7 @@ def query(sql_query):
     try:
         conn = psycopg2.connect(
             database='gbd2019',
-            host='postgres',
-            # host='localhost',
+            host=sql_host,
             user='lemur',
             password='tx*Oj3HjwAlNbNY0XrY3288E#',
         )
@@ -162,42 +162,42 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     return {"status": status, "message": message, "args": args}
 
 
-def validate_token(token, access="read"):
+def validate(ip):
+
+    daily_limit = 10000
+
     conn = psycopg2.connect(
-        host=os.environ.get("POSTGRES_HOST"),
-        database="gbd2019",
-        user=os.environ.get("POSTGRES_USER"),
-        password=os.environ.get("POSTGRES_PASSWORD"),
+        database='gbd2019',
+        host=sql_host,
+        user='lemur',
+        password='tx*Oj3HjwAlNbNY0XrY3288E#',
     )
     cur = conn.cursor()
-    sql_query = (
-        "SELECT id, " + access + " FROM users WHERE token='{}';".format(token)
-    )
+    sql_query = "select count(*) from api_requests where ip='{}' and date=current_date;".format(ip)
     cur.execute(sql_query)
     conn.commit()
-    response = cur.fetchall()
+    response = cur.fetchall()[0][0]
 
-    if len(response) > 0:
-        contributor_id = str(response[0][0])
-        authenticated = response[0][1]
-        cur.execute(
-            "UPDATE contributors SET reqs_total=reqs_total+1, reqs_today=reqs_today+1 WHERE id="
-            + contributor_id
-            + ";"
-        )
+    authenticated = False
+    if response == 0:
+        authenticated = True
+        sql_query = "insert into api_requests(date, ip) values(current_date, '{}');".format(ip)
+        cur.execute(sql_query)
         conn.commit()
-    else:
-        contributor_id = None
-        authenticated = False
+    elif response < daily_limit:
+        authenticated = True
+        sql_query = "update api_requests set requests=requests+1 where ip='{}' and date=current_date;".format(ip)
+        cur.execute(sql_query)
+        conn.commit()
 
     if authenticated:
         status = 200
-        message = "OK: Token successfully authenticated for " + access + " access."
+        message = "OK: Successfully authenticated."
     else:
         status = 401
-        message = "Unauthorized: Token failed authentication for " + access + " access."
+        message = "Unauthorized: Daily limit exceeded ({} API requests).".format(daily_limit)
 
     conn.close()
-    return {"status": status, "message": message, "user_id": contributor_id}
+    return {"status": status, "message": message}
 
 
