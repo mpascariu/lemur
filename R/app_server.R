@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU <mpascariu@scor.com>
-# Last update: Tue Apr 26 17:00:23 2022
+# Author: Marius D. PASCARIU
+# Last update: Thu Jun 02 15:45:46 2022
 # --------------------------------------------------- #
 
 #' The application server-side
@@ -105,7 +105,9 @@ app_server <- function(input, output, session) {
         cod_change = 0
       )
       
-      S1 = paste(0:1)
+      S1 = paste(0:1)   # Under-five mortality 
+      S2a = "Maternal disorders"
+      S2b = "Neonatal disorders"
       S3 = c("HIV/ AIDS / STD",
              "Tuberculosis",
              "Malaria",
@@ -118,13 +120,27 @@ app_server <- function(input, output, session) {
       S6 = "Transport Injuries"
       S7 = "Exposure to Forces of Nature"
       
+      M[  , S2a] <- input$sdg_2a
+      M[  , S2b] <- input$sdg_2b
       M[  , S3] <- input$sdg_3
       M[  , S4] <- input$sdg_4
       M[  , S5] <- input$sdg_5
       M[  , S6] <- input$sdg_6
       M[  , S7] <- input$sdg_7
-      # M[S1,   ] <- input$sdg_1
-      M[S1,   ] <- input$sdg_1 + M[S1, ] * abs(input$sdg_1)/100
+      
+      # when under 5 mortality is reduced across all COD we have to deal with 
+      # interactions, or successive reduction inputs. E.g. One may reduce 
+      # neonatal mortality (50%) and under-five mortality (10%) resulting a 55%
+      # total reduction. This is what we try to in the next 5 lines.
+       
+      if (input$sdg_1 != 0) {
+        if (sum(M[S1, ]) != 0) {
+          M[S1,   ] <- input$sdg_1 + M[S1, ] * abs(input$sdg_1)/100
+        } else  {
+          M[S1,   ] <- input$sdg_1 
+        }
+      }
+      
       
     } else {
       M <- build_reduction_matrix(
@@ -477,7 +493,7 @@ app_server <- function(input, output, session) {
   
   # THE RESET EVENT
   observeEvent(input$reset, {
-    updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
+    # updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
     updateRadioGroupButtons(session, 'sex', selected = "both")
     updateSwitchInput(session, 'perc', value = FALSE)
     # updateSelectInput(session, 'region1', selected = "GLOBAL")
@@ -487,6 +503,8 @@ app_server <- function(input, output, session) {
     updateSliderTextInput(session, 'age_change', selected = c(0, 110))
     updateSliderInput(session, 'cod_change', value = 0)
     updateSliderInput(session, 'sdg_1', value = 0)
+    updateSliderInput(session, 'sdg_2a', value = 0)
+    updateSliderInput(session, 'sdg_2b', value = 0)
     updateSliderInput(session, 'sdg_3', value = 0)
     updateSliderInput(session, 'sdg_4', value = 0)
     updateSliderInput(session, 'sdg_5', value = 0)

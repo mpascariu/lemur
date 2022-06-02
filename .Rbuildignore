@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^sources$
+^deploy$
 ^dev$
 ^docs$
 ^builds$
@@ -13,3 +14,5 @@ $run_dev.*
 ^CODE_OF_CONDUCT\.md$
 ^Dockerfile$
 ^\.dockerignore$
+docker-compose.yml
+pkg_build.R

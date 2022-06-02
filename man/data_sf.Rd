@@ -5,7 +5,7 @@
 \alias{data_sf}
 \title{Simple features data for the map}
 \format{
-An object of class \code{sf} (inherits from \code{data.frame}) with 169 rows and 19 columns.
+An object of class \code{sf} (inherits from \code{data.frame}) with 170 rows and 19 columns.
 }
 \usage{
 data_sf

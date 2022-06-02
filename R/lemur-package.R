@@ -15,6 +15,7 @@
 #' @import ggplot2
 #' @import data.table
 #' @import sf
+#' @import shinydashboard
 #'
 #' @importFrom shiny 
 #' actionButton 
