@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Mar 17 18:15:40 2022
+# Last update: Thu Jun 02 14:17:10 2022
 # --------------------------------------------------- #
 
 #' UI - dashboard page
@@ -125,10 +125,7 @@ top_panel <- function() {
       tags$div(
         style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
       ),
-      bookmarkButton(
-        id = "bookmark",
-        label = "Bookmark"
-      ),
+      bookmarkButton(),
       actionButton(
         inputId = "reset",
         icon = icon("recycle"),
@@ -185,7 +182,7 @@ side_panel <- function() {
     ),
 
     chooseSliderSkin("Flat"),
-    setSliderColor(rep("black", 10), c(1:10)),
+    setSliderColor(rep("black", 20), c(1:20)),
 
     conditionalPanel(
       condition = "input.mode != 'mode_sdg'",
@@ -264,17 +261,27 @@ side_panel <- function() {
     # Side panel for sdg mode
     conditionalPanel(
       condition = "input.mode == 'mode_sdg'",
-
-      # sliderInput(
-      #   inputId = "goal_1_maternal",
-      #   label = "Maternal mortality ratio:",
-      #   post = " per 100k",
-      #   value = 80,
-      #   min = 0,
-      #   max = 200,
-      #   step = 1
-      # ),
-
+      
+      sliderInput(# End Epidemics. Goal: -100% relative to 2015 level
+        inputId = "sdg_3",
+        label   = "AIDS epidemic, tuberculosis, malaria and neglected tropical diseases:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 5
+      ),
+      
+      sliderInput( #Goal: - 33.3% relative to 2015 level
+        inputId = "sdg_4",
+        label   = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
+        post    = "%",
+        value   = 0,
+        min     = -100,
+        max     = 100,
+        step    = 5
+      ),
+      
       sliderInput(
         inputId = "sdg_1",
         label = "Under-five mortality rate:",
@@ -285,35 +292,27 @@ side_panel <- function() {
         max = 100,
         step = 5
       ),
-
-      # sliderInput( # goal 25
-      #   inputId = "goal_3_neonatal",
-      #   label = "Neonatal mortality rate:",
-      #   post = " per 1000 live births",
-      #   value = 80,
-      #   min = 0,
-      #   max = 200,
-      #   step = 1
-      # ),
-
-      sliderInput(# End Epidemics. Goal: -100% relative to 2015 level
-        inputId = "sdg_3",
-        label   = "AIDS epidemic, tuberculosis, malaria and neglected tropical diseases:",
-        post    = "%",
-        value   = 0,
-        min     = -100,
-        max     = 100,
-        step    = 5
+        
+      sliderInput(
+        inputId = "sdg_2a",
+        label = "Maternal mortality ratio:",
+        # post = " per 100k",
+        post = "%",
+        value = 0,
+        min = -100,
+        max = 100,
+        step = 5
       ),
 
-      sliderInput( #Goal: - 33.3% relative to 2015 level
-        inputId = "sdg_4",
-        label   = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:",
-        post    = "%",
-        value   = 0,
-        min     = -100,
-        max     = 100,
-        step    = 5
+      sliderInput( # goal 25
+        inputId = "sdg_2b",
+        label = "Neonatal mortality rate:",
+        # post = " per 1000 live births",
+        post = "%",
+        value = 0,
+        min = -100,
+        max = 100,
+        step = 5
       ),
 
       sliderInput( # Goal: -50% relative to 2015 level
@@ -338,7 +337,7 @@ side_panel <- function() {
 
       sliderInput( # substantially reduce the number of deaths from pollution
         inputId = "sdg_7",
-        label   = "Mortality due to air pollution:",
+        label   = "Mortality due to natural disasters:",
         post    = "%",
         value   = 0,
         min     = -100,
@@ -356,7 +355,7 @@ main_panel <- function() {
     fluidRow(
       column(
         width = 7,
-        style ='padding:0px 0px 0px 18px;',
+        style = 'padding:0px 0px 0px 18px;',
 
         boxFrame(
           style = 'padding:0px',
@@ -376,7 +375,7 @@ main_panel <- function() {
 
       column(
         width = 5,
-        style='padding:0px;',
+        style = 'padding:0px;',
 
         boxFrame(
           title = boxTitleInput(
@@ -430,7 +429,7 @@ main_panel <- function() {
 
       column(
         width = 6,
-        style ='padding:0px;',
+        style = 'padding:0px;',
 
         boxFrame(
           title = boxTitleInput(
@@ -501,33 +500,6 @@ boxTitleInput <- function(title, db_style, ...) {
     ),
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

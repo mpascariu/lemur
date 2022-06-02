@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 09:32:14 2021
+# Last update: Wed Apr 27 2021
 # --------------------------------------------------- #
 
 # HERE we import the source code of several functions in order to reduce the 
@@ -98,3 +98,23 @@ number <- function (x, accuracy = NULL, scale = 1, prefix = "", suffix = "",
   names(ret) <- names(x)
   ret
 }
+
+
+# Hack CRAN check warnings related to tidyverse coding style
+globalVariables(
+  c(
+    ".",
+    "cause_name",
+    "cause_name", 
+    "deaths", 
+    "decomposition", 
+    "llx",
+    "period", 
+    "region", 
+    "sex",
+    "ttx",
+    "x", 
+    "x.int",
+    "x_int"
+  )
+)

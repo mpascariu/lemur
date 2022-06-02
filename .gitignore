@@ -1,3 +1,7 @@
+*.env
+/deploy/*.tar
+/deploy/*.csv
+
 # History files
 .Rhistory
 .Rapp.history

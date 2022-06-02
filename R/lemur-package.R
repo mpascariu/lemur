@@ -1,6 +1,6 @@
 # --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Tue Mar 08 16:58:45 2022
+# Author: Marius D. PASCARIU <mpascariu@scor.com>
+# Last update: Tue Apr 26 16:26:21 2022
 # --------------------------------------------------- #
 
 # lemur Package
@@ -9,14 +9,44 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "lemur")}
 #'
-#' @import shiny
 #' @import shinyBS
 #' @import shinyWidgets
 #' @import golem
 #' @import ggplot2
 #' @import data.table
 #' @import sf
+#' @import shinydashboard
 #'
+#' @importFrom shiny 
+#' actionButton 
+#' addResourcePath 
+#' bookmarkButton 
+#' br
+#' column
+#' conditionalPanel 
+#' div 
+#' fluidPage 
+#' fluidRow 
+#' h3 
+#' icon
+#' includeMarkdown 
+#' navbarPage 
+#' observeEvent 
+#' reactive
+#' selectInput 
+#' shinyApp 
+#' sliderInput 
+#' shinyOptions
+#' showNotification
+#' getShinyOption
+#' tabPanel 
+#' tabsetPanel
+#' updateSelectInput 
+#' updateSliderInput 
+#' validateCssUnit
+#' 
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbDisconnect
+#' @importFrom RPostgres Postgres
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shinyjs useShinyjs
 #' @importFrom MortalityLaws LifeTable

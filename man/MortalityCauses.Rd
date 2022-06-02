@@ -23,7 +23,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Doug Leasure [contributor]
+  \item Douglas R. Leasure (\href{https://orcid.org/0000-0002-8768-2811}{ORCID}) [contributor]
 }
 
 }

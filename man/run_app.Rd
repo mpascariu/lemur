@@ -4,13 +4,21 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(..., lb = TRUE)
+run_app(..., lb = TRUE, serverMode = FALSE)
 }
 \arguments{
 \item{...}{A series of options to be used inside the app.}
 
 \item{lb}{Launch browser. Default: TRUE.}
+
+\item{serverMode}{If TRUE the app will use data stored on the server, 
+otherwise the datsets saved in the package. Default: FALSE.}
 }
 \description{
 Run the Shiny Application
+}
+\examples{
+\dontrun{
+run_app()
+}
 }
