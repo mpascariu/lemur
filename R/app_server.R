@@ -39,7 +39,6 @@ app_server <- function(input, output, session) {
         ) %>%
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name))
-      
     }
   })
 
@@ -522,7 +521,7 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year) {
 # Query data from a PostgresSQL. This would replace the local data and  the 
 # dt_filter() function 
 dt_filter_sql <- function(data, mode, region1, region2, gender, year) {
-  con <- dbConnect(
+  con <- DBI::dbConnect(
     RPostgres::Postgres(),
     host     = 'postgres', #"3.10.114.240",
     dbname   = "gbd2019",
@@ -540,8 +539,8 @@ dt_filter_sql <- function(data, mode, region1, region2, gender, year) {
     query <- paste0(query, " AND sex = '", gender, "'")
   }
   
-  dt  <- dbFetch(dbSendQuery(con, query))
-  dbDisconnect(con)
+  dt  <- DBI::dbFetch(DBI::dbSendQuery(con, query))
+  DBI::dbDisconnect(con)
   
   return(as_tibble(dt))
 }
@@ -566,3 +565,4 @@ format_datatable <- function(data, caption){
     )
   )
 }
+
