@@ -21,33 +21,3 @@ A long table with the same format as the input data
 \description{
 Modify COD table by changing the cause of death associated risks
 }
-\examples{
-D <- data_gbd2019_cod # cod data
-
-# Select COD data
-cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-cod_change = -50
-
-# Example 1:
-# Modify by 50\% all COD values. This is trivial and not need really.
-modify_cod_table(cod, cod_change = -50)
-
-
-# Example 2:
-# Change the first cod by 1\%, second one with 2\% and so on until 17\%
-modify_cod_table(cod, cod_change = 1:17)
-
-# Example 3:
-# Apply a specific change by cause and age
-# Say, we want to decrease the cod's risk only between age 45 and 75
-# with values between 24\% and 40\%.
-
-# we have to build a matrix with 24 rows and 17 columns (ages x cods)
-# to indicate the change for each combination
-M <- matrix(24:40, nrow = 24, ncol = 17, byrow = TRUE)
-dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
-M[!(rownames(M) \%in\% 45:75), ] <- 0
-M
-
-modify_cod_table(cod, cod_change = -M)
-}

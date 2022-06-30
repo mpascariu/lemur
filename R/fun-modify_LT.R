@@ -13,46 +13,6 @@
 #' in order to reduce or increase the mortality estimates given by the life
 #' table. Accepted input: any value greater than -100. See examples.
 #' @return A life table in the same format as the input life table.
-#' @examples
-#'
-#' L <- data_gbd2019_lt  # life tables
-#' D <- data_gbd2019_cod # cod data
-#'
-#' # Select Life Table
-#' lt <- L[L$region == "ROMANIA" & L$sex == "both" & L$period == 2019, ]
-#' # Select COD data
-#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-#' cod_change = -50
-#'
-#' # Example 1:
-#' # How does the life table modify if the cause-specific mortality is
-#' # reduced by 50% (all ages, all causes of death)?
-#' lt_reduced <- modify_life_table(lt, cod, cod_change = -50)
-#' lt_reduced
-#'
-#' # Example 2:
-#' # Let's change the first cod by 1%, second one with 2% and so on until 17%
-#' # Note, we are increasing death rates. This should result in a lower life
-#' # expectancy.
-#'
-#' unique(cod$cause_name) # we have 17 causes
-#'
-#' lt_reduced2 <- modify_life_table(lt, cod, cod_change = 1:17)
-#' lt_reduced2
-#'
-#' # Example 3:
-#' # Apply a specific change by cause and age
-#' # Say, we want to decrease the cod's risk only between age 45 and 75
-#' # with values between 24% and 40%.
-#'
-#' # we have to build a matrix with 24 rows and 17 columns (ages x cods)
-#' # to indicate the change for each combination
-#' M <- matrix(24:40, nrow = 24, ncol = 17, byrow = TRUE)
-#' dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
-#' M[!(rownames(M) %in% 45:75), ] <- 0
-#'
-#' lt_reduced3 <- modify_life_table(lt, cod, cod_change = -M)
-#' lt_reduced3
 #' @export
 modify_life_table <- function(lt, cod, cod_change) {
   # death counts by cod from a long dataset
@@ -94,35 +54,6 @@ modify_life_table <- function(lt, cod, cod_change) {
 #'
 #' @inheritParams modify_life_table
 #' @return A long table with the same format as the input data
-#' @examples
-#' D <- data_gbd2019_cod # cod data
-#'
-#' # Select COD data
-#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-#' cod_change = -50
-#'
-#' # Example 1:
-#' # Modify by 50% all COD values. This is trivial and not need really.
-#' modify_cod_table(cod, cod_change = -50)
-#'
-#'
-#' # Example 2:
-#' # Change the first cod by 1%, second one with 2% and so on until 17%
-#' modify_cod_table(cod, cod_change = 1:17)
-#'
-#' # Example 3:
-#' # Apply a specific change by cause and age
-#' # Say, we want to decrease the cod's risk only between age 45 and 75
-#' # with values between 24% and 40%.
-#'
-#' # we have to build a matrix with 24 rows and 17 columns (ages x cods)
-#' # to indicate the change for each combination
-#' M <- matrix(24:40, nrow = 24, ncol = 17, byrow = TRUE)
-#' dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
-#' M[!(rownames(M) %in% 45:75), ] <- 0
-#' M
-#'
-#' modify_cod_table(cod, cod_change = -M)
 #' @export
 modify_cod_table <- function(cod, cod_change){
 
@@ -176,14 +107,6 @@ modify_cod_table <- function(cod, cod_change){
 #'
 #' @param cod COD long table
 #' @return A matrix with percentages.
-#' @examples
-#' # cod data
-#' D <- data_gbd2019_cod
-#' # Select COD data for 1 region
-#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 1990, ]
-#' # COD data in matrix format
-#'
-#' build_cod_matrix(cod)
 #' @export
 build_cod_matrix <- function(cod) {
 

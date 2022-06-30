@@ -12,7 +12,7 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.13.0
+**Monitor Version:** 0.13.1
 
 **Last Update:** "2022-06-02 16:00:16 CEST"
 

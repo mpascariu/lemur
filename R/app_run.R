@@ -14,7 +14,7 @@
 #' run_app()
 #' }
 #' @export
-run_app <- function(..., lb = TRUE, serverMode = FALSE) {
+run_app <- function(..., lb = TRUE, serverMode = TRUE) {
   
   # requireNamespace("shinyBS", quietly=TRUE)
   library("shinyBS")

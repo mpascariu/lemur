@@ -20,25 +20,6 @@ Decompose the difference in life expectancy (at the smallest available age)
 of two populations represented by their life tables in a given
 period of time.
 }
-\examples{
-# Data
-L <- data_gbd2019_lt
-
-# Select Life Table 1 & 2
-region1 = "ROMANIA"
-region2 = "MEXICO"
-sex     = "female"
-year    = 2019
-
-L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-
-# Age decomposition
-dec <- decompose_by_age(L1, L2)
-dec
-
-plot_decompose(dec)
-}
 \references{
 ...
 }

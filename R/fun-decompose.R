@@ -13,24 +13,6 @@
 #' @inheritParams decompose_by_cod
 #' @return A numerical vector.
 #' @references ...
-#' @examples
-#' # Data
-#' L <- data_gbd2019_lt
-#'
-#' # Select Life Table 1 & 2
-#' region1 = "ROMANIA"
-#' region2 = "MEXICO"
-#' sex     = "female"
-#' year    = 2019
-#'
-#' L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-#' L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-#'
-#' # Age decomposition
-#' dec <- decompose_by_age(L1, L2)
-#' dec
-#'
-#' plot_decompose(dec)
 #' @export
 decompose_by_age <- function(L1, L2){
 
@@ -120,32 +102,6 @@ decompose_by_age <- function(L1, L2){
 #' @source The code of this function is based on the implementation of the
 #' \code{DemoDecomp::stepwise_replacement} function maintained by Tim RIFFE.
 #' @references ...
-#' @examples
-#' L <- data_gbd2019_lt  # life tables
-#' D <- data_gbd2019_cod # cod data
-#'
-#' # Select two Life Tables
-#' region1 = "ROMANIA"
-#' region2 = "MEXICO"
-#' sex     = "male"
-#' year    = 2019
-#'
-#' lt1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-#' lt2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-#'
-#' # Select COD corresponding data
-#' cod1 <- D[D$region == region1 & D$sex == sex & D$period == year, ]
-#' cod2 <- D[D$region == region2 & D$sex == sex & D$period == year, ]
-#'
-#' ## Example of decomposition by age and cause of death
-#' dec  <- decompose_by_cod(L1 = lt1,
-#'                          L2 = lt2,
-#'                          C1 = cod1,
-#'                          C2 = cod2)
-#'
-#' dec
-#'
-#' plot_decompose(dec)
 #' @export
 decompose_by_cod <- function(L1,
                              L2,

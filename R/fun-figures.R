@@ -192,10 +192,6 @@ plot_change <- function(L1, L2,
 #' @param perc Logical. If TRUE data will be displayed as percentages else
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
-#' @examples
-#' D <- data_gbd2019_cod # cod data
-#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-#' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 

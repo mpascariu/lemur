@@ -18,8 +18,3 @@ as absolute values. Default: FALSE.}
 \description{
 Plot function for COD data
 }
-\examples{
-D <- data_gbd2019_cod # cod data
-cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-plot_cod(cod)
-}
