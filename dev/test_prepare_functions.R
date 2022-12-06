@@ -5,6 +5,7 @@
 remove(list = ls())
 library(tidyverse)
 library(dttest)
+library(lemur)
 
 
 region1 = "ROMANIA"
@@ -45,9 +46,10 @@ prepare_data_mode_cntr(
 )
 
 prepare_data_mode_sex(
+  cod = cod,
+  lt = lt,
   region1 = region1,
-  cod_change = M,
-  year = 2000
+  cod_change = M
 )
 
 prepare_data_mode_sdg(
@@ -62,6 +64,6 @@ prepare_data_mode_sdg(
   sdg_7 = -10
 )
 
-
+lemur::run_app()
 
 
