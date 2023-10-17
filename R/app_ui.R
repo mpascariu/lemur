@@ -116,7 +116,7 @@ golem_add_external_resources <- function(){
       type="text/css",
       href="www/styles.css"),
     tags$script(src="www/addNavLink.js"),
-    shinyWidgets::useShinydashboard()
+    useShinydashboard_()
   )
 }
 

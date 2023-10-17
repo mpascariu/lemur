@@ -6,7 +6,6 @@ run_app()
 
 
 
-
 library(lemur)
 run_app()
 plot_map("US")

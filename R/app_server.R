@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 02 15:45:46 2022
-# --------------------------------------------------- #
+# Last Update: Tue Oct 17 22:30:57 2023
+# -------------------------------------------------------------- #
 
 #' The application server-side
 #'
@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
       
       dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2019_sdg
       
-      eval(
+      dt <- eval(
         call(
           name    = queryFunction(), 
           data    = dataSource,
@@ -58,11 +58,12 @@ app_server <- function(input, output, session) {
           gender  = input$sex,
           year    = input$time_slider
         )
-      ) %>%
+      ) %>% 
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
       
     }
+    dt
   })
 
   # 3) life tables data
@@ -96,8 +97,9 @@ app_server <- function(input, output, session) {
 
   # Reduction matrix -----------------------------
   data_cod_change <- reactive({
-
+    
     if (input$mode == "mode_sdg") {
+      
       M <- build_reduction_matrix(
         data       = data_sdg(),
         select_cod = as.character(unique(data_sdg()$cause_name)),
@@ -120,27 +122,29 @@ app_server <- function(input, output, session) {
       S6 = "Transport Injuries"
       S7 = "Exposure to Forces of Nature"
       
-      M[  , S2a] <- input$sdg_2a
+      if (input$sex != 'male') {
+        # For now males are not exposed to maternal disorders :)
+        M[  , S2a] <- input$sdg_2a
+      }
       M[  , S2b] <- input$sdg_2b
       M[  , S3] <- input$sdg_3
       M[  , S4] <- input$sdg_4
       M[  , S5] <- input$sdg_5
       M[  , S6] <- input$sdg_6
       M[  , S7] <- input$sdg_7
-      
+    
       # when under 5 mortality is reduced across all COD we have to deal with 
       # interactions, or successive reduction inputs. E.g. One may reduce 
       # neonatal mortality (50%) and under-five mortality (10%) resulting a 55%
-      # total reduction. This is what we try to in the next 5 lines.
-       
+      # total reduction. This is what we try to do in the next 5 lines.
+
       if (input$sdg_1 != 0) {
         if (sum(M[S1, ]) != 0) {
-          M[S1,   ] <- input$sdg_1 + M[S1, ] * abs(input$sdg_1)/100
+          M[S1,   ] <- ((1 + input$sdg_1/100) * ((M[S1, ] + 100)/100) - 1) * 100
         } else  {
           M[S1,   ] <- input$sdg_1 
         }
       }
-      
       
     } else {
       M <- build_reduction_matrix(
@@ -194,6 +198,7 @@ app_server <- function(input, output, session) {
   
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
+    # print(data_fig())
     decompose_by_cod(
       data_fig()$lt_initial,
       data_fig()$lt_final,
@@ -528,7 +533,7 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year) {
   dt <- as.data.table(data)
   dt <- dt[period == year]
   dt <- dt[region %in% c(region1, region2)]
-
+  
   if (mode != "mode_sex") {
     dt <- dt[sex == gender]
   }

@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU <mpascariu@scor.com>
-# Last update: Tue Apr 26 16:26:21 2022
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
+# Author: Marius D. PASCARIU
+# Last Update: Tue Oct 17 22:36:36 2023
+# -------------------------------------------------------------- #
 
 # lemur Package
 
@@ -58,6 +58,8 @@
 #' tagList
 #' tagAppendAttributes
 #' HTML
+#' findDependencies
+#' attachDependencies
 #'
 #' @importFrom tibble
 #' column_to_rownames

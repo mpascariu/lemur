@@ -1,3 +1,7 @@
+version 0.14.0
+- Fix bug related to lack of maternal mortality data when male population is selected;
+- Fix bug in the under 5 mortality reduction method;
+
 version 0.13.0
 - Include the maternal and neonatal mortality in the SDG section;
 

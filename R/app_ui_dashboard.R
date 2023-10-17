@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Jun 02 14:17:10 2022
-# --------------------------------------------------- #
+# Last Update: Tue Oct 17 22:41:44 2023
+# -------------------------------------------------------------- #
 
 #' UI - dashboard page
 #' @keywords internal
@@ -182,7 +182,7 @@ side_panel <- function() {
     ),
 
     chooseSliderSkin("Flat"),
-    setSliderColor(rep("black", 20), c(1:20)),
+    setSliderColor_(rep("black", 20), c(1:20)),
 
     conditionalPanel(
       condition = "input.mode != 'mode_sdg'",
