@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 15 15:11:11 2022
-# --------------------------------------------------- #
+# Last Update: Wed Nov  8 13:50:55 2023
+# -------------------------------------------------------------- #
 
 #' UI - data page
 #' @keywords internal
@@ -74,25 +74,22 @@ data_panel <- function() {
           DT::dataTableOutput("decomposition_data")
         )
       ),
+    ),
+    
+    tabPanel(
+      title = "Reduction Matrix", 
+      fluidRow(
+        column(
+          width = 12,
+          offset = 0,
+          DT::dataTableOutput("reduction_matrix")
+        )
+      ),
     )
   )
   
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

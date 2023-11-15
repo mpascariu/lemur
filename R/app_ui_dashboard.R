@@ -39,7 +39,7 @@ top_panel <- function() {
   fluidRow(
 
     column(
-      width = 3,
+      width = 4,
 
       conditionalPanel(
         condition = "input.mode != 'mode_sex'",
@@ -81,7 +81,7 @@ top_panel <- function() {
     ),
 
     column(
-      width = 4,
+      width = 6,
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
         label   = "Life Expectancy Comparisons",
@@ -120,16 +120,16 @@ top_panel <- function() {
     ),
 
     column(
-      width = 4,
+      width = 1,
       style = 'padding-right:0px; margin-right: 0px;',
       tags$div(
         style = "padding: 25px 0px 0px 0px; margin-right: 0px;"
       ),
-      bookmarkButton(),
+      #bookmarkButton(),
       actionButton(
         inputId = "reset",
-        icon = icon("recycle"),
-        label = "Reset Selection"
+        label   = "Reset",
+        icon    = icon("recycle")
       ),
     ),
   )
@@ -218,7 +218,7 @@ side_panel <- function() {
 
       fluidRow(
         column(
-          width = 10,
+          width = 12,
           prettyCheckboxGroup(
             inputId = "cod_target",
             label = "Cause of death:",
@@ -240,21 +240,16 @@ side_panel <- function() {
           ),
         ),
 
-        column(
-          width = 2,
-          style = 'padding:0px;',
-          br(),
           actionButton(
             inputId = "cod_target_all",
             label = "ALL",
-            style = "width:100%;"
+            style = "width:48%;"
           ),
           actionButton(
             inputId = "cod_target_none",
             label = "NONE",
-            style = "width:100%;"
+            style = "width:48%;"
           )
-        )
       )
     ),
 

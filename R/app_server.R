@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Oct 17 22:30:57 2023
+# Last Update: Wed Nov 15 08:24:24 2023
 # -------------------------------------------------------------- #
 
 #' The application server-side
@@ -169,6 +169,8 @@ app_server <- function(input, output, session) {
         cod        = data_cod(),
         lt         = data_lt(),
         region1    = input$region1,
+        region2    = input$region2,
+        sex        = input$sex,
         cod_change = data_cod_change()
       ),
 
@@ -177,6 +179,7 @@ app_server <- function(input, output, session) {
         lt         = data_lt(),
         region1    = input$region1,
         region2    = input$region2,
+        sex        = input$sex,
         cod_change = data_cod_change()
         ),
 
@@ -184,6 +187,8 @@ app_server <- function(input, output, session) {
         cod        = data_cod(),
         lt         = data_lt(),
         region1    = input$region1,
+        region2    = input$region2,
+        sex        = input$sex,
         cod_change = data_cod_change()
         ),
 
@@ -191,6 +196,8 @@ app_server <- function(input, output, session) {
         cod        = data_sdg(),
         lt         = data_lt(),
         region1    = input$region1,
+        region2    = input$region2,
+        sex        = input$sex,
         cod_change = data_cod_change()
         )
     )
@@ -280,7 +287,15 @@ app_server <- function(input, output, session) {
       format_datatable(
         caption = table_captions()[5]
       )
-      
+  })
+  
+  output$reduction_matrix <- DT::renderDataTable({
+    data_cod_change() %>% 
+      as_tibble() %>% 
+      mutate(`Age Group` = rownames(.), .before = 1) %>% 
+      format_datatable(
+        caption = table_captions()[6]
+      )
   })
   # ----------------------------------------------------------------------------
   # RENDER FIGURES
@@ -464,19 +479,19 @@ app_server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$mode, {
-    
-    # If we move into region or sex comparison mode we set the risk reduction
-    # slider to 0, since our main interest would be to see the differences 
-    # as is before playing with hypothetical reductions of the cod's.   
-    if (input$mode != "mode_cod") {
-      updateSliderInput(
-        session,
-        inputId = "cod_change",
-        value = 0
-      )
-    }
-  })
+  # observeEvent(input$mode, {
+  #   
+  #   # If we move into region or sex comparison mode we set the risk reduction
+  #   # slider to 0, since our main interest would be to see the differences 
+  #   # as is before playing with hypothetical reductions of the cod's.   
+  #   if (input$mode != "mode_cod") {
+  #     updateSliderInput(
+  #       session,
+  #       inputId = "cod_change",
+  #       value = 0
+  #     )
+  #   }
+  # })
 
   observeEvent(input$cod_target_none, {
     updatePrettyCheckboxGroup(
@@ -576,7 +591,7 @@ format_datatable <- function(data, caption){
       x = as.data.frame(data),
       big.mark = ",",
       scientific = FALSE,
-      digits = 2
+      digits = 3
     ),
     caption  = caption,
     rownames = FALSE,

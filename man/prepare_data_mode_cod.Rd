@@ -4,7 +4,7 @@
 \alias{prepare_data_mode_cod}
 \title{Prepare data for risk changes}
 \usage{
-prepare_data_mode_cod(cod, lt, region1, cod_change)
+prepare_data_mode_cod(cod, lt, region1, region2, sex, cod_change)
 }
 \description{
 Prepare data for risk changes

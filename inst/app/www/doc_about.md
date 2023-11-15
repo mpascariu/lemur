@@ -12,12 +12,12 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.14.1
+**Monitor Version:** 0.14.2
 
 **Last Update:** "2023-11-01 11:03:21 CET"
 
 **News in previous versions:**
-
+- 2023-11-15 - v0.14.2 - UI bug fix; 
 - 2023-11-01 - v0.14.1 - Fix bug related under five and maternal mortality data; 
 - 2022-06-02 - v0.13.0 - Include the maternal and neonatal mortality in the SDG section;
 - 2022-04-26 - v0.12.2 - Develop server side scaling solution, Postgres SQL etc;

@@ -4,7 +4,7 @@
 \alias{prepare_data_mode_cntr}
 \title{Prepare data for country comparisons}
 \usage{
-prepare_data_mode_cntr(cod, lt, region1, region2, cod_change)
+prepare_data_mode_cntr(cod, lt, region1, region2, sex, cod_change)
 }
 \description{
 Prepare data for country comparisons

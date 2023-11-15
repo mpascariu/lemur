@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Tue Mar 15 15:11:26 2022
-# --------------------------------------------------- #
+# Last Update: Wed Nov  8 13:50:34 2023
+# -------------------------------------------------------------- #
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
 # WE TRY TO MAKE THEM AS DYNAMIC AS POSSIBLE IN ORDER TO BE INFORMATIVE 
@@ -55,7 +55,6 @@ generate_table_captions <- function(mode,
     "The values are resulted from various changes to the ", 
     "SDG accomplishment levels applied to one or more risks factors ",
     "as specified in the dashboard.") 
-  
   
   if (mode %in% c("mode_cod", "mode_sdg")) {
     lt_initial <- paste0(
@@ -141,7 +140,13 @@ generate_table_captions <- function(mode,
     )
   }
   
-  captions <- c(lt_initial, lt_final, cod_initial, cod_final, decomposition)
+  
+  reduction_matrix <- paste0(
+    "TABLE 6 -- Matrix displaying the applied % changes in mortality by age group and cause of death"
+  )
+  
+  captions <- c(lt_initial, lt_final, cod_initial, cod_final, decomposition,
+                reduction_matrix)
   return(captions)
 }
 
