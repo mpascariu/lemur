@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Wed Nov 15 08:24:24 2023
+# Last Update: Tue Dec  5 22:23:04 2023
 # -------------------------------------------------------------- #
 
 #' The application server-side
@@ -290,9 +290,10 @@ app_server <- function(input, output, session) {
   })
   
   output$reduction_matrix <- DT::renderDataTable({
+    
     data_cod_change() %>% 
       as_tibble() %>% 
-      mutate(`Age Group` = rownames(.), .before = 1) %>% 
+      mutate(`Age Group` = data_fig()$lt_initial$x.int, .before = 1) %>% 
       format_datatable(
         caption = table_captions()[6]
       )

@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Oct 17 22:41:44 2023
+# Last Update: Wed Dec  6 00:19:58 2023
 # -------------------------------------------------------------- #
 
 #' UI - dashboard page
@@ -250,7 +250,7 @@ side_panel <- function() {
             label = "NONE",
             style = "width:48%;"
           )
-      )
+      ),
     ),
 
     # Side panel for sdg mode
@@ -339,122 +339,160 @@ side_panel <- function() {
         max     = 100,
         step    = 5
       ),
-    )
+    ),
+    
+    # radioGroupButtons(
+    #   inputId = "stack_charts",
+    #   label   = "Stack Charts?!",
+    #   choices = c("NO", "YES"),
+    #   justified = TRUE
+    # )
   )
 }
 
 
 #' @keywords internal
 main_panel <- function() {
-  tagList(
-    fluidRow(
-      column(
-        width = 7,
-        style = 'padding:0px 0px 0px 18px;',
 
-        boxFrame(
-          style = 'padding:0px',
-          title = tagList(
-            tags$div(
-              "World Map",
-              style = "display: inline-block; font-weight: bold; padding:0px;"
-            )
-          ),
-
-          leafletOutput(
-            outputId = "figure1",
-            height = 381*0.93
-          )
-        )
-      ),
-
-      column(
-        width = 5,
-        style = 'padding:0px;',
-
-        boxFrame(
-          title = boxTitleInput(
-            title = "Difference in Life Expectancy at various ages",
-            db_style = "padding: 0px 0px 0px 340px;",
-            selectInput(
-              inputId = "fig2_x",
-              label = "Ages to be displayed",
-              choices = lemur::data_app_input$x,
-              selected = seq(0, 110, 10),
-              multiple = TRUE
-            )
-          ),
-
-          plotlyOutput(
-            outputId = "figure2",
-            height = 350*0.955
-          )
-        )
+  # conditionalPanel(
+  #   condition = "input.stack_charts == 'NO'",
+    tagList(
+      chart_1(width_ = 7),
+      chart_2(width_ = 5),
+      chart_3(width_ = 6),
+      chart_4(width_ = 6)
       )
-    ),
+    # )
+  
+  # conditionalPanel(
+  #   condition = "input.stack_charts == 'YES'",
+  #   tagList(
+  #     fluidRow(chart_1(width_ = 10, height_ = 1.0, offset_ = 1)),
+  #     fluidRow(chart_2(width_ = 10, height_ = 1.1, offset_ = 1)),
+  #     fluidRow(chart_3(width_ = 10, height_ = 1.3, offset_ = 1)),
+  #     fluidRow(chart_4(width_ = 10, height_ = 1.3, offset_ = 1))
+  #   )
+  # )
+}
 
-    fluidRow(
-      column(
-        width = 6,
-        style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
 
-        boxFrame(
-          title = boxTitleInput(
-            title = "Cause of Death Distribution",
-            db_style = "padding: 0px 0px 0px 450px;",
-            radioGroupButtons(
-              inputId = "fig3_chart_type",
-              label = "View by:",
-              choices = c("Bar-plot" = "barplot"),
-              justified = TRUE,
-              checkIcon = list(
-                yes = tags$i(class = "fa fa-circle",
-                             style = "color: black"),
-                no = tags$i(class = "fa fa-circle-o")),
-              direction = "vertical"
-            )
-          ),
-
-          plotlyOutput(
-            outputId = "figure3",
-            height = 330
-          )
+#' @keywords internal
+chart_1 <- function(width_, height_ = 1, offset_ = 0) {
+  column(
+    width = width_,
+    style = 'padding:0px 0px 0px 18px;',
+    offset = offset_,
+    
+    boxFrame(
+      style = 'padding:0px',
+      title = tagList(
+        tags$div(
+          "World Map",
+          style = "display: inline-block; font-weight: bold; padding:0px;"
         )
       ),
-
-      column(
-        width = 6,
-        style = 'padding:0px;',
-
-        boxFrame(
-          title = boxTitleInput(
-            title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
-            db_style = "padding: 0px 0px 0px 410px;",
-            radioGroupButtons(
-              inputId = "fig4_dim",
-              label = "View by:",
-              choices = c("Age-and-COD" = "both",
-                          "Age" = "age",
-                          "COD" = "cod"),
-              justified = TRUE,
-              checkIcon = list(
-                yes = tags$i(class = "fa fa-circle",
-                             style = "color: black"),
-                no = tags$i(class = "fa fa-circle-o")),
-              direction = "vertical"
-            )
-          ),
-
-          plotlyOutput(
-            outputId = "figure4",
-            height = 330
-          )
-        )
+      
+      leafletOutput(
+        outputId = "figure1",
+        height = 354.33 * height_
       )
     )
   )
 }
 
+#' @keywords internal
+chart_2 <- function(width_, height_ = 1, offset_ = 0) {
+  column(
+    width = width_,
+    style = 'padding:0px;',
+    offset = offset_,
+    
+    boxFrame(
+      title = boxTitleInput(
+        title = "Difference in Life Expectancy at various ages",
+        db_style = "padding: 0px 0px 0px 340px;",
+        selectInput(
+          inputId = "fig2_x",
+          label = "Ages to be displayed",
+          choices = lemur::data_app_input$x,
+          selected = seq(0, 110, 10),
+          multiple = TRUE
+        )
+      ),
+      
+      plotlyOutput(
+        outputId = "figure2",
+        height = 332.7 * height_
+      )
+    )
+  )
+}
+
+#' @keywords internal
+chart_3 <- function(width_, height_ = 1, offset_ = 0) {
+  column(
+    width = width_,
+    style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
+    offset = offset_,
+    
+    boxFrame(
+      title = boxTitleInput(
+        title = "Cause of Death Distribution",
+        db_style = "padding: 0px 0px 0px 450px;",
+        radioGroupButtons(
+          inputId = "fig3_chart_type",
+          label = "View by:",
+          choices = c("Bar-plot" = "barplot"),
+          justified = TRUE,
+          checkIcon = list(
+            yes = tags$i(class = "fa fa-circle",
+                         style = "color: black"),
+            no = tags$i(class = "fa fa-circle-o")),
+          direction = "vertical"
+        )
+      ),
+      
+      plotlyOutput(
+        outputId = "figure3",
+        height = 330 * height_
+      )
+    )
+  )
+}
+
+#' @keywords internal
+chart_4 <- function(width_, height_ = 1, offset_ = 0) {
+  column(
+    width = width_,
+    style = 'padding:0px;',
+    offset = offset_,
+    
+    boxFrame(
+      title = boxTitleInput(
+        title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
+        db_style = "padding: 0px 0px 0px 410px;",
+        radioGroupButtons(
+          inputId = "fig4_dim",
+          label = "View by:",
+          choices = c("Age-and-COD" = "both",
+                      "Age" = "age",
+                      "COD" = "cod"),
+          justified = TRUE,
+          checkIcon = list(
+            yes = tags$i(class = "fa fa-circle",
+                         style = "color: black"),
+            no = tags$i(class = "fa fa-circle-o")),
+          direction = "vertical"
+        )
+      ),
+      
+      plotlyOutput(
+        outputId = "figure4",
+        height = 330 * height_
+      )
+    )
+  )
+}
 
 #' @keywords internal
 boxFrame <- function(...,

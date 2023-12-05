@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Wed Nov 15 08:19:45 2023
+# Last Update: Tue Dec  5 22:08:41 2023
 # -------------------------------------------------------------- #
 
 # ----------------------------------------------------------------------------
@@ -29,9 +29,9 @@ prepare_data_mode_cod <- function(cod,
   logic <- any(cod_change != 0)
   if (logic) {
     # c1 <- modify_cod_table(c1, cod_change)
-    c2 <- modify_cod_table(c2, cod_change)
+    c2 <- modify_cod_table(c1, cod_change)
     # l1 <- modify_life_table(l1, c1, cod_change)
-    l2 <- modify_life_table(l2, c2, cod_change)
+    l2 <- modify_life_table(l1, c1, cod_change)
   }
 
   out <- list(
