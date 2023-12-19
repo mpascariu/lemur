@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
+# -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last update: Thu Mar 17 18:14:49 2022
-# --------------------------------------------------- #
+# Last Update: Tue Dec 19 22:26:48 2023
+# -------------------------------------------------------------- #
 
 # Figure 1.
 
@@ -136,6 +136,14 @@ plot_change <- function(L1, L2,
       `Life Expectancy Difference` = value,
       Age = x)
   
+  if (L1$region[1] != L2$region[1] | (L1$region[1] == L2$region[1] & L1$sex[1] != L2$sex[1])) {
+    label_losses = "<--- Negative gap"
+    label_gains  = "Positive gap --->"
+  } else {
+    label_losses = "<--- Losses"
+    label_gains  = "Gains --->"
+  }
+  
   # -------------
   # Figure
   
@@ -158,12 +166,12 @@ plot_change <- function(L1, L2,
     geom_text(
       x = min(-0.01, (-dmax * 1.05)/2), 
       y = 110, 
-      label = "<--- Losses",
+      label = label_losses,
       color = "black") + 
     geom_text(
       x = max(0.01, (dmax * 1.05)/2), 
       y = 110, 
-      label = "Gains --->",
+      label = label_gains,
       color = "black") + 
     scale_x_continuous(
       limits = c(-dmax, dmax) * 1.05,
