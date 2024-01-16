@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Wed Nov  8 13:50:34 2023
+# Last Update: Tue Jan 16 18:21:29 2024
 # -------------------------------------------------------------- #
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
@@ -56,7 +56,7 @@ generate_table_captions <- function(mode,
     "SDG accomplishment levels applied to one or more risks factors ",
     "as specified in the dashboard.") 
   
-  if (mode %in% c("mode_cod", "mode_sdg")) {
+  if (mode %in% c("mode_cod", "mode_sdg", "mode_sdg2")) {
     lt_initial <- paste0(
       "TABLE 1 -- Life table for ", part1, ". ", part2,
       " TABLE 2 below includes such alterations."
@@ -79,7 +79,7 @@ generate_table_captions <- function(mode,
     )
   }
   
-  if (mode == "mode_sdg") {
+  if (mode %in% c("mode_sdg", "mode_sdg2")) {
     
     lt_final <- paste0(
       "TABLE 2 -- Hypothetical life table for ", part1, ". ", part4
@@ -194,7 +194,7 @@ generate_fig2_captions <- function(mode,
   }
   
   # Part 3 - Life expectancy before and after
-  if (mode %in% c("mode_cod", "mode_sdg")) {
+  if (mode %in% c("mode_cod", "mode_sdg", "mode_sdg2")) {
     prefix1 <- "Before: "
     prefix2 <- "After the changes: "
   }

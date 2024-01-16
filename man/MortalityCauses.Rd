@@ -4,6 +4,7 @@
 \name{MortalityCauses}
 \alias{lemur}
 \alias{lemur-package}
+\alias{MortalityCauses}
 \title{lemur: Life expectancy monitor upscaled in R}
 \description{
 The life expectancy monitoring tool allows the user to selected mortality changes over the entire lifespan or at specific ages, as well as for overall mortality or for specific causes of death. For example, how would life expectancy look if cardiovascular mortality were to be reduced by 50%? Or how would life expectancy look if infant mortality was eliminated? The tool facilitates assessing changes and comparisons in life expectancy under those selected scenarios of mortality change. Furthermore, the tool lets the user compare cause-of-death profiles and life expectancies across time, countries and sexes.

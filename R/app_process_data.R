@@ -3,7 +3,7 @@
 # Last Update: Tue Dec 19 22:08:15 2023
 # -------------------------------------------------------------- #
 
-# somebody should merge these functions in 1?
+# somebody should merge these functions into 1 function?
   
 # ----------------------------------------------------------------------------
 # PROCESS DATA

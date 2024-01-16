@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Dec  5 22:23:04 2023
+# Last Update: Tue Jan 16 18:31:54 2024
 # -------------------------------------------------------------- #
 
 #' The application server-side
@@ -22,7 +22,7 @@ app_server <- function(input, output, session) {
 
   # 1) cod data ---
   data_cod <- reactive({
-    if (input$mode != "mode_sdg") {
+    if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr") ) {
       
       dataSource <- if (serverMode()) "cod" else lemur::data_gbd2019_cod
       
@@ -44,7 +44,7 @@ app_server <- function(input, output, session) {
 
   # 2) sdg data ---
   data_sdg <- reactive({
-    if (input$mode == "mode_sdg") {
+    if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
       
       dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2019_sdg
       
@@ -146,7 +146,39 @@ app_server <- function(input, output, session) {
         }
       }
       
+    } else if (input$mode == 'mode_sdg2') {
+      
+      M <- build_reduction_matrix(
+        data       = data_sdg(),
+        select_cod = as.character(unique(data_sdg()$cause_name)),
+        select_x   = 0:110,
+        cod_change = 0
+      )
+      
+      M[  , "Cardiovascular Diseases"] <- input$sdg2_1  
+      M[  , "Chronic Respiratory Diseases"] <- input$sdg2_2  
+      M[  , "Diabetes"] <- input$sdg2_3  
+      M[  , "Enteric Infections"] <- input$sdg2_4  
+      M[  , "Exposure to Forces of Nature"] <- input$sdg2_5  
+      M[  , "HIV/ AIDS / STD"] <- input$sdg2_6  
+      M[  , "Injuries (excl. Poisonings)"] <- input$sdg2_7  
+      M[  , "Interpersonal Violence"] <- input$sdg2_8  
+      M[  , "Kidney Disease"] <- input$sdg2_9  
+      M[  , "Malaria"] <- input$sdg2_10  
+      if (input$sex != 'male') M[  , "Maternal disorders"] <- input$sdg2_11
+      M[  , "Neglected Tropical Diseases (excl. Malaria)"] <- input$sdg2_12  
+      M[  , "Neonatal disorders"] <- input$sdg2_13  
+      M[  , "Neoplasms"] <- input$sdg2_14  
+      M[  , "Other Communicable"] <- input$sdg2_15  
+      M[  , "Other Non-Communicable"] <- input$sdg2_16  
+      M[  , "Poisonings"] <- input$sdg2_17  
+      M[  , "Respiratory Infections (excl. Tuberculosis)"] <- input$sdg2_18  
+      M[  , "Self-Harm"] <- input$sdg2_19  
+      M[  , "Transport Injuries"] <- input$sdg2_20  
+      M[  , "Tuberculosis"] <- input$sdg2_21  
+      
     } else {
+      
       M <- build_reduction_matrix(
         data = data_cod(),
         select_cod = input$cod_target,
@@ -199,7 +231,16 @@ app_server <- function(input, output, session) {
         region2    = input$region2,
         sex        = input$sex,
         cod_change = data_cod_change()
-        )
+        ),
+      
+      mode_sdg2 = prepare_data_mode_cod(
+        cod        = data_sdg(),
+        lt         = data_lt(),
+        region1    = input$region1,
+        region2    = input$region2,
+        sex        = input$sex,
+        cod_change = data_cod_change()
+        ) 
     )
   })
   
@@ -419,7 +460,7 @@ app_server <- function(input, output, session) {
         type = "barplot") +
         facet_wrap("sex")
 
-    } else if (input$mode == "mode_sdg") {
+    } else if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
       p <- plot_cod(
         cod  = data_fig()$cod_final,
         perc = input$perc,
@@ -531,6 +572,28 @@ app_server <- function(input, output, session) {
     updateSliderInput(session, 'sdg_5', value = 0)
     updateSliderInput(session, 'sdg_6', value = 0)
     updateSliderInput(session, 'sdg_7', value = 0)
+    
+    updateSliderInput(session, 'sdg2_1', value = 0)
+    updateSliderInput(session, 'sdg2_2', value = 0)
+    updateSliderInput(session, 'sdg2_3', value = 0)
+    updateSliderInput(session, 'sdg2_4', value = 0)
+    updateSliderInput(session, 'sdg2_5', value = 0)
+    updateSliderInput(session, 'sdg2_6', value = 0)
+    updateSliderInput(session, 'sdg2_7', value = 0)
+    updateSliderInput(session, 'sdg2_8', value = 0)
+    updateSliderInput(session, 'sdg2_9', value = 0)
+    updateSliderInput(session, 'sdg2_10', value = 0)
+    updateSliderInput(session, 'sdg2_11', value = 0)
+    updateSliderInput(session, 'sdg2_12', value = 0)
+    updateSliderInput(session, 'sdg2_13', value = 0)
+    updateSliderInput(session, 'sdg2_14', value = 0)
+    updateSliderInput(session, 'sdg2_15', value = 0)
+    updateSliderInput(session, 'sdg2_16', value = 0)
+    updateSliderInput(session, 'sdg2_17', value = 0)
+    updateSliderInput(session, 'sdg2_18', value = 0)
+    updateSliderInput(session, 'sdg2_19', value = 0)
+    updateSliderInput(session, 'sdg2_20', value = 0)
+    updateSliderInput(session, 'sdg2_21', value = 0)
     updatePrettyCheckboxGroup(session, 'cod_target', selected = lemur::data_app_input$cause_name)
   })
 
