@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Jan 16 21:07:03 2024
+# Last Update: Mon Jan 29 11:16:13 2024
 # -------------------------------------------------------------- #
 
 #' UI - dashboard page
@@ -259,14 +259,14 @@ side_panel <- function() {
     conditionalPanel(
       condition = "input.mode == 'mode_sdg'",
       
+      #
+      slider_input_(inputId = "sdg_3", label = "AIDS epidemic, tuberculosis, malaria and neglected tropical diseases:"),
       # End Epidemics. Goal: -100% relative to 2015 level
-      slider_input_(inputId = "sdg_3", label = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:"),
+      slider_input_(inputId = "sdg_4", label = "Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease:"),
       #Goal: - 33.3% relative to 2015 level
-      slider_input_(inputId = "sdg_4", label = "Under-five mortality rate:"),
+      slider_input_(inputId = "sdg_1", label = "Under-five mortality rate:"),
       #
-      slider_input_(inputId = "sdg_1", label = "Maternal mortality ratio:"),
-      #
-      slider_input_(inputId = "sdg_2a", label = "Mortality due to natural disasters:"),
+      slider_input_(inputId = "sdg_2a", label = "Maternal mortality ratio:"),
       # goal 25
       slider_input_(inputId = "sdg_2b", label = "Neonatal mortality rate:"),
       # Goal: -50% relative to 2015 level
