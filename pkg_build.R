@@ -8,7 +8,23 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 devtools::document()
 
 # dockerfile
-golem::add_dockerfile_shinyproxy()
+# see https://rocker-project.org/images/ for other Rocker images
+golem::add_dockerfile_shinyproxy(
+  paste0("rocker/rstudio:", R.Version()$major, ".", R.Version()$minor))
+
+# in Terminal
+# 1. place yourself in the folder where your docker file is created
+# 2. check that you have docker installed: docker --version
+# 3. create the image: docker build -t lemurapp:v2 .
+# 4. after 15min when all is ready: docker image ls
+# 5. test image locally: docker run lemurapp:v2
+
+# > options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()
+# Loading required package: shiny
+# 
+# Listening on http://0.0.0.0:3838
+# sh: 1: xdg-open: not found.          ???????????
+
 
 # restart R
 rstudioapi::restartSession()
