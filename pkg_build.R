@@ -19,13 +19,6 @@ golem::add_dockerfile_shinyproxy(
 # 4. after 15min when all is ready: docker image ls
 # 5. test image locally: docker run lemurapp:v3
 
-# > options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()
-# Loading required package: shiny
-# 
-# Listening on http://0.0.0.0:3838
-# sh: 1: xdg-open: not found.          ???????????
-
-
 # restart R
 rstudioapi::restartSession()
 
