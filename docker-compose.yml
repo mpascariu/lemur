@@ -9,8 +9,12 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./deploy/nginx/apps.conf
+        source: ./deploy/nginx/conf.d/apps.conf
         target: /etc/nginx/conf.d/apps.conf
+      - type: bind
+        source: ./deploy/nginx/html/
+        target: /var/www/html/
+
     ports:
       - 80:80
     network_mode: 'host'
@@ -24,6 +28,7 @@ services:
       - type: bind
         source: ./deploy/shinyproxy/application.yml
         target: /opt/shinyproxy/application.yml
+
     ports:
       - 8080:8080
     networks:
@@ -51,7 +56,7 @@ services:
         target: /docker-entrypoint-initdb.d/init-db.sh
       - type: bind
         source: ./deploy/postgresql/postgresql.conf
-        target: /etc/postpgreql/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
     ports: 
       - 5432:5432
     networks:

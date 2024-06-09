@@ -15,9 +15,9 @@ golem::add_dockerfile_shinyproxy(
 # in Terminal
 # 1. place yourself in the folder where your docker file is created
 # 2. check that you have docker installed: docker --version
-# 3. create the image: docker build -t lemurapp:v2 .
+# 3. create the image: docker build -t lemurapp:v3 .
 # 4. after 15min when all is ready: docker image ls
-# 5. test image locally: docker run lemurapp:v2
+# 5. test image locally: docker run lemurapp:v3
 
 # > options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()
 # Loading required package: shiny
