@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Mon Jan 29 11:16:13 2024
+# Last Update: Sun Sep 29 20:41:09 2024
 # -------------------------------------------------------------- #
 
 #' UI - dashboard page
@@ -59,22 +59,7 @@ top_panel <- function() {
           checkIcon = list(yes = icon("ok", lib = "glyphicon"))
         ),
       ),
-
-      conditionalPanel(
-        condition = "input.mode == 'mode_sex'",
-        shinyWidgets::checkboxGroupButtons(
-          inputId = "sex",
-          label   = "Sex",
-          choices = c(
-            "Female" = "female",
-            "Male"   = "male",
-            "Both"   = "both"),
-          selected = c("female", "male"),
-          justified = TRUE,
-          size = "sm",
-          checkIcon = list(yes = icon("ok", lib = "glyphicon"))
-        ),
-      ),
+      
       shinyBS::bsTooltip(
         id = "sex",
         title = paste(

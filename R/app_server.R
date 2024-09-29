@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Jan 16 18:31:54 2024
+# Last Update: Sun Sep 29 20:42:16 2024
 # -------------------------------------------------------------- #
 
 #' The application server-side
@@ -193,7 +193,6 @@ app_server <- function(input, output, session) {
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
 
-    # print(data_lt())
     switch(
       input$mode,
 
@@ -246,7 +245,7 @@ app_server <- function(input, output, session) {
   
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
-    # print(data_fig())
+    
     decompose_by_cod(
       data_fig()$lt_initial,
       data_fig()$lt_final,

@@ -1,6 +1,6 @@
 # -------------------------------------------------------------- #
 # Author: Marius D. PASCARIU
-# Last Update: Tue Oct 17 22:36:36 2023
+# Last Update: Sun Sep 29 19:07:37 2024
 # -------------------------------------------------------------- #
 
 # lemur Package
@@ -16,6 +16,7 @@
 #' @import data.table
 #' @import sf
 #' @import shinydashboard
+#' @import markdown
 #'
 #' @importFrom shiny 
 #' actionButton 
