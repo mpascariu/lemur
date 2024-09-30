@@ -24,7 +24,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Douglas R. Leasure (\href{https://orcid.org/0000-0002-8768-2811}{ORCID}) [contributor]
+  \item Daniel Valdenegro [contributor]
 }
 
 }
