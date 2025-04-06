@@ -3,15 +3,15 @@
 \docType{data}
 \name{data_sf}
 \alias{data_sf}
-\title{Simple features data for the map}
+\title{Simple features data for world country polygons used in mapping}
 \format{
-An object of class \code{sf} (inherits from \code{data.frame}) with 170 rows and 19 columns.
+An object of class \code{sf} (inherits from \code{data.frame}) with 204 rows and 11 columns.
 }
 \usage{
 data_sf
 }
 \description{
-Simple features data for the map
+Simple features data for world country polygons used in mapping
 }
 \seealso{
 \code{\link{plot_map}}

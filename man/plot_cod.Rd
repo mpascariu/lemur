@@ -13,13 +13,12 @@ to the population and time period of the life table;}
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{type}{Options: "barplot" or "piechart".}
+\item{type}{Options: "barplot" or "piechart".
+#' @examples
+D <- data_gbd2021_cod # cod data
+cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
+plot_cod(cod)}
 }
 \description{
 Plot function for COD data
-}
-\examples{
-D <- data_gbd2019_cod # cod data
-cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
-plot_cod(cod)
 }

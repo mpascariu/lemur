@@ -1,7 +1,8 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Sun Sep 29 20:42:16 2024
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 21:37:44 2025
+# ------------------------------------------------- #
+
 
 #' The application server-side
 #'
@@ -24,7 +25,7 @@ app_server <- function(input, output, session) {
   data_cod <- reactive({
     if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr") ) {
       
-      dataSource <- if (serverMode()) "cod" else lemur::data_gbd2019_cod
+      dataSource <- if (serverMode()) "cod" else lemur::data_gbd2021_cod
       
       eval(
         call(
@@ -46,7 +47,7 @@ app_server <- function(input, output, session) {
   data_sdg <- reactive({
     if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
       
-      dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2019_sdg
+      dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2021_sdg
       
       dt <- eval(
         call(
@@ -61,7 +62,6 @@ app_server <- function(input, output, session) {
       ) %>% 
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
-      
     }
     dt
   })
@@ -69,7 +69,7 @@ app_server <- function(input, output, session) {
   # 3) life tables data
   data_lt  <- reactive({
     
-    dataSource <- if (serverMode()) "lt" else lemur::data_gbd2019_lt
+    dataSource <- if (serverMode()) "lt" else lemur::data_gbd2021_lt
     
     lt <- eval(
       call(
@@ -116,11 +116,11 @@ app_server <- function(input, output, session) {
              "Neglected Tropical Diseases (excl. Malaria)")
       S4 = c("Cardiovascular Diseases",
              "Neoplasms",
-             "Diabetes",
-             "Chronic Respiratory Diseases")
-      S5 = "Self-Harm"
+             "Diabetes mellitus",
+             "Chronic Respiratory diseases")
+      S5 = "Self-harm"
       S6 = "Transport Injuries"
-      S7 = "Exposure to Forces of Nature"
+      S7 = "Exposure to forces of nature"
       
       if (input$sex != 'male') {
         # For now males are not exposed to maternal disorders :)
@@ -154,28 +154,30 @@ app_server <- function(input, output, session) {
         select_x   = 0:110,
         cod_change = 0
       )
+      print(M)
       
-      M[  , "Cardiovascular Diseases"] <- input$sdg2_1  
-      M[  , "Chronic Respiratory Diseases"] <- input$sdg2_2  
-      M[  , "Diabetes"] <- input$sdg2_3  
-      M[  , "Enteric Infections"] <- input$sdg2_4  
-      M[  , "Exposure to Forces of Nature"] <- input$sdg2_5  
-      M[  , "HIV/ AIDS / STD"] <- input$sdg2_6  
-      M[  , "Injuries (excl. Poisonings)"] <- input$sdg2_7  
-      M[  , "Interpersonal Violence"] <- input$sdg2_8  
-      M[  , "Kidney Disease"] <- input$sdg2_9  
-      M[  , "Malaria"] <- input$sdg2_10  
+      M[  , "Cardiovascular Diseases"]                     <- input$sdg2_1  
+      M[  , "Chronic Respiratory diseases"]                <- input$sdg2_2  
+      M[  , "Diabetes mellitus"]                           <- input$sdg2_3  
+      M[  , "Enteric Infections"]                          <- input$sdg2_4  
+      M[  , "Exposure to forces of nature"]                <- input$sdg2_5  
+      M[  , "HIV/ AIDS / STD"]                             <- input$sdg2_6  
+      M[  , "Injuries (excl. Poisonings)"]                 <- input$sdg2_7  
+      M[  , "Interpersonal Violence"]                      <- input$sdg2_8  
+      M[  , "Kidney disease (excl. Diabetes)"]             <- input$sdg2_9  
+      M[  , "Malaria"]                                     <- input$sdg2_10  
       if (input$sex != 'male') M[  , "Maternal disorders"] <- input$sdg2_11
       M[  , "Neglected Tropical Diseases (excl. Malaria)"] <- input$sdg2_12  
-      M[  , "Neonatal disorders"] <- input$sdg2_13  
-      M[  , "Neoplasms"] <- input$sdg2_14  
-      M[  , "Other Communicable"] <- input$sdg2_15  
-      M[  , "Other Non-Communicable"] <- input$sdg2_16  
-      M[  , "Poisonings"] <- input$sdg2_17  
+      M[  , "Neonatal disorders"]                          <- input$sdg2_13  
+      M[  , "Neoplasms"]                                   <- input$sdg2_14  
+      M[  , "Other Communicable"]                          <- input$sdg2_15  
+      M[  , "Other Non-Communicable"]                      <- input$sdg2_16  
+      M[  , "Poisonings"]                                  <- input$sdg2_17  
       M[  , "Respiratory Infections (excl. Tuberculosis)"] <- input$sdg2_18  
-      M[  , "Self-Harm"] <- input$sdg2_19  
-      M[  , "Transport Injuries"] <- input$sdg2_20  
-      M[  , "Tuberculosis"] <- input$sdg2_21  
+      M[  , "Self-harm"]                                   <- input$sdg2_19  
+      M[  , "Transport Injuries"]                          <- input$sdg2_20  
+      M[  , "Tuberculosis"]                                <- input$sdg2_21  
+      
       
     } else {
       
@@ -347,19 +349,24 @@ app_server <- function(input, output, session) {
     # We would like to zoom out if the region surface is large
     macro_region <- lemur::data_app_input$regions
     large_regions <- c(
-      "ALGERIA", 
-      "AUSTRALIA", 
-      "CANADA", 
-      "CHILE", 
-      "INDIA", 
-      "JAPAN", 
-      "MOROCCO", 
-      "SWEDEN", 
-      "NORWAY", 
-      "FINLAND", 
-      "KAZAKHSTAN")
+      "Algeria", 
+      "Australia", 
+      "Canada", 
+      "Chile", 
+      "India", 
+      "Japan", 
+      "Morocco", 
+      "Sweden", 
+      "Norway", 
+      "Finland", 
+      "Kazakhstan")
     
-    larger_regions <- c("ARGENTINA", "BRAZIL", "CHINA", "RUSSIA", "US")
+    larger_regions <- c(
+      "Argentina", 
+      "Brazil", 
+      "China (People's Republic of)", 
+      "Russian Federation", 
+      "United States of America")
     
     loc <- input$region1
     if (input$region1 %in% large_regions) {
@@ -370,7 +377,7 @@ app_server <- function(input, output, session) {
       
     } else if (input$region1 %in% macro_region) {
       zoom = 1
-      loc <- "TUNISIA" 
+      loc <- "Tunisia" 
       # Since we don't have the borders for the macro regions
       # select a location in the middle of the map and zoom out
       # just to display the map of the world
@@ -560,7 +567,7 @@ app_server <- function(input, output, session) {
     # updateSelectInput(session, 'region1', selected = "GLOBAL")
     # updateSelectInput(session, 'region2', selected = "EUROPE")
     updateSelectInput(session, 'fig2_x', selected = seq(0, 110, 10))
-    updateSliderTextInput(session, 'time_slider', selected = 2019)
+    updateSliderTextInput(session, 'time_slider', selected = 2021)
     updateSliderTextInput(session, 'age_change', selected = c(0, 110))
     updateSliderInput(session, 'cod_change', value = 0)
     updateSliderInput(session, 'sdg_1', value = 0)
@@ -625,7 +632,7 @@ dt_filter_sql <- function(data, mode, region1, region2, gender, year) {
   con <- DBI::dbConnect(
     RPostgres::Postgres(),
     host     = 'postgres', #"3.10.114.240",
-    dbname   = "gbd2019",
+    dbname   = "gbd2021",
     user     = "lemur",
     # password = Sys.getenv(c('SQL_PASS')),
     password = "tx*Oj3HjwAlNbNY0XrY3288E#",

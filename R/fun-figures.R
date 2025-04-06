@@ -1,7 +1,8 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Tue Dec 19 22:26:48 2023
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 20:51:07 2025
+# ------------------------------------------------- #
+
 
 # Figure 1.
 
@@ -10,7 +11,7 @@
 #' @param zoom The zoom level
 #' @param data data
 #' @examples
-#' plot_map(location = "MEXICO")
+#' plot_map(location = "Mexico")
 #'
 #' @export
 plot_map <- function(location,
@@ -36,12 +37,11 @@ plot_map <- function(location,
   tooltip <- glue::glue_data(
     data,
     "<strong>{name}</strong><br>
-  Population (2019): {number(pop_2019, accuracy = 1)}<br>
-  Life Expectancy - Females: {number(e0F, accuracy = 0.1)}<br>
-  Life Expectancy - Males: {number(e0M, accuracy = 0.1)}<br>
-  Total Fertility Rate: {number(tfr, accuracy = 0.01)}<br>
-  Sex Ratio: {number(sexRatio, accuracy = 0.01)}<br>
-  <i>(Source: WPP 2019)</i><br>
+  Population: {number(population_2021, accuracy = 1)}<br>
+  Life Expectancy - Females: {number(e0f_2021, accuracy = 0.1)}<br>
+  Life Expectancy - Males: {number(e0m_2021, accuracy = 0.1)}<br>
+  Total Fertility Rate: {number(tfr_2021, accuracy = 0.01)}<br>
+  <i>(Year: 2021)</i><br>
   "
   ) %>%
     purrr::map(htmltools::HTML)
@@ -72,8 +72,8 @@ plot_map <- function(location,
       weight       = 0.1,
       smoothFactor = .1,
       opacity      = 1,
-      fillOpacity  = .5,
-      fillColor    = ~ colorQuantile("YlOrRd", e0F)(e0F),
+      fillOpacity  = .25,
+      fillColor    = ~ colorQuantile("YlOrRd", e0f_2021)(e0f_2021),
       highlightOptions = highlightOptions(
         color  = "white",
         weight = 2,
@@ -200,9 +200,9 @@ plot_change <- function(L1, L2,
 #' @param perc Logical. If TRUE data will be displayed as percentages else
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
-#' @examples
-#' D <- data_gbd2019_cod # cod data
-#' cod <- D[D$region == "ROMANIA" & D$sex == "both" & D$period == 2019, ]
+#' #' @examples
+#' D <- data_gbd2021_cod # cod data
+#' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
 #' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
@@ -329,7 +329,8 @@ plot_decompose <- function(object,
 
   levels(object$`Age Interval`) <- 
     c("0", 
-      "1-4",
+      "1",
+      "2-4",
       "5-9",
       "10-14",
       "15-19",

@@ -22,13 +22,13 @@ period of time.
 }
 \examples{
 # Data
-L <- data_gbd2019_lt
+L <- data_gbd2021_lt
 
 # Select Life Table 1 & 2
-region1 = "ROMANIA"
-region2 = "MEXICO"
+region1 = "Romania"
+region2 = "Mexico"
 sex     = "female"
-year    = 2019
+year    = 2021
 
 L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
 L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]

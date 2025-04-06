@@ -1,7 +1,8 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Sun Sep 29 20:41:09 2024
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 21:23:38 2025
+# ------------------------------------------------- #
+
 
 #' UI - dashboard page
 #' @keywords internal
@@ -9,6 +10,14 @@
 ui_dashbord <- function() {
   
   tagList(
+    # Add CSS to adjust the plot container size to half the screen
+    tags$style(HTML("
+    #plot {
+      width: 50%;   # Half the width of the screen
+      height: 50vh; # Half the height of the viewport
+      margin: auto; # Center it on the screen
+    }
+  ")),
     
     # # Disable the vertical scroll bar in shiny dashboard
     # tags$head(
@@ -163,7 +172,7 @@ side_panel <- function() {
       inputId = "time_slider",
       label = "Year",
       choices = lemur::data_app_input$period,
-      selected = 2019,
+      selected = 2021,
       grid = TRUE
     ),
     shinyBS::bsTooltip(
@@ -268,25 +277,25 @@ side_panel <- function() {
     conditionalPanel(
       condition = "input.mode == 'mode_sdg2'",
       slider_input_(inputId = "sdg2_1", label   = "Cardiovascular Diseases:"),
-      slider_input_(inputId = "sdg2_2", label   = "Chronic Respiratory Diseases:"),
-      slider_input_(inputId = "sdg2_3", label   = "Diabetes:"),
+      slider_input_(inputId = "sdg2_2", label   = "Chronic Respiratory diseases:"),
+      slider_input_(inputId = "sdg2_3", label   = "Diabetes mellitus:"),
       slider_input_(inputId = "sdg2_4", label   = "Enteric Infections:"),
-      slider_input_(inputId = "sdg2_5", label   = "Exposure to Forces of Nature:"),
+      slider_input_(inputId = "sdg2_5", label   = "Exposure to forces of nature:"),
       slider_input_(inputId = "sdg2_6", label   = "HIV/ AIDS / STD:"),
       slider_input_(inputId = "sdg2_7", label   = "Injuries (excl. Poisonings):"),
       slider_input_(inputId = "sdg2_8", label   = "Interpersonal Violence:"),
-      slider_input_(inputId = "sdg2_9", label   = "Kidney Disease:"),
+      slider_input_(inputId = "sdg2_9", label   = "Kidney disease (excl. Diabetes):"),
       slider_input_(inputId = "sdg2_10", label   = "Malaria:"),
       slider_input_(inputId = "sdg2_11", label   = "Maternal disorders:"),
-      slider_input_(inputId = "sdg2_12", label   = "Neglected Tropical Diseases (excl. Malaria):"),
+      slider_input_(inputId = "sdg2_12", label   = "Neglected tropical diseases (excl. Malaria):"),
       slider_input_(inputId = "sdg2_13", label   = "Neonatal disorders:"),
       slider_input_(inputId = "sdg2_14", label   = "Neoplasms:"),
       slider_input_(inputId = "sdg2_15", label   = "Other Communicable:"),
       slider_input_(inputId = "sdg2_16", label   = "Other Non-Communicable:"),
       slider_input_(inputId = "sdg2_17", label   = "Poisonings:"),
       slider_input_(inputId = "sdg2_18", label   = "Respiratory Infections (excl. Tuberculosis):"),
-      slider_input_(inputId = "sdg2_19", label   = "Self-Harm:"),
-      slider_input_(inputId = "sdg2_20", label   = "Transport Injuries:"),
+      slider_input_(inputId = "sdg2_19", label   = "Self-harm:"),
+      slider_input_(inputId = "sdg2_20", label   = "Transport injuries:"),
       slider_input_(inputId = "sdg2_21", label   = "Tuberculosis:"),
     ),
     # ******************************************************************
@@ -347,14 +356,14 @@ chart_1 <- function(width_, height_ = 1, offset_ = 0) {
       
       leafletOutput(
         outputId = "figure1",
-        height = 354.33 * height_
+        height = "41.5vh"
       )
     )
   )
 }
 
 #' @keywords internal
-chart_2 <- function(width_, height_ = 1, offset_ = 0) {
+chart_2 <- function(width_, offset_ = 0) {
   column(
     width = width_,
     style = 'padding:0px;',
@@ -375,14 +384,14 @@ chart_2 <- function(width_, height_ = 1, offset_ = 0) {
       
       plotlyOutput(
         outputId = "figure2",
-        height = 332.7 * height_
+        height = "40vh"
       )
     )
   )
 }
 
 #' @keywords internal
-chart_3 <- function(width_, height_ = 1, offset_ = 0) {
+chart_3 <- function(width_, offset_ = 0) {
   column(
     width = width_,
     style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
@@ -407,14 +416,14 @@ chart_3 <- function(width_, height_ = 1, offset_ = 0) {
       
       plotlyOutput(
         outputId = "figure3",
-        height = 330 * height_
+        height = "38vh"
       )
     )
   )
 }
 
 #' @keywords internal
-chart_4 <- function(width_, height_ = 1, offset_ = 0) {
+chart_4 <- function(width_, offset_ = 0) {
   column(
     width = width_,
     style = 'padding:0px;',
@@ -441,7 +450,7 @@ chart_4 <- function(width_, height_ = 1, offset_ = 0) {
       
       plotlyOutput(
         outputId = "figure4",
-        height = 330 * height_
+        height = "38vh"
       )
     )
   )

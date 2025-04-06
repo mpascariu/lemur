@@ -52,14 +52,14 @@ with defaults set to approximate their recommendations for replacement
 ordering and result averaging.
 }
 \examples{
-L <- data_gbd2019_lt  # life tables
-D <- data_gbd2019_cod # cod data
+L <- data_gbd2021_lt  # life tables
+D <- data_gbd2021_cod # cod data
 
 # Select two Life Tables
-region1 = "ROMANIA"
-region2 = "MEXICO"
+region1 = "Romania"
+region2 = "Mexico"
 sex     = "male"
-year    = 2019
+year    = 2021
 
 lt1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
 lt2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]

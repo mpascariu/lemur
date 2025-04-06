@@ -5,7 +5,7 @@
 \alias{data_cod_mapping}
 \title{Causes of Death List Mapped to ICD Codes}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 61 rows and 7 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 377 rows and 10 columns.
 }
 \usage{
 data_cod_mapping
@@ -13,8 +13,7 @@ data_cod_mapping
 \description{
 This table contains the cause of death list used in the package
 mapped to International Classification of Diseases (ICD) codes: ICD-10,
-ICD-10 used in hospital/claim analyses, ICD-9 and ICD-9 used in
-hospital/claim analyses.
+ICD-10 used in hospital/claim analyses and ICD-9.
 }
 \examples{
 data_cod_mapping

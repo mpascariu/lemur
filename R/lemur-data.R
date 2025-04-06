@@ -1,50 +1,51 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Tue Nov 16 21:28:37 2021
-# --------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 22:15:37 2025
+# ------------------------------------------------- #
 
-#' Abridged life table between 1990 and 2019 -- Global Burden of Disease Study 2019
-#'
+
+#' Abridged life table between 1990 and 2021 -- Global Burden of Disease Study 2022
+#' Life tables constructed using the GBD2021 probability of death data.
+#' 
 #' @source
-#' United Nations, Department of Economic and Social Affairs,
-#' Population Division (2019). World Population Prospects 2019,
-#' \href{http://ghdx.healthdata.org/record/ihme-data/gbd-2019-life-tables-1950-2019}{
-#'  Online Edition. Rev. 1.}
-#'
+#' Global Burden of Disease Collaborative Network.
+#' Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2022.
+#' Available from https://vizhub.healthdata.org/gbd-results/.
+#' \href{https://vizhub.healthdata.org/gbd-results/}{
+#'  Global Burden of Disease Study 2021 (GBD 2021) Results}
 #' @examples
-#' data_gbd2019_lt
-"data_gbd2019_lt"
+#' data_gbd2021_lt
+"data_gbd2021_lt"
 
 
-#' Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019
+#' Causes of Death Data between 1990 and 2021 -- Global Burden of Disease Study 2022
 #'
 #' @source
 #' Global Burden of Disease Collaborative Network.
-#' Global Burden of Disease Study 2019 (GBD 2019) Results.
-#' Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2020.
-#' Available from http://ghdx.healthdata.org/gbd-results-tool.
-#'
+#' Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2022.
+#' Available from https://vizhub.healthdata.org/gbd-results/.
+#' \href{https://vizhub.healthdata.org/gbd-results/}{
+#'  Global Burden of Disease Study 2021 (GBD 2021) Results}
 #' @examples
-#' data_gbd2019_cod
-"data_gbd2019_cod"
+#' data_gbd2021_cod
+"data_gbd2021_cod"
 
-#' Causes of Death Data between 1990 and 2019 -- Global Burden of Disease Study 2019
+#' Causes of Death Data between 1990 and 2021 -- Global Burden of Disease Study 2022
 #'
-#' In this data object the death count data (GBD2019) is grouped in such a way
+#' In this data object the death count data (GBD2021) is grouped in such a way
 #' that make possible the tracking of the evolution of the UN's
 #' Sustainable Development Goals.
-#' @inherit data_gbd2019_cod source
+#' @inherit data_gbd2021_cod source
 #' @examples
-#' data_gbd2019_sdg
-"data_gbd2019_sdg"
+#' data_gbd2021_sdg
+"data_gbd2021_sdg"
 
 
 #' Causes of Death List Mapped to ICD Codes
 #'
 #' This table contains the cause of death list used in the package
 #' mapped to International Classification of Diseases (ICD) codes: ICD-10,
-#' ICD-10 used in hospital/claim analyses, ICD-9 and ICD-9 used in
-#' hospital/claim analyses.
+#' ICD-10 used in hospital/claim analyses and ICD-9.
 #'
 #' @examples
 #' data_cod_mapping
@@ -53,7 +54,7 @@
 #' Input data for the shiny app
 "data_app_input"
 
-#' Simple features data for the map
+#' Simple features data for world country polygons used in mapping
 #' @seealso \code{\link{plot_map}}
 "data_sf"
 
@@ -61,9 +62,9 @@
 # Hack CRAN check warnings related to tidyverse coding style
 globalVariables(
   c("data_sf",
-    "data_gbd2019_lt",
-    "data_gbd2019_cod",
-    "data_gbd2019_sdg",
+    "data_gbd2021_lt",
+    "data_gbd2021_cod",
+    "data_gbd2021_sdg",
     "data_cod_mapping",
     "data_app_input"
   ))

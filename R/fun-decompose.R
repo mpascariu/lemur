@@ -1,7 +1,8 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 17:46:34 2021
-# --------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 20:27:33 2025
+# ------------------------------------------------- #
+
 
 #' Perform decomposition of age-specific mortality contributions
 #' in life expectancy between any two regions/time periods
@@ -15,21 +16,21 @@
 #' @references ...
 #' @examples
 #' # Data
-#' L <- data_gbd2019_lt
-#'
+#' L <- data_gbd2021_lt
+#' 
 #' # Select Life Table 1 & 2
-#' region1 = "ROMANIA"
-#' region2 = "MEXICO"
+#' region1 = "Romania"
+#' region2 = "Mexico"
 #' sex     = "female"
-#' year    = 2019
-#'
+#' year    = 2021
+#' 
 #' L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
 #' L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-#'
+#' 
 #' # Age decomposition
 #' dec <- decompose_by_age(L1, L2)
 #' dec
-#'
+#' 
 #' plot_decompose(dec)
 #' @export
 decompose_by_age <- function(L1, L2){
@@ -121,30 +122,30 @@ decompose_by_age <- function(L1, L2){
 #' \code{DemoDecomp::stepwise_replacement} function maintained by Tim RIFFE.
 #' @references ...
 #' @examples
-#' L <- data_gbd2019_lt  # life tables
-#' D <- data_gbd2019_cod # cod data
-#'
+#' L <- data_gbd2021_lt  # life tables
+#' D <- data_gbd2021_cod # cod data
+#' 
 #' # Select two Life Tables
-#' region1 = "ROMANIA"
-#' region2 = "MEXICO"
+#' region1 = "Romania"
+#' region2 = "Mexico"
 #' sex     = "male"
-#' year    = 2019
-#'
+#' year    = 2021
+#' 
 #' lt1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
 #' lt2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-#'
+#' 
 #' # Select COD corresponding data
 #' cod1 <- D[D$region == region1 & D$sex == sex & D$period == year, ]
 #' cod2 <- D[D$region == region2 & D$sex == sex & D$period == year, ]
-#'
+#' 
 #' ## Example of decomposition by age and cause of death
 #' dec  <- decompose_by_cod(L1 = lt1,
 #'                          L2 = lt2,
 #'                          C1 = cod1,
 #'                          C2 = cod2)
-#'
+#' 
 #' dec
-#'
+#' 
 #' plot_decompose(dec)
 #' @export
 decompose_by_cod <- function(L1,

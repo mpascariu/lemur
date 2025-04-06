@@ -17,6 +17,6 @@ plot_map(location, zoom = 5, data = lemur::data_sf)
 Plot map
 }
 \examples{
-plot_map(location = "MEXICO")
+plot_map(location = "Mexico")
 
 }

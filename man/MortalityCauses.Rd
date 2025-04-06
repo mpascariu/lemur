@@ -22,9 +22,4 @@ Authors:
   \item Vladimir Canudas-Romo (\href{https://orcid.org/0000-0001-6532-0089}{ORCID})
 }
 
-Other contributors:
-\itemize{
-  \item Daniel Valdenegro [contributor]
-}
-
 }

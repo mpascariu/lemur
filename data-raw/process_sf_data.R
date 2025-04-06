@@ -1,14 +1,13 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Wed Nov 17 18:49:24 2021
-# --------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Apr  6 20:20:48 2025
+# ------------------------------------------------- #
+
 remove(list = ls())
 library(tidyverse)
 library(rnaturalearth)
 library(giscoR)
-library(countrycode)
 library(sf)
-library(wpp2019)
 
 
 # READ countries mapping -----------------------------------------
@@ -90,17 +89,15 @@ taiwan_polygons <- ne_countries(scale = "small", returnclass = "sf") %>%
   rename(iso3_code = iso_a3) %>% 
   filter(iso3_code == "TWN")
 
-world <- bind_rows(world_polygons, taiwan_polygons) %>% 
+data_sf <- bind_rows(world_polygons, taiwan_polygons) %>% 
   # Append additional information: population size, fertility, and life expectancy
   left_join(., region_map, by = "iso3_code") %>% 
   left_join(., gbd_pop, by = c("region")) %>% 
   left_join(., gbd_fertility, by = c("region")) %>% 
   left_join(., gbd_lt, by = c("region")) %>% 
   cbind(st_coordinates(st_centroid(., of_largest_polygon = TRUE))) %>% 
-  rename(lon = X, lat = Y) %>% 
-  filter(!is.na(region)) 
-
-
+  rename(name = region, lon = X, lat = Y) %>% 
+  filter(!is.na(name)) 
 
 
 dt <- format(Sys.Date(), '%Y%m%d')
