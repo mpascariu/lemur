@@ -1,10 +1,9 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 0.16.0
+Version: 0.20.0
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
-  person("Daniel", "Valdenegro", role = "ctb"),
   person("Vladimir", "Canudas-Romo", role = "aut", comment = c(ORCID = "0000-0001-6532-0089"))
   )
 Description: The life expectancy monitoring tool allows the user to selected 

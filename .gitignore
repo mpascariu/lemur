@@ -46,9 +46,14 @@ vignettes/*.pdf
 .Renviron
 
 # Excel Data
-data-raw/WPP2019LT/*.xlsx
-data-raw/GBD2019LT/*.zip
-data-raw/GBD2019COD/*.zip
-data-raw/GBD2019COD_20211013/*.zip
+
+data-raw/IHME_GBD2021_Data/*.zip
+data-raw/IHME_GBD2021_Data/CoD_Level_1/*.zip
+data-raw/IHME_GBD2021_Data/CoD_Level_2/*.zip
+data-raw/IHME_GBD2021_Data/CoD_Level_3/*.zip
+data-raw/IHME_GBD2021_Data/PoD/*.zip
+data-raw/IHME_GBD2021_Data/Fertility/*.zip
+data-raw/IHME_GBD2021_Data/Population/*.zip
+data-raw/IHME_GBD2021_Data/*.Rdata
 data-raw/*.Rdata
 docs/*.*

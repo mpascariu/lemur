@@ -4,12 +4,10 @@
 **Development team and maintainers**
 
 **Marius D. PASCARIU** PhD
-Biometric Risks Modeling Chapter, SCOR Global Life
+Allianz Suisse
 
 Prof. **Jose Manuel ABURTO**
-University of Oxford
-
-**Doug Leasure** PhD
+London School of Hygiene and Tropical Medicine
 University of Oxford
 
 Prof. **Vladimir CANUDAS-ROMO**
