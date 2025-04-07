@@ -154,7 +154,6 @@ app_server <- function(input, output, session) {
         select_x   = 0:110,
         cod_change = 0
       )
-      print(M)
       
       M[  , "Cardiovascular Diseases"]                     <- input$sdg2_1  
       M[  , "Chronic Respiratory diseases"]                <- input$sdg2_2  

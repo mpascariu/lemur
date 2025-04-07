@@ -1,10 +1,13 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 19:51:07 2025
+# Last update: Mon Apr  7 17:25:41 2025
 # ------------------------------------------------- #
+
 
 remove(list = ls())
 library(tidyverse)
+library(janitor)
+library(readxl)
 
 path_map <- paste0(getwd(),"/data-raw/GBD_2021_Data_Tools_Guide/")
 file_map <- "IHME_GBD_2021_A1_HIERARCHIES_Y2024M05D15.XLSX"
@@ -26,7 +29,8 @@ countries <- region_map %>%
   filter(type == "country") %>% 
   select(location_name) %>% 
   unlist() %>% 
-  unname()
+  unname() %>% 
+  sort()
 
 cod_map <- read_excel(
   path = path_file_map,

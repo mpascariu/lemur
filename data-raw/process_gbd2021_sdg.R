@@ -263,14 +263,6 @@ cases <- gbd2 %>%
   unlist() %>% 
   as.character()
 
-threshold = 75 # threshold age
-
-gbd2 <- gbd %>% 
-  filter(
-    x >= threshold
-  ) %>%  # use only data above threshold for ungrouping
-  unite("key", key, sep = "-", remove = FALSE) 
-
 system.time({ 
   # THIS LOOP SHOULD TAKE SOME TIME!! Be prepared or go grab a coffee.
   gbd_to_110 <- NULL
