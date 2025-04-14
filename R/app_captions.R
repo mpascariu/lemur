@@ -1,7 +1,8 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Tue Jan 16 18:21:29 2024
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Mon Apr 14 23:49:23 2025
+# ------------------------------------------------- #
+
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
 # WE TRY TO MAKE THEM AS DYNAMIC AS POSSIBLE IN ORDER TO BE INFORMATIVE 
@@ -174,12 +175,15 @@ generate_fig2_captions <- function(mode,
   
   suffix <- if (cod_change == 0) " in life expectancy" else ""
   xlab_part1 <- ifelse(perc, 
-    paste0("Relative difference", suffix),
-    paste0("Difference", suffix)
+    paste0("\nRelative difference", suffix),
+    paste0("\nDifference", suffix)
   )
   
   # Part 2 - increase, decrease how much, where? 
-  xlab_part2 <- if(all(!is.null(cod_target)) & cod_change != 0) {
+  xlab_part2 <- if (mode %in% c("mode_sdg", "mode_sdg2")) {
+    " following the applied changes in mortality risks"
+    
+    } else if(all(!is.null(cod_target)) & cod_change != 0) {
     paste0(
       " following a ", abs(cod_change), "%",
       ifelse(sign(cod_change) == -1, " reduction", " increase"),

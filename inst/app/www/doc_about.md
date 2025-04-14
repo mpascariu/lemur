@@ -17,7 +17,7 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 **Last Update:** "2024-01-29 11:17:17 CET"
 
 **News in previous versions:**
-- 2024-03-06 - v0.20.1 - Update application and library to GBD2021 data;
+- 2024-03-06 - v0.21.0 - Update application and library to GBD2021 data;
 - 2024-01-16 - v0.15.1 - experiment with a second SDG mode that allows changes in individual causes of death; 
 - 2023-11-15 - v0.14.2 - UI bug fix; 
 - 2023-11-01 - v0.14.1 - Fix bug related under five and maternal mortality data; 

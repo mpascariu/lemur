@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Mon Apr  7 17:25:41 2025
+# Last update: Mon Apr 14 22:33:07 2025
 # ------------------------------------------------- #
 
 
@@ -23,7 +23,7 @@ super_regions <- region_map %>%
   select(location_name) %>% 
   unlist() %>% 
   toupper() %>% 
-  unname()
+  unname() 
 
 countries <- region_map %>% 
   filter(type == "country") %>% 
