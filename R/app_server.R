@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 21:37:44 2025
+# Last update: Sun May  4 18:43:07 2025
 # ------------------------------------------------- #
 
 
@@ -375,8 +375,8 @@ app_server <- function(input, output, session) {
       zoom = 3
       
     } else if (input$region1 %in% macro_region) {
-      zoom = 1
-      loc <- "Tunisia" 
+      zoom = 2
+      loc <- "Malta" 
       # Since we don't have the borders for the macro regions
       # select a location in the middle of the map and zoom out
       # just to display the map of the world

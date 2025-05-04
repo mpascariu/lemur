@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 21:23:38 2025
+# Last update: Sun May  4 18:39:48 2025
 # ------------------------------------------------- #
 
 
@@ -19,24 +19,15 @@ ui_dashbord <- function() {
     }
   ")),
     
-    # # Disable the vertical scroll bar in shiny dashboard
-    # tags$head(
-    #   tags$style(
-    #     "body {overflow-y: hidden;}"
-    #   )
-    # ),
+    column(
+      width = 2,
+      side_panel()
+    ),
     
-    tagList(
-      column(
-        width = 2,
-        side_panel()
-      ),
-      
-      column(
-        width = 10,
-        top_panel(),
-        main_panel()
-      )
+    column(
+      width = 10,
+      top_panel(),
+      main_panel()
     )
   )
 }

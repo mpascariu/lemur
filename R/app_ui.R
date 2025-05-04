@@ -1,7 +1,7 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last update: Thu Feb 10 13:49:34 2022
-# --------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun May  4 16:33:57 2025
+# ------------------------------------------------- #
 
 #' The application User-Interface
 #'
@@ -23,9 +23,9 @@ app_ui <- function() {
 ui_tabs <- function() {
   tagList(
     navbarPage(
-      title = tagList("Life Expectancy Monitor"),
+      title       = tagList("Life Expectancy Monitor"),
       windowTitle = "Life Expectancy Monitor",
-      position = "fixed-top",
+      position    = "fixed-top",
       collapsible = TRUE,
 
       # The 5 main tabs defined in 5 separate modules
