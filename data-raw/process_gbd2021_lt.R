@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 15:10:13 2025
+# Last update: Mon May  5 21:55:11 2025
 # ------------------------------------------------- #
 
 remove(list = ls())
@@ -8,6 +8,7 @@ library(tidyverse)
 library(stringr)
 library(readxl)
 library(MortalityLaws)
+library(janitor)
 
 # BUILD LIFE TABLES FROM PROBABILITY OF DEATH GBD DATA
 
@@ -75,7 +76,7 @@ gbd_qxn <- data %>%
   # Capitalize the macro-regions
   mutate(location_name = ifelse(location_level == 3, location_name, toupper(location_name))) %>%
   filter(
-    measure_name == "Probability of death",
+    measure_name == "Life table",
     year %in% year_selection,
     age_name != "All ages"
     ) %>% 
@@ -99,25 +100,26 @@ gbd_qxn <- data %>%
 
 
 
-
-
 # ------------------------------------------
 # BUILD complete abridged life tables with {MortalityLaws}
 
 # we will have to create 6750 life tables covering the 0-110 age range
 # Because we have data on the 0-95 age range we will need to have an intermediary 
 # step on which we extend the death probability vector up to age 110 using the 
-# Kannisto model.
+# Kannisto model. In our case this has to be done without modifying almost at 
+# all the life table records at ages 90 and younger. The GBD results already
+# match pretty well the HMD values, and we don't want to alter that in any way!
 
 cases <- gbd_qxn %>% 
   select(-x, -qxn) %>% 
-  unique()
+  unique() 
 
 n <- nrow(cases)
 
-x_fitted    = seq(55, 80, by = 5)
-x_predicted = seq(55, 110, by = 5)
+x_fitted    = seq(75, 95, by = 5)
+x_predicted = seq(95, 110, by = 5)
 x_full      = c(0:2, seq(5,110, by=5))
+nx          = length(x_full)
 
 i = 1
 
@@ -140,10 +142,11 @@ for(i in 1:n) {
     x = x_fitted, 
     qx = qx_fitted, 
     law = 'kannisto', 
-    opt.method = 'LF2') %>% 
+    opt.method = 'poissonL') %>% 
     predict(., x = x_predicted)
   
-  qx_full = c(unlist(d[d$x <= 50, "qxn"]), qx_predicted)
+  qx_full = c(unlist(d[d$x < x_predicted[1], "qxn"]), qx_predicted)
+  qx_full[nx] <- 1 # make sure last value is 1.
   
   # Life table function
   lt <- LifeTable(
@@ -171,8 +174,6 @@ data_gbd2021_lt <- as_tibble(LTS) %>%
 data_gbd2021_lt %>% 
   filter(is.na(mx)) %>% 
   print(n = Inf)
-
-
 
 # ------------------------------------------
 # include data in the package
