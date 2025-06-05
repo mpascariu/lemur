@@ -12,19 +12,20 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.23.0
+**Monitor Version:** 0.24.0
 
-**Last Update:** 2025-05-05 22:50:32 CEST
+**Last Update:** 2025-06-05 20:05:10 CEST
 
 **News in previous versions:**
+- 2025-06-05 - v0.24.0 - Implement Shiny Bootstrap 5 user interface for improved security;
 - 2025-05-05 - v0.23.0 - Update application and library to GBD2021 data;
 - 2024-01-16 - v0.15.1 - experiment with a second SDG mode that allows changes in individual causes of death; 
 - 2023-11-15 - v0.14.2 - UI bug fix; 
 - 2023-11-01 - v0.14.1 - Fix bug related under five and maternal mortality data; 
 - 2022-06-02 - v0.13.0 - Include the maternal and neonatal mortality in the SDG section;
 - 2022-04-26 - v0.12.2 - Develop server side scaling solution, Postgres SQL etc;
-- 2022-03-17 - v0.11.0 - Add new functionality (bookmarks, reset) and provide a more consistet arrangement of the cod with the ICD classification; 
-- 2022-02-23 - v0.10.0 - Create datatab corresponding to dashboard figures (lifetables, cod distributions and decomposition values); 
+- 2022-03-17 - v0.11.0 - Add new functionality (bookmarks, reset) and provide a more consistent arrangement of the cod with the ICD classification; 
+- 2022-02-23 - v0.10.0 - Create datatab corresponding to dashboard figures (life tables, cod distributions and decomposition values); 
 - 2022-02-10 - v0.9.0 - Update database by adding macro-regions; 
 - 2021-12-09 - v0.8.0 - Change the name of the R library from {MortalityCauses} to {lemur} and add dashboard documentation.
 - 2021-06-03 - v0.4.0 - Important advance in app functionality and figure coordination.

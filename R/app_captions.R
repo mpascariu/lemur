@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Mon Apr 14 23:49:23 2025
+# Last update: Thu Jun  5 20:01:53 2025
 # ------------------------------------------------- #
 
 
@@ -245,24 +245,26 @@ generate_fig3_captions <- function(perc) {
 #' All arguments are shiny inputs
 #' @keywords internal
 generate_fig4_captions <- function(perc, fig4_dim) {
+  if (perc == "TRUE") perc = TRUE
+  if (perc == "FALSE") perc = FALSE
   
   # compute % is necessary
-  if (perc & fig4_dim != "cod") {
+  if (perc & (fig4_dim != "cod")) {
     ttip <- c("fill", "y")
     ylab <- "Change in Life Expectancy at Birth\n[%]"
     xlab <- "Age Group (years)"
     
-  } else if (!perc & fig4_dim != "cod"){
+  } else if (!perc & (fig4_dim != "cod")){
     ttip <- c("fill", "y")
     ylab <- "Change in Life Expectancy at Birth\n(years)"
     xlab <- "Age Group (years)"
     
-  } else if (perc & fig4_dim == "cod"){
+  } else if (perc & (fig4_dim == "cod")){
     ttip = c("fill", "x")
     ylab <- "Causes of Death"
     xlab <- "Change in Life Expectancy at Birth [%]"
     
-  } else if (!perc & fig4_dim == "cod"){
+  } else if (!perc & (fig4_dim == "cod")){
     ttip = c("fill", "x")
     ylab <- "Causes of Death"
     xlab <- "Change in Life Expectancy at Birth [years]"

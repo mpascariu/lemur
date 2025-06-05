@@ -1,6 +1,6 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 0.23.0
+Version: 0.24.0
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -39,7 +39,8 @@ Imports:
   golem (>= 0.5.1),
   DBI (>= 1.2.3),
   RPostgres (>= 1.4.7),
-  markdown (>= 1.13)
+  markdown (>= 1.13),
+  bslib (>= 0.9.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
