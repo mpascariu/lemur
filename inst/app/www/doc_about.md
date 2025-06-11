@@ -12,12 +12,12 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.24.0
+**Monitor Version:** 0.25.0
 
-**Last Update:** 2025-06-05 20:05:10 CEST
+**Last Update:** 2025-06-11 11:39:17 CEST
 
 **News in previous versions:**
-- 2025-06-05 - v0.24.0 - Implement Shiny Bootstrap 5 user interface for improved security;
+- 2025-06-11 - v0.25.0 - Implement Shiny Bootstrap 5 user interface for improved security;
 - 2025-05-05 - v0.23.0 - Update application and library to GBD2021 data;
 - 2024-01-16 - v0.15.1 - experiment with a second SDG mode that allows changes in individual causes of death; 
 - 2023-11-15 - v0.14.2 - UI bug fix; 

@@ -1,7 +1,8 @@
-# --------------------------------------------------- #
-# Author: Marius D. PASCARIU <mpascariu@scor.com>
-# Last update: Wed Apr 27 15:19:32 2022
-# --------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Fri Jun  6 06:41:01 2025
+# ------------------------------------------------- #
+
 
 #' Run the Shiny Application
 #'
@@ -15,20 +16,16 @@
 #' }
 #' @export
 run_app <- function(..., lb = TRUE, serverMode = FALSE) {
-  
-  # requireNamespace("shinyBS", quietly=TRUE)
-  library("shinyBS")
-  
   shinyOptions(serverMode = serverMode)
   
   with_golem_options(
     app = shinyApp(
       ui = app_ui, 
       server = app_server, 
-      options = list("launch.browser" = lb),
+      options = list(launch.browser = lb),
       enableBookmarking = "server",
       uiPattern = "/"
-      ), 
+    ), 
     golem_opts = list(...)
   )
 }

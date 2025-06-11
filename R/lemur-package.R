@@ -1,7 +1,7 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Sun Sep 29 19:07:37 2024
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Fri Jun  6 07:12:26 2025
+# ------------------------------------------------- #
 
 # lemur Package
 
@@ -9,13 +9,11 @@
 #' To learn more about the package, start with the vignettes:
 #' \code{browseVignettes(package = "lemur")}
 #'
-#' @import shinyBS
 #' @import shinyWidgets
 #' @import golem
 #' @import ggplot2
 #' @import data.table
 #' @import sf
-#' @import shinydashboard
 #' @import markdown
 #' @import bslib
 #'

@@ -1,24 +1,23 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Thu Jun  5 20:01:11 2025
+# Last update: Wed Jun 11 10:58:37 2025
 # ------------------------------------------------- #
+
 
 
 #' UI - dashboard page
 #' @keywords internal
 #' @export
 ui_dashbord <- function() {
-  
   layout_sidebar(
-    style = "overflow-y: hidden;",
+    style = "background-color: #fff;",
     sidebar = sidebar(
+      side_panel(),
       width = "400px",
-      div(
-        style = "max-height: 90vh; overflow-y: auto;",  
-        side_panel()
-      )
     ),
-    tagList(
+    # Main content area: always top-aligned
+    div(
+      style = "display: flex; flex-direction: column; justify-content: flex-start; min-height: 100vh;",
       top_panel(),
       main_panel()
     )
@@ -26,19 +25,30 @@ ui_dashbord <- function() {
 }
 
 
+
 #' TOP PANEL
 #' @keywords internal
 top_panel <- function() {
   layout_columns(
-    col_widths = c(4, 5, 2, 1),
-    style = "align-items: top; max-height: 90vh; overflow-y: auto;",
+    col_widths = breakpoints(
+      # Large screens: custom widths (out of 12)
+      lg = c(4, 5, 2, 1),
+      # Medium and small screens: stack all vertically
+      md = c(12, 12, 12, 12),
+      sm = c(12, 12, 12, 12)
+    ),
     
     # Sex selection (conditionally shown)
-    tagList(
+    card(
+      class = "border-0",
       conditionalPanel(
         condition = "input.mode != 'mode_sex'",
         
         tags$style(HTML("
+        .btn-bw {
+        background-color: white;
+        color: black;
+        }
         .btn-silver {
         background-color: black;
         color: white;
@@ -47,10 +57,11 @@ top_panel <- function() {
         background-color: black;
         color: white;
         }
-          .btn-group, .btn-group-justified {
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-  }")),
+        .btn-group, .btn-group-justified {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        }
+        ")),
         
         shinyWidgets::radioGroupButtons(
           inputId = "sex",
@@ -71,7 +82,8 @@ top_panel <- function() {
     ),
     
     # Mode selection
-    tagList(
+    card(
+      class = "border-0",
       shinyWidgets::radioGroupButtons(
         inputId = "mode",
         label   = "Life Expectancy Comparisons",
@@ -92,7 +104,8 @@ top_panel <- function() {
     ),
     
     # Percentage switch
-    tagList(
+    card(
+      class = "border-0",
       shinyWidgets::radioGroupButtons(
         inputId = "perc",
         label = "Data Type",
@@ -110,7 +123,8 @@ top_panel <- function() {
     ),
     
     # Reset button
-    tagList(
+    card(
+      class = "border-0",
       tags$h5("Reset", style = "margin: 0px; padding: 0px; font-size: 14px;"),
       shinyWidgets::circleButton(
         inputId = "reset",
@@ -136,9 +150,8 @@ side_panel <- function() {
       });
     ")),
     
-    # Container div with styles to prevent horizontal scrolling
     tags$div(
-      style = "max-height: 90vh; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box;",
+      style = "overflow-y: hidden; overflow-x: hidden; width: 100%; box-sizing: border-box;",
       
       # Region selection
       layout_columns(
@@ -309,9 +322,13 @@ side_panel <- function() {
 main_panel <- function() {
   tagList(
     div(
-      style = "align-items: top; margin-top: -5px; margin-bottom: -25px;",
+      style = "align-items: top; margin-top: 0px; margin-bottom: 0px;",
       layout_columns(
-        col_widths = c(7, 5),
+        col_widths = breakpoints(
+          lg = c(7, 5),
+          md = c(12, 12),
+          sm = c(12, 12)
+        ),
         gap = "4px",
         chart_1(),
         chart_2()
@@ -319,9 +336,13 @@ main_panel <- function() {
     ),
     
     div(
-      style = "align-items: top; margin-top: -20px; margin-bottom: -25px;",
+      style = "align-items: top; margin-top: 0px; margin-bottom: 0px;",
       layout_columns(
-        col_widths = c(6, 6),
+        col_widths = breakpoints(
+          lg = c(6, 6),
+          md = c(12, 12),
+          sm = c(12, 12)
+        ),
         gap = "4px",
         chart_3(),
         chart_4()
@@ -331,158 +352,121 @@ main_panel <- function() {
 }
 
 
-
-
+#' @keywords internal
+boxTitleInput2 <- function(title, ...) {
+  card_header(
+    style = "background-color: #fff; border-bottom: none;",
+    tags$div(
+      style = "display: flex; align-items: center; justify-content: space-between; width: 100%;",
+      tags$span(title, style = "font-weight: bold; font-size: 1.1rem;"),
+      
+      shinyWidgets::dropdownButton(
+        size   = "sm",
+        label  = "",
+        icon   = icon("sliders-h"),
+        inline = TRUE,
+        width  = "180px",
+        circle = FALSE,
+        status = "bw",
+        ...
+      )
+    )
+  )
+}
 
 
 #' @keywords internal
 chart_1 <- function(height_ = 1) {
-  layout_columns(
-    width = 12, # Fill the parent column
-    style = 'padding:0px 0px 0px 18px;',
-    boxFrame(
-      style = 'padding:0px',
-      title = tags$div(
-        "World Map",
-        style = "display: inline-block; font-weight: bold; padding:0px;"
-      ),
-      leafletOutput(
-        outputId = "figure1",
-        height = "41.5vh"
+  card(
+    class = "border-0",
+    card_header(
+      style = "background-color: #fff; border-bottom: none;",
+      tags$div(
+        style = "display: flex; align-items: center; justify-content: space-between; width: 100%;",
+        tags$span("World Map", style = "font-weight: bold; font-size: 1.1rem;")
+        )
+    ),
+    card_body(
+      leafletOutput(outputId = "figure1")
       )
-    )
   )
 }
+
 
 
 #' @keywords internal
 chart_2 <- function() {
-  layout_columns(
-    width = 12, # Fills the parent column
-    style = 'padding:0px;',
-    boxFrame(
-      title = boxTitleInput(
-        title = "Difference in Life Expectancy at various ages",
-        db_style = "padding: 0px 0px 0px 340px;",
-        selectInput(
-          inputId = "fig2_x",
-          label = "Ages to be displayed",
-          choices = lemur::data_app_input$x,
-          selected = seq(0, 110, 10),
-          multiple = TRUE
-        )
-      ),
-      plotlyOutput(
-        outputId = "figure2",
-        height = "40vh"
+  card(
+    class = "border-0",
+    boxTitleInput2(
+      title = "Difference in Life Expectancy at various ages",
+      selectInput(
+        inputId = "fig2_x",
+        label = "Ages to be displayed",
+        choices = lemur::data_app_input$x,
+        selected = seq(0, 110, 10),
+        multiple = TRUE
       )
+    ),
+    card_body(
+      plotlyOutput(outputId = "figure2")
     )
   )
 }
-
 
 #' @keywords internal
 chart_3 <- function() {
-  layout_columns(
-    width = 12, # Fills the parent column (parent layout controls actual width)
-    style = 'padding-right:0px; padding-top:0px; padding-bottom:0px',
-    boxFrame(
-      title = boxTitleInput(
-        title = "Cause of Death Distribution",
-        db_style = "padding: 0px 0px 0px 450px;",
-        radioGroupButtons(
-          inputId = "fig3_chart_type",
-          label = "View by:",
-          choices = c("Bar-plot" = "barplot"),
-          justified = TRUE,
-          checkIcon = list(
-            yes = tags$i(class = "fa fa-circle", style = "color: black"),
-            no = tags$i(class = "fa fa-circle-o")
-          ),
-          direction = "vertical"
-        )
-      ),
-      plotlyOutput(
-        outputId = "figure3",
-        height = "38vh"
+  card(
+    class = "border-0",
+    boxTitleInput2(
+      title = "Cause of Death Distribution",
+      radioGroupButtons(
+        inputId = "fig3_chart_type",
+        label = "View by:",
+        choices = c("Bar-plot" = "barplot"),
+        justified = TRUE,
+        checkIcon = list(
+          yes = tags$i(class = "fa fa-circle", style = "color: black"),
+          no = tags$i(class = "fa fa-circle-o")
+        ),
+        direction = "vertical"
       )
+    ),
+    card_body(
+      plotlyOutput(outputId = "figure3")
     )
   )
 }
+
 
 #' @keywords internal
 chart_4 <- function() {
-  layout_columns(
-    width = 12, # Fills the parent column; parent controls actual width
-    style = 'padding:0px;',
-    boxFrame(
-      title = boxTitleInput(
-        title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
-        db_style = "padding: 0px 0px 0px 410px;",
-        radioGroupButtons(
-          inputId = "fig4_dim",
-          label = "View by:",
-          choices = c(
-            "Age-and-COD" = "both",
-            "Age" = "age",
-            "COD" = "cod"
-          ),
-          justified = TRUE,
-          checkIcon = list(
-            yes = tags$i(class = "fa fa-circle", style = "color: black"),
-            no = tags$i(class = "fa fa-circle-o")
-          ),
-          direction = "vertical"
-        )
-      ),
-      plotlyOutput(
-        outputId = "figure4",
-        height = "38vh"
+  card(
+    class = "border-0",
+    boxTitleInput2(
+      title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
+      radioGroupButtons(
+        inputId = "fig4_dim",
+        label = "View by:",
+        choices = c(
+          "Age-and-COD" = "both",
+          "Age" = "age",
+          "COD" = "cod"
+        ),
+        justified = TRUE,
+        checkIcon = list(
+          yes = tags$i(class = "fa fa-circle", style = "color: black"),
+          no = tags$i(class = "fa fa-circle-o")
+        ),
+        direction = "vertical"
       )
+    ),
+    card_body(
+      plotlyOutput(outputId = "figure4")
     )
   )
 }
 
-
-#' @keywords internal
-boxFrame <- function(...,
-                     width = NULL,
-                     solidHeader = TRUE,
-                     style = NULL) {
-  box(
-    width = width,
-    solidHeader = solidHeader,
-    style = style,
-    ...
-  )
-}
-
-
-#' @keywords internal
-boxTitleInput <- function(title, db_style, ...) {
-
-  tagList(
-    tags$div(
-      title,
-      style = "display: inline-block; font-weight: bold; padding:0px; margin: -20px 0px 0px 5px;",
-      shinyWidgets::dropdownButton(
-        size   = "xs",
-        label  = "",
-        right  = TRUE,
-        icon   = icon("sliders-h"),
-        inline = TRUE,
-        width  = "50px",
-        circle = FALSE,
-        ...
-      )
-    ),
-
-    tags$div(
-      # "subtitle....",
-      style = "display: padding:0px; margin: 0px 0px -20px 5px; font-size: 12px;"
-    ),
-  )
-}
 
 #' @keywords internal
 slider_input_ <- function(
