@@ -12,9 +12,9 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.25.0
+**Monitor Version:** 0.25.1
 
-**Last Update:** 2025-06-11 11:39:17 CEST
+**Last Update:** 2025-09-28 16:17:14 CEST
 
 **News in previous versions:**
 - 2025-06-11 - v0.25.0 - Implement Shiny Bootstrap 5 user interface for improved security;

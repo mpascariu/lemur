@@ -19,7 +19,7 @@ psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
   cause_name VARCHAR,
   deaths FLOAT(12)
 );
-COPY cod FROM '/data/data_gbd2019_cod.csv' DELIMITER ',' CSV HEADER;"
+COPY cod FROM '/data/data_gbd2021_cod.csv' DELIMITER ',' CSV HEADER;"
 
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 "CREATE TABLE sdg (
@@ -30,7 +30,7 @@ psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
   cause_name VARCHAR,
   deaths FLOAT(12)
 );
-COPY sdg FROM '/data/data_gbd2019_sdg.csv' DELIMITER ',' CSV HEADER;"
+COPY sdg FROM '/data/data_gbd2021_sdg.csv' DELIMITER ',' CSV HEADER;"
 
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 "CREATE TABLE lt (
@@ -48,4 +48,4 @@ psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
   ttx FLOAT(15),
   ex FLOAT(15)
 );
-COPY lt FROM '/data/data_gbd2019_lt.csv' DELIMITER ',' CSV HEADER;"
+COPY lt FROM '/data/data_gbd2021_lt.csv' DELIMITER ',' CSV HEADER;"

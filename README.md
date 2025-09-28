@@ -24,6 +24,9 @@ in life expectancy under those selected scenarios of mortality change.
 Furthermore, the tool lets the user compare cause-of-death profiles and
 life expectancies across time, countries and sexes.
 
+The tool is hosted by the **HASS Digital Research Hub (HDRH)** at the
+Australian National University (ANU).
+
 ## Installation
 
 You can install the development version from
@@ -44,23 +47,10 @@ lemur::run_app()
 ```
 
 [![App
-Screenshot](inst/app/www/app_lemur_20220315.png)](https://github.com/mpascariu/lemur)
+Screenshot](inst/app/www/app_lemur_20250928.png)](https://github.com/mpascariu/lemur)
 
 All the simulations done in the monitor can be executed using the `R`
 syntax directly in the R/Rstudio console. See the available data object
-`data_gbd2019_cod`, `data_gbd2019_lt` or the help pages of relevant
+`data_gbd2021_cod`, `data_gbd2021_lt` or the help pages of relevant
 functions like `decompose_by_cod()`, `modify_life_table()` and the
-related `plot` functions.
-
-### Support us
-
-We are researchers who enjoys making useful utilities. You’re probably
-here as a result of our free software and apps.
-
-The software solutions we create have the purpose of supporting
-teachers, students and anyone else interested in life expectancy
-modeling and demographic research. All of this is developed in our
-limited, spare time, and your contribution helps to remind us how
-important our work is.
-
-donate (ETH / ERC20): `0x58CfD867256e0a93F98873C0B9C45a4fEfF974e4`
+related `plot_` functions.
