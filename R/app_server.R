@@ -1,8 +1,7 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun May  4 18:43:07 2025
+# Last update: Wed Oct  1 20:57:35 2025
 # ------------------------------------------------- #
-
 
 #' The application server-side
 #'
@@ -18,7 +17,20 @@ app_server <- function(input, output, session) {
   # indicared source and to query the data according to input in the dashboard.
   # If serverMode = TRUE, we read the postgresSQL data otherwise the local data.
   
-  serverMode    <- reactive(getShinyOption("serverMode"))
+  serverMode <- reactive(getShinyOption("serverMode"))
+  
+  # Create pool only if necessary
+  db_pool <- reactive(create_db_pool(run_db = serverMode()))
+  
+  reactive(
+    onStop(function() {
+      if (!is.null(db_pool())) {
+        pool::poolClose(db_pool())
+      }
+    })
+  )
+  
+  # identify the filter function
   queryFunction <- reactive(ifelse(serverMode(), "dt_filter_sql", "dt_filter_local"))
 
   # 1) cod data ---
@@ -35,7 +47,8 @@ app_server <- function(input, output, session) {
           region1 = input$region1,
           region2 = input$region2,
           gender  = input$sex,
-          year    = input$time_slider
+          year    = input$time_slider,
+          db_pool = db_pool()
           )
         ) %>%
         mutate(
@@ -57,7 +70,8 @@ app_server <- function(input, output, session) {
           region1 = input$region1,
           region2 = input$region2,
           gender  = input$sex,
-          year    = input$time_slider
+          year    = input$time_slider,
+          db_pool = db_pool()
         )
       ) %>% 
         mutate(
@@ -79,7 +93,8 @@ app_server <- function(input, output, session) {
         region1 = input$region1,
         region2 = input$region2,
         gender  = input$sex,
-        year    = input$time_slider
+        year    = input$time_slider,
+        db_pool = db_pool()
       )
     ) 
     
@@ -271,6 +286,8 @@ app_server <- function(input, output, session) {
   })
   
   output$lt_initial  = DT::renderDataTable({
+    req(data_fig())
+    
     data_fig()$lt_initial %>% 
       select(-region, -period, -sex) %>% 
       rename(
@@ -283,6 +300,8 @@ app_server <- function(input, output, session) {
   })
   
   output$lt_final = DT::renderDataTable({
+    req(data_fig())
+    
     data_fig()$lt_final %>% 
       select(-region, -period, -sex) %>% 
       rename(
@@ -294,6 +313,8 @@ app_server <- function(input, output, session) {
   })
   
   output$cod_initial = DT::renderDataTable({
+    req(data_fig())
+    
     data_fig()$cod_initial %>% 
       select(-region, -period, -sex) %>% 
       pivot_wider(
@@ -306,6 +327,8 @@ app_server <- function(input, output, session) {
   })
   
   output$cod_final = DT::renderDataTable({
+    req(data_fig())
+    
     data_fig()$cod_final %>% 
       select(-region, -period, -sex) %>% 
       pivot_wider(
@@ -318,6 +341,8 @@ app_server <- function(input, output, session) {
   })
   
   output$decomposition_data <- DT::renderDataTable({
+    req(data_decomp())
+    
     data_decomp() %>% 
       select(-region, -period, -sex, -x.int) %>% 
       mutate(decomposition = round(decomposition, 6)) %>% 
@@ -331,6 +356,7 @@ app_server <- function(input, output, session) {
   })
   
   output$reduction_matrix <- DT::renderDataTable({
+    req(data_cod_change())
     
     data_cod_change() %>% 
       as_tibble() %>% 
@@ -395,6 +421,9 @@ app_server <- function(input, output, session) {
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
     
+    # Stop execution if no dataset is selected
+    req(data_fig(), cancelOutput = TRUE)
+    
     # create figure caption
     fig2_caption <- generate_fig2_captions(
       input$mode,
@@ -437,6 +466,8 @@ app_server <- function(input, output, session) {
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlotly({
 
+    req(data_fig(), cancelOutput = TRUE)
+    
     if (input$mode == "mode_cod") {
       p <- plot_cod(
         cod  = data_fig()$cod_final,
@@ -493,7 +524,9 @@ app_server <- function(input, output, session) {
 
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlotly({
-
+    
+    req(data_decomp(), cancelOutput = TRUE)
+    
     fig4_captions <- generate_fig4_captions(
       input$perc,
       input$fig4_dim
@@ -607,51 +640,6 @@ app_server <- function(input, output, session) {
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS used in the Server
-
-#' Filter dataset using data.table methods
-#' @keywords internal
-dt_filter_local <- function(data, mode, region1, region2, gender, year) {
-
-  # we use data.table method to filter here because is faster
-  # and we will do this all a lot
-  dt <- as.data.table(data)
-  dt <- dt[period == year]
-  dt <- dt[region %in% c(region1, region2)]
-  
-  if (mode != "mode_sex") {
-    dt <- dt[sex == gender]
-  }
-
-  return(as_tibble(dt))
-}
-
-# Query data from a PostgresSQL. This would replace the local data and  the 
-# dt_filter() function 
-dt_filter_sql <- function(data, mode, region1, region2, gender, year) {
-  con <- DBI::dbConnect(
-    RPostgres::Postgres(),
-    host     = 'postgres', #"3.10.114.240",
-    dbname   = "gbd2021",
-    user     = "lemur",
-    # password = Sys.getenv(c('SQL_PASS')),
-    password = "tx*Oj3HjwAlNbNY0XrY3288E#",
-    port     = 5432)
-  
-  query <- paste0("SELECT * FROM ", data, 
-                  " WHERE period = '", year, 
-                  "' AND (region = '", region1,
-                  "' OR region = '", region2, "')")
-  
-  if (mode != "mode_sex") {
-    query <- paste0(query, " AND sex = '", gender, "'")
-  }
-  
-  dt  <- DBI::dbFetch(DBI::dbSendQuery(con, query))
-  DBI::dbDisconnect(con)
-  
-  return(as_tibble(dt))
-}
-
 
 #' @keywords internal
 format_datatable <- function(data, caption){

@@ -1,8 +1,7 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 20:51:07 2025
+# Last update: Wed Oct  1 22:48:21 2025
 # ------------------------------------------------- #
-
 
 # Figure 1.
 
@@ -18,6 +17,8 @@ plot_map <- function(location,
                      zoom = 5,
                      data = lemur::data_sf) {
 
+  check_null(data, "map data")
+  
   tag.map.title <- tags$style(
     HTML("
    .leaflet-control.map-title {
@@ -104,6 +105,9 @@ plot_change <- function(L1, L2,
                         subtitle = ""
                         ) {
 
+  check_null(L1, "Life Table 1")
+  check_null(L2, "Life Table 2")
+  
   x = ex = value = `Life Expectancy Difference` = Age <- NULL
 
   # Data -------
@@ -157,12 +161,12 @@ plot_change <- function(L1, L2,
       yend     = d$Age,
       linetype = 2,
       color    = 1,
-      size     = 0.2) +
+      linewidth = 0.2) +
     geom_point(
       size = 2) +
     geom_vline(
       xintercept = 0,
-      size       = 0.8) +
+      linewidth  = 0.8) +
     geom_text(
       x = min(-0.01, (-dmax * 1.05)/2), 
       y = 110, 
@@ -206,7 +210,9 @@ plot_change <- function(L1, L2,
 #' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
-
+  
+  check_null(cod, "cod data")
+  
   region = period = sex = cause_name <- NULL
   deaths = Deaths = COD <- NULL
 
@@ -318,6 +324,8 @@ plot_decompose <- function(object,
                            perc = FALSE,
                            by = "both") {
 
+  check_null(object, "decomposition data")
+  
   region = period = sex = COD = cause_name = sign_ <- NULL
   x = x.int = `Age Interval` = `Change in LE` = decomposition <- NULL
 
@@ -410,7 +418,6 @@ plot_decompose <- function(object,
     xlab <- "Age Group\n(Years)"
 
   } else {
-    # aess <- aes(x = COD, y = `Change in LE`, fill = COD)
     aess <- aes(y = sex, x = `Change in LE`, fill = COD)
     xlab <- "Causes of Death\nDecomposition"
   }
@@ -527,5 +534,12 @@ glasbey <- function() {
   )
 }
 
+#' @keywords internal
+check_null <- function(data, data_name = "data") {
+  if (is.null(data)) {
+    stop(paste(data_name, "is NULL - cannot proceed with plotting"))
+  }
+  return(TRUE)
+}
 
 

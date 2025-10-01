@@ -1,7 +1,8 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri Jun  6 07:12:26 2025
+# Last update: Wed Oct  1 21:07:57 2025
 # ------------------------------------------------- #
+
 
 # lemur Package
 
@@ -17,6 +18,8 @@
 #' @import markdown
 #' @import bslib
 #'
+#' @importFrom pool dbPool poolClose
+
 #' @importFrom shiny 
 #' actionButton 
 #' addResourcePath 
@@ -44,6 +47,8 @@
 #' updateSelectInput 
 #' updateSliderInput 
 #' validateCssUnit
+#' onStop
+#' req
 #' 
 #' @importFrom DBI dbConnect dbSendQuery dbFetch dbDisconnect
 #' @importFrom RPostgres Postgres
