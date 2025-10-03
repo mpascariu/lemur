@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Oct  1 20:57:35 2025
+# Last update: Fri Oct  3 21:08:14 2025
 # ------------------------------------------------- #
 
 #' The application server-side
@@ -10,6 +10,36 @@
 #' @export
 app_server <- function(input, output, session) {
 
+  # Initialize reactive values
+  ui_state <- reactiveValues(
+    ready = FALSE
+  )
+  
+  # Check when UI is fully rendered
+  observe({
+    # Check multiple critical inputs
+    critical_inputs_ready <- all(
+      !is.null(input$mode),
+      !is.null(input$region1),
+      !is.null(input$region2),
+      !is.null(input$sex),
+      !is.null(input$time_slider),
+      !is.null(input$age_change),
+      !is.null(input$cod_change),
+      !is.null(input$cod_target),
+      !is.null(input$cod_target_all),
+      !is.null(input$cod_target_none),
+      !is.null(input$fig2_x),
+      !is.null(input$fig4_dim),
+      !is.null(input$perc)
+    )
+    
+    if (critical_inputs_ready && !ui_state$ready) {
+      ui_state$ready <- TRUE
+    }
+  })
+  
+  
   # INPUT DATA selection
   # The source of data can be the local datasets saved in the package or the 
   # datasets saved in a postgresSQL and hosted externally on a server. The 
@@ -35,6 +65,8 @@ app_server <- function(input, output, session) {
 
   # 1) cod data ---
   data_cod <- reactive({
+    req(ui_state$ready)
+    
     if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr") ) {
       
       dataSource <- if (serverMode()) "cod" else lemur::data_gbd2021_cod
@@ -58,6 +90,8 @@ app_server <- function(input, output, session) {
 
   # 2) sdg data ---
   data_sdg <- reactive({
+    req(ui_state$ready)
+    
     if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
       
       dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2021_sdg
@@ -82,6 +116,7 @@ app_server <- function(input, output, session) {
 
   # 3) life tables data
   data_lt  <- reactive({
+    req(ui_state$ready)
     
     dataSource <- if (serverMode()) "lt" else lemur::data_gbd2021_lt
     
@@ -112,6 +147,7 @@ app_server <- function(input, output, session) {
 
   # Reduction matrix -----------------------------
   data_cod_change <- reactive({
+    req(ui_state$ready)
     
     if (input$mode == "mode_sdg") {
       
@@ -208,6 +244,7 @@ app_server <- function(input, output, session) {
 
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
+    req(ui_state$ready)
 
     switch(
       input$mode,
@@ -261,6 +298,7 @@ app_server <- function(input, output, session) {
   
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
+    req(ui_state$ready)
     
     decompose_by_cod(
       data_fig()$lt_initial,
@@ -275,6 +313,8 @@ app_server <- function(input, output, session) {
   # Prepare data tables to add in the data tab
   
   table_captions <- reactive({
+    req(ui_state$ready)
+    
     generate_table_captions(
       input$mode,
       input$region1,
@@ -370,6 +410,7 @@ app_server <- function(input, output, session) {
 
   # Figure 1 - The Map
   output$figure1 <- renderLeaflet({
+    req(ui_state$ready)
     
     # We would like to zoom out if the region surface is large
     macro_region <- lemur::data_app_input$regions
@@ -420,9 +461,9 @@ app_server <- function(input, output, session) {
 
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
-    
     # Stop execution if no dataset is selected
-    req(data_fig(), cancelOutput = TRUE)
+    req(ui_state$ready)
+    req(data_fig())
     
     # create figure caption
     fig2_caption <- generate_fig2_captions(
@@ -465,8 +506,9 @@ app_server <- function(input, output, session) {
 
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlotly({
-
-    req(data_fig(), cancelOutput = TRUE)
+    # Stop execution if no dataset is selected
+    req(ui_state$ready)
+    req(data_fig())
     
     if (input$mode == "mode_cod") {
       p <- plot_cod(
@@ -524,8 +566,9 @@ app_server <- function(input, output, session) {
 
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlotly({
-    
-    req(data_decomp(), cancelOutput = TRUE)
+    # Stop execution if no dataset is selected
+    req(ui_state$ready)
+    req(data_decomp())
     
     fig4_captions <- generate_fig4_captions(
       input$perc,

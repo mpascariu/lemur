@@ -1,8 +1,7 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Oct  1 21:07:57 2025
+# Last update: Fri Oct  3 21:12:43 2025
 # ------------------------------------------------- #
-
 
 # lemur Package
 
@@ -34,8 +33,10 @@
 #' icon
 #' includeMarkdown 
 #' navbarPage 
+#' observe
 #' observeEvent 
 #' reactive
+#' reactiveValues
 #' selectInput 
 #' shinyApp 
 #' sliderInput 
