@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri Oct  3 21:08:14 2025
+# Last update: Sun Oct 19 21:27:58 2025
 # ------------------------------------------------- #
 
 #' The application server-side
@@ -71,7 +71,7 @@ app_server <- function(input, output, session) {
       
       dataSource <- if (serverMode()) "cod" else lemur::data_gbd2021_cod
       
-      eval(
+      result <- eval(
         call(
           name    = queryFunction(), 
           data    = dataSource,
@@ -84,7 +84,11 @@ app_server <- function(input, output, session) {
           )
         ) %>%
         mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name))
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) %>% 
+        arrange(region, sex, x, cause_name) %>% 
+        as_tibble()
+      
+      return(result)
     }
   })
 
@@ -96,7 +100,7 @@ app_server <- function(input, output, session) {
       
       dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2021_sdg
       
-      dt <- eval(
+      result <- eval(
         call(
           name    = queryFunction(), 
           data    = dataSource,
@@ -109,9 +113,12 @@ app_server <- function(input, output, session) {
         )
       ) %>% 
         mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg))
+          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg)) %>% 
+        arrange(region, sex, x, cause_name) %>% 
+        as_tibble()
     }
-    dt
+    
+    return(result)
   })
 
   # 3) life tables data
@@ -141,7 +148,10 @@ app_server <- function(input, output, session) {
           Tx = ttx)
     }
     
-    lt
+    # critical fix: return a proper tibble copy with consistent ordering 
+    result <- as_tibble(lt) %>% arrange(region, sex, x) 
+    # print(result)
+    return(result)
     
     })
 

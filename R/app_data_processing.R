@@ -1,7 +1,7 @@
-# -------------------------------------------------------------- #
-# Author: Marius D. PASCARIU
-# Last Update: Tue Dec 19 22:08:15 2023
-# -------------------------------------------------------------- #
+# ------------------------------------------------- #
+# Author: Marius D. Pascariu
+# Last update: Sun Oct 19 20:58:22 2025
+# ------------------------------------------------- #
 
 # somebody should merge these functions into 1 function?
   
@@ -23,9 +23,9 @@ prepare_data_mode_cod <- function(cod,
   # Select cod and lt for 1 region
   # If no risk change is applied the tables before and after are the same
   # not change in LE no decomposition
-  c1 <- cod[cod$region == region1 & cod$sex == sex, ]
+  c1 <- as_tibble(cod[cod$region == region1 & cod$sex == sex, ])
   c2 <- c1
-  l1 <- lt[lt$region == region1  & lt$sex == sex, ]
+  l1 <- as_tibble(lt[lt$region == region1  & lt$sex == sex, ])
   l2 <- l1
 
   # IF there is a change applied we take the initial tables and

@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Wed Oct  1 20:54:58 2025
+# Last update: Sun Oct 19 21:08:03 2025
 # ------------------------------------------------- #
 
 # Create a global connection pool (to be reused across calls)
@@ -31,6 +31,8 @@ create_db_pool <- function(run_db = TRUE) {
 #' @keywords internal
 dt_filter_local <- function(data, mode, region1, region2, gender, year, db_pool) {
   
+  if(mode != "mode_cntr") region2 <- region1
+  
   # we use data.table method to filter here because is faster
   # and we will do this all a lot
   p  <- db_pool
@@ -51,6 +53,9 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year, db_pool)
 #' This would replace the local data and the dt_filter_local() function
 #' @keywords internal
 dt_filter_sql <- function(data, mode, region1, region2, gender, year, db_pool) {
+  
+  if(mode != "mode_cntr") region2 <- region1
+  
   # Build base query
   query <- paste0(
     "SELECT * FROM ", DBI::dbQuoteIdentifier(db_pool, data),
