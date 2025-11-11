@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Oct 19 21:27:58 2025
+# Last update: Tue Nov 11 10:18:45 2025
 # ------------------------------------------------- #
 
 #' The application server-side
@@ -168,7 +168,7 @@ app_server <- function(input, output, session) {
         cod_change = 0
       )
       
-      S1 = paste(0:1)   # Under-five mortality 
+      S1  = c("0", "1", "2")   # Under-five mortality 
       S2a = "Maternal disorders"
       S2b = "Neonatal disorders"
       S3 = c("HIV/ AIDS / STD",
@@ -202,6 +202,7 @@ app_server <- function(input, output, session) {
       if (input$sdg_1 != 0) {
         if (sum(M[S1, ]) != 0) {
           M[S1,   ] <- ((1 + input$sdg_1/100) * ((M[S1, ] + 100)/100) - 1) * 100
+          
         } else  {
           M[S1,   ] <- input$sdg_1 
         }
