@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 20:20:48 2025
+# Last update: Mon Dec 22 13:38:19 2025
 # ------------------------------------------------- #
 
 remove(list = ls())
@@ -8,6 +8,8 @@ library(tidyverse)
 library(rnaturalearth)
 library(giscoR)
 library(sf)
+library(janitor)
+library(readxl)
 
 
 # READ countries mapping -----------------------------------------

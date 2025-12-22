@@ -12,11 +12,12 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 0.27.1
+**Monitor Version:** 1.0.0
 
-**Last Update:** 2025-11-11 10:21:02 CET
+**Last Update:** 2025-12-22 12:45:21 CET
 
 **News in previous versions:**
+- 2025-12-22 - v1.0.0 - First stable release;
 - 2025-10-19 - v0.27.1 - Implement Shiny Dependency Management;
 - 2025-06-11 - v0.25.0 - Implement Shiny Bootstrap 5 user interface for improved security;
 - 2025-05-05 - v0.23.0 - Update application and library to GBD2021 data;
