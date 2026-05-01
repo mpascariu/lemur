@@ -1,6 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Tue Nov 11 10:18:45 2025
+# Last update: Fri May  1 11:42:29 2026
 # ------------------------------------------------- #
 
 #' The application server-side
@@ -9,7 +9,7 @@
 #' @keywords internal
 #' @export
 app_server <- function(input, output, session) {
-
+  
   # Initialize reactive values
   ui_state <- reactiveValues(
     ready = FALSE
@@ -39,7 +39,6 @@ app_server <- function(input, output, session) {
     }
   })
   
-  
   # INPUT DATA selection
   # The source of data can be the local datasets saved in the package or the 
   # datasets saved in a postgresSQL and hosted externally on a server. The 
@@ -49,20 +48,24 @@ app_server <- function(input, output, session) {
   
   serverMode <- reactive(getShinyOption("serverMode"))
   
-  # Create pool only if necessary
-  db_pool <- reactive(create_db_pool(run_db = serverMode()))
+  # Initialize pool once at app startup
+  session$userData$pool <- create_db_pool(run_db = getShinyOption("serverMode"))
   
-  reactive(
-    onStop(function() {
-      if (!is.null(db_pool())) {
-        pool::poolClose(db_pool())
-      }
-    })
-  )
+  # Clean up on app stop
+  onStop(function() {
+    if (!is.null(session$userData$pool)) {
+      pool::poolClose(session$userData$pool)
+    }
+  })
+  
+  # Simple reactive wrapper for use in data reactives
+  db_pool <- reactive({
+    session$userData$pool
+  })
   
   # identify the filter function
   queryFunction <- reactive(ifelse(serverMode(), "dt_filter_sql", "dt_filter_local"))
-
+  
   # 1) cod data ---
   data_cod <- reactive({
     req(ui_state$ready)
@@ -81,8 +84,8 @@ app_server <- function(input, output, session) {
           gender  = input$sex,
           year    = input$time_slider,
           db_pool = db_pool()
-          )
-        ) %>%
+        )
+      ) %>%
         mutate(
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) %>% 
         arrange(region, sex, x, cause_name) %>% 
@@ -116,11 +119,13 @@ app_server <- function(input, output, session) {
           cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg)) %>% 
         arrange(region, sex, x, cause_name) %>% 
         as_tibble()
+      
+      return(result)
     }
     
-    return(result)
+    return(NULL)
   })
-
+  
   # 3) life tables data
   data_lt  <- reactive({
     req(ui_state$ready)
@@ -153,8 +158,8 @@ app_server <- function(input, output, session) {
     # print(result)
     return(result)
     
-    })
-
+  })
+  
   # Reduction matrix -----------------------------
   data_cod_change <- reactive({
     req(ui_state$ready)
@@ -193,12 +198,12 @@ app_server <- function(input, output, session) {
       M[  , S5] <- input$sdg_5
       M[  , S6] <- input$sdg_6
       M[  , S7] <- input$sdg_7
-    
+      
       # when under 5 mortality is reduced across all COD we have to deal with 
       # interactions, or successive reduction inputs. E.g. One may reduce 
       # neonatal mortality (50%) and under-five mortality (10%) resulting a 55%
       # total reduction. This is what we try to do in the next 5 lines.
-
+      
       if (input$sdg_1 != 0) {
         if (sum(M[S1, ]) != 0) {
           M[S1,   ] <- ((1 + input$sdg_1/100) * ((M[S1, ] + 100)/100) - 1) * 100
@@ -249,61 +254,32 @@ app_server <- function(input, output, session) {
         cod_change = input$cod_change
       )
     }
-
+    
     M
   })
-
+  
   # Prepare data for figures depending on with mode is selected
   data_fig <- reactive({
     req(ui_state$ready)
-
-    switch(
-      input$mode,
-
-      mode_cod  = prepare_data_mode_cod(
-        cod        = data_cod(),
+    
+    process_data <- function(x, mode) {
+      prepare_data(
+        cod        = x,
         lt         = data_lt(),
         region1    = input$region1,
         region2    = input$region2,
         sex        = input$sex,
-        cod_change = data_cod_change()
-      ),
-
-      mode_cntr = prepare_data_mode_cntr(
-        cod        = data_cod(),
-        lt         = data_lt(),
-        region1    = input$region1,
-        region2    = input$region2,
-        sex        = input$sex,
-        cod_change = data_cod_change()
-        ),
-
-      mode_sex = prepare_data_mode_sex(
-        cod        = data_cod(),
-        lt         = data_lt(),
-        region1    = input$region1,
-        region2    = input$region2,
-        sex        = input$sex,
-        cod_change = data_cod_change()
-        ),
-
-      mode_sdg = prepare_data_mode_cod(
-        cod        = data_sdg(),
-        lt         = data_lt(),
-        region1    = input$region1,
-        region2    = input$region2,
-        sex        = input$sex,
-        cod_change = data_cod_change()
-        ),
-      
-      mode_sdg2 = prepare_data_mode_cod(
-        cod        = data_sdg(),
-        lt         = data_lt(),
-        region1    = input$region1,
-        region2    = input$region2,
-        sex        = input$sex,
-        cod_change = data_cod_change()
-        ) 
+        cod_change = data_cod_change(),
+        mode       = mode
+      )
+    }
+    
+    switch(input$mode,
+           mode_cod  = process_data(x = data_cod(), mode = "cod"),
+           mode_cntr = process_data(x = data_cod(), mode = "cntr"),
+           mode_sex  = process_data(x = data_cod(), mode = "sex"),
+           mode_sdg  = process_data(x = data_sdg(), mode = "cod"),
+           mode_sdg2 = process_data(x = data_sdg(), mode = "cod")
     )
   })
   
@@ -318,11 +294,10 @@ app_server <- function(input, output, session) {
       data_fig()$cod_final
     )
   })
-
-  # ----------------------------------------------------------------------------
-  # RENDER datatables
-  # Prepare data tables to add in the data tab
   
+  #----------------------------------------------------------------------------
+  
+  # Define table and figure captions
   table_captions <- reactive({
     req(ui_state$ready)
     
@@ -333,8 +308,30 @@ app_server <- function(input, output, session) {
       input$time_slider,
       input$sex,
       input$cod_change
-      )
+    )
   })
+  
+  figure_captions <- reactive({
+    req(ui_state$ready)
+    
+    generate_figure_captions(
+      input$mode,
+      input$region1,
+      input$region2,
+      input$fig2_x,
+      input$perc,
+      input$cod_change,
+      input$cod_target,
+      data_fig()$lt_initial,
+      data_fig()$lt_final,
+      input$fig4_dim
+    )
+  })
+  
+  # ----------------------------------------------------------------------------
+  # RENDER datatables
+  # Prepare data tables to add in the data tab
+  
   
   output$lt_initial  = DT::renderDataTable({
     req(data_fig())
@@ -344,7 +341,7 @@ app_server <- function(input, output, session) {
       rename(
         `Age Interval` = x.int,
         `Age, (x)` = x
-        ) %>% 
+      ) %>% 
       format_datatable(
         caption = table_captions()[1]
       )
@@ -410,7 +407,7 @@ app_server <- function(input, output, session) {
     req(data_cod_change())
     
     data_cod_change() %>% 
-      as_tibble() %>% 
+      as_tibble() %>%
       mutate(`Age Group` = data_fig()$lt_initial$x.int, .before = 1) %>% 
       format_datatable(
         caption = table_captions()[6]
@@ -448,7 +445,7 @@ app_server <- function(input, output, session) {
     loc <- input$region1
     if (input$region1 %in% large_regions) {
       zoom = 4
-    
+      
     } else if (input$region1 %in% larger_regions) {
       zoom = 3
       
@@ -466,29 +463,16 @@ app_server <- function(input, output, session) {
     
     suppressWarnings(
       plot_map(location = loc, zoom = zoom)
-      )
-    }
+    )
+  }
   )
-
+  
   # Figure 2 - The change
   output$figure2 <- renderPlotly({
     # Stop execution if no dataset is selected
     req(ui_state$ready)
     req(data_fig())
-    
-    # create figure caption
-    fig2_caption <- generate_fig2_captions(
-      input$mode,
-      input$region1,
-      input$region2,
-      input$fig2_x,
-      input$perc,
-      input$cod_change,
-      input$cod_target,
-      data_fig()$lt_initial,
-      data_fig()$lt_final
-      )
-      
+
     # create ggplot
     p2 <- plot_change(
       L1 = data_fig()$lt_final,
@@ -500,21 +484,21 @@ app_server <- function(input, output, session) {
       theme(
         axis.text = element_text(size = 10)
       )
-
+    
     # ggplot -> ggplotly
     p2 <- ggplotly(p2, tooltip = c("x", "y")) %>%
       plotly::layout(
-        xaxis = list(title = fig2_caption),
-        yaxis = list(title = "Age (years)")) %>%
+        xaxis = list(title = figure_captions()$fig2$xlab),
+        yaxis = list(title = figure_captions()$fig2$ylab)) %>%
       plotly::layout(
         xaxis = list(titlefont = list(size = 13), tickfont = list(size = 11)),
         yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11))
-        )
-
+      )
+    
     p2
-
+    
   })
-
+  
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlotly({
     # Stop execution if no dataset is selected
@@ -526,36 +510,36 @@ app_server <- function(input, output, session) {
         cod  = data_fig()$cod_final,
         perc = input$perc,
         type = "barplot")
-
+      
     } else if (input$mode == "mode_cntr") {
       cod <- bind_rows(
         data_fig()$cod_initial,
         data_fig()$cod_final)
-
+      
       p <- plot_cod(
         cod  = cod,
         perc = input$perc,
         type = "barplot") +
         facet_wrap("region")
-
+      
     } else if (input$mode == "mode_sex") {
       cod <- bind_rows(
         data_fig()$cod_initial,
         data_fig()$cod_final)
-
+      
       p <- plot_cod(
         cod  = cod,
         perc = input$perc,
         type = "barplot") +
         facet_wrap("sex")
-
+      
     } else if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
       p <- plot_cod(
         cod  = data_fig()$cod_final,
         perc = input$perc,
         type = "barplot")
     }
-
+    
     p <- p +
       labs(x = "", y = "") +
       scale_y_discrete(limits = rev) + 
@@ -563,48 +547,47 @@ app_server <- function(input, output, session) {
         axis.text = element_text(size = 7)
       )
     
-    xlab <- generate_fig3_captions(input$perc)
-
-    p <- ggplotly(p, tooltip = c("fill", "x")) %>%
+    p3 <- ggplotly(p, tooltip = c("fill", "x")) %>%
       plotly::layout(
-        xaxis = list(title = xlab)) %>%
+        xaxis = list(title = figure_captions()$fig3)) %>%
       plotly::layout(
         xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
         yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
-
-    p
+    
+    p3
   })
-
+  
+  # Reactive to track plot readiness
+  plot4_ready <- reactiveVal(FALSE)
+  
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlotly({
     # Stop execution if no dataset is selected
     req(ui_state$ready)
     req(data_decomp())
     
-    fig4_captions <- generate_fig4_captions(
-      input$perc,
-      input$fig4_dim
-    )
-
     p4 <- plot_decompose(
       object = data_decomp(),
       perc   = input$perc,
       by     = input$fig4_dim
-      )
-
-    p4 <- ggplotly(p4, tooltip = fig4_captions$ttip) %>%
+    )
+    
+    p4 <- ggplotly(p4, tooltip = figure_captions()$fig4$ttip) %>%
       plotly::layout(
-        xaxis = list(title = fig4_captions$xlab),
-        yaxis = list(title = fig4_captions$ylab)) %>%
+        xaxis = list(title = figure_captions()$fig4$xlab),
+        yaxis = list(title = figure_captions()$fig4$ylab)
+        ) %>%
       plotly::layout(
         xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
         yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
-
+    
     p4
   })
-
+  
+  
   # ----------------------------------------------------------------------------
   # EVENTS
+
   observeEvent(input$cod_target_all, {
     updatePrettyCheckboxGroup(
       session,
@@ -613,20 +596,6 @@ app_server <- function(input, output, session) {
     )
   })
   
-  # observeEvent(input$mode, {
-  #   
-  #   # If we move into region or sex comparison mode we set the risk reduction
-  #   # slider to 0, since our main interest would be to see the differences 
-  #   # as is before playing with hypothetical reductions of the cod's.   
-  #   if (input$mode != "mode_cod") {
-  #     updateSliderInput(
-  #       session,
-  #       inputId = "cod_change",
-  #       value = 0
-  #     )
-  #   }
-  # })
-
   observeEvent(input$cod_target_none, {
     updatePrettyCheckboxGroup(
       session,
@@ -641,77 +610,17 @@ app_server <- function(input, output, session) {
         ui = "Select two distinct regions to allow for comparisons!",
         duration = 10,
         type = "error"
-        )
+      )
     }
   })
   
   # THE RESET EVENT
   observeEvent(input$reset, {
-    # updateRadioGroupButtons(session, 'mode', selected = "mode_cod")
-    updateRadioGroupButtons(session, 'sex', selected = "both")
-    updateSwitchInput(session, 'perc', value = FALSE)
-    # updateSelectInput(session, 'region1', selected = "GLOBAL")
-    # updateSelectInput(session, 'region2', selected = "EUROPE")
-    updateSelectInput(session, 'fig2_x', selected = seq(0, 110, 10))
-    updateSliderTextInput(session, 'time_slider', selected = 2021)
-    updateSliderTextInput(session, 'age_change', selected = c(0, 110))
-    updateSliderInput(session, 'cod_change', value = 0)
-    updateSliderInput(session, 'sdg_1', value = 0)
-    updateSliderInput(session, 'sdg_2a', value = 0)
-    updateSliderInput(session, 'sdg_2b', value = 0)
-    updateSliderInput(session, 'sdg_3', value = 0)
-    updateSliderInput(session, 'sdg_4', value = 0)
-    updateSliderInput(session, 'sdg_5', value = 0)
-    updateSliderInput(session, 'sdg_6', value = 0)
-    updateSliderInput(session, 'sdg_7', value = 0)
-    
-    updateSliderInput(session, 'sdg2_1', value = 0)
-    updateSliderInput(session, 'sdg2_2', value = 0)
-    updateSliderInput(session, 'sdg2_3', value = 0)
-    updateSliderInput(session, 'sdg2_4', value = 0)
-    updateSliderInput(session, 'sdg2_5', value = 0)
-    updateSliderInput(session, 'sdg2_6', value = 0)
-    updateSliderInput(session, 'sdg2_7', value = 0)
-    updateSliderInput(session, 'sdg2_8', value = 0)
-    updateSliderInput(session, 'sdg2_9', value = 0)
-    updateSliderInput(session, 'sdg2_10', value = 0)
-    updateSliderInput(session, 'sdg2_11', value = 0)
-    updateSliderInput(session, 'sdg2_12', value = 0)
-    updateSliderInput(session, 'sdg2_13', value = 0)
-    updateSliderInput(session, 'sdg2_14', value = 0)
-    updateSliderInput(session, 'sdg2_15', value = 0)
-    updateSliderInput(session, 'sdg2_16', value = 0)
-    updateSliderInput(session, 'sdg2_17', value = 0)
-    updateSliderInput(session, 'sdg2_18', value = 0)
-    updateSliderInput(session, 'sdg2_19', value = 0)
-    updateSliderInput(session, 'sdg2_20', value = 0)
-    updateSliderInput(session, 'sdg2_21', value = 0)
-    updatePrettyCheckboxGroup(session, 'cod_target', selected = lemur::data_app_input$cause_name)
+    reset_inputs(session)
   })
-
+  
 }
 
 
-# ----------------------------------------------------------------------------
-# FUNCTIONS used in the Server
 
-#' @keywords internal
-format_datatable <- function(data, caption){
-  DT::datatable(
-    data = format(
-      x = as.data.frame(data),
-      big.mark = ",",
-      scientific = FALSE,
-      digits = 3
-    ),
-    caption  = caption,
-    rownames = FALSE,
-    # filter  = 'top',
-    options = list(
-      # dom = 't',
-      pageLength = 25,
-      autoWidth = TRUE
-    )
-  )
-}
 

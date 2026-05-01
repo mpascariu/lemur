@@ -1,8 +1,7 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Thu Jun  5 20:01:53 2025
+# Last update: Fri May  1 14:20:32 2026
 # ------------------------------------------------- #
-
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
 # WE TRY TO MAKE THEM AS DYNAMIC AS POSSIBLE IN ORDER TO BE INFORMATIVE 
@@ -163,7 +162,7 @@ generate_fig2_captions <- function(mode,
                                    cod_target,
                                    lt_initial, 
                                    lt_final
-                                   ) {
+) {
   
   # Build a dynamic x-axis title to help with interpretability
   # Part 1 - absolute or relative values?
@@ -175,15 +174,15 @@ generate_fig2_captions <- function(mode,
   
   suffix <- if (cod_change == 0) " in life expectancy" else ""
   xlab_part1 <- ifelse(perc, 
-    paste0("\nRelative difference", suffix),
-    paste0("\nDifference", suffix)
+                       paste0("\nRelative difference", suffix),
+                       paste0("\nDifference", suffix)
   )
   
   # Part 2 - increase, decrease how much, where? 
   xlab_part2 <- if (mode %in% c("mode_sdg", "mode_sdg2")) {
     " following the applied changes in mortality risks"
     
-    } else if(all(!is.null(cod_target)) & cod_change != 0) {
+  } else if(all(!is.null(cod_target)) & cod_change != 0) {
     paste0(
       " following a ", abs(cod_change), "%",
       ifelse(sign(cod_change) == -1, " reduction", " increase"),
@@ -221,7 +220,9 @@ generate_fig2_captions <- function(mode,
     " years", x_min_text, "]"
   )
   
-  out <- paste0(xlab_part1, xlab_part2, xlab_part3)
+  xlab <- paste0(xlab_part1, xlab_part2, xlab_part3)
+  ylab <- "Age (years)"
+  out  <- list(xlab = xlab, ylab = ylab)
   return(out)
 }
 
@@ -277,9 +278,35 @@ generate_fig4_captions <- function(perc, fig4_dim) {
 }
 
 
-
-
-
+#' @keywords internal
+generate_figure_captions <- function(mode,
+                                     region1,
+                                     region2,
+                                     fig2_x,
+                                     perc,
+                                     cod_change,
+                                     cod_target,
+                                     lt_initial, 
+                                     lt_final,
+                                     fig4_dim) {
+  
+  fig2 <- generate_fig2_captions(
+    mode,
+    region1,
+    region2,
+    fig2_x,
+    perc,
+    cod_change,
+    cod_target,
+    lt_initial, 
+    lt_final
+  )
+  
+  fig3 <- generate_fig3_captions(perc)
+  fig4 <- generate_fig4_captions(perc, fig4_dim)
+  
+  return(list(fig2 = fig2, fig3 = fig3, fig4 = fig4))
+}
 
 
 

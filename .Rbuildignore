@@ -16,3 +16,4 @@ $run_dev.*
 ^\.dockerignore$
 docker-compose.yml
 pkg_build.R
+.vscode

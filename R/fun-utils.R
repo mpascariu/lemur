@@ -1,8 +1,7 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri Jun  6 08:29:06 2025
+# Last update: Fri May  1 11:43:48 2026
 # ------------------------------------------------- #
-
 
 # HERE we import the source code of several functions in order to reduce the 
 # dependency of our package on other packages and avoid future trouble caused 
@@ -69,3 +68,61 @@ globalVariables(
     "x_int"
   )
 )
+
+# ----------------------------------------------------------------------------
+# FUNCTIONS used in the Server
+
+#' @keywords internal
+format_datatable <- function(data, caption){
+  DT::datatable(
+    data = format(
+      x = as.data.frame(data),
+      big.mark = ",",
+      scientific = FALSE,
+      digits = 3
+    ),
+    caption  = caption,
+    rownames = FALSE,
+    # filter  = 'top',
+    options = list(
+      # dom = 't',
+      pageLength = 25,
+      autoWidth = TRUE
+    )
+  )
+}
+
+#' @keywords internal 
+reset_inputs <- function(session) {
+  # Define all reset values in one place
+  reset_values <- list(
+    sex = list(inputId = "sex", value = "both", type = "radio"),
+    perc = list(inputId = "perc", value = FALSE, type = "switch"),
+    fig2_x = list(inputId = "fig2_x", value = seq(0, 110, 10), type = "select"),
+    time_slider = list(inputId = "time_slider", value = 2021, type = "sliderText"),
+    age_change = list(inputId = "age_change", value = c(0, 110), type = "sliderText"),
+    cod_change = list(inputId = "cod_change", value = 0, type = "slider"),
+    cod_target = list(inputId = "cod_target", value = lemur::data_app_input$cause_name, type = "checkbox")
+  )
+  
+  # SDG sliders (1-7 and 2_1-2_21)
+  sdg_sliders <- c(paste0("sdg_", 1:7), paste0("sdg2_", 1:21))
+  for (slider_id in sdg_sliders) {
+    reset_values[[slider_id]] <- list(inputId = slider_id, value = 0, type = "slider")
+  }
+  
+  # Apply all resets with a loop
+  for (input_config in reset_values) {
+    switch(
+      input_config$type,
+      radio = shinyjs::runjs(sprintf(
+        "Shiny.setInputValue('%s', '%s');", 
+        input_config$inputId, input_config$value)),
+      switch     = updateSwitchInput(session, input_config$inputId, value = input_config$value),
+      select     = updateSelectInput(session, input_config$inputId, selected = input_config$value),
+      sliderText = updateSliderTextInput(session, input_config$inputId, selected = input_config$value),
+      slider     = updateSliderInput(session, input_config$inputId, value = input_config$value),
+      checkbox   = updatePrettyCheckboxGroup(session, input_config$inputId, selected = input_config$value)
+    )
+  }
+}
