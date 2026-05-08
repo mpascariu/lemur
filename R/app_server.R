@@ -1,11 +1,11 @@
-# ------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Fri May  1 11:42:29 2026
-# ------------------------------------------------- #
+# --------------------------------------------
+# Author: Marius D PASCARIU
+# Date: 2026-05-08 18:18:33
+# --------------------------------------------
 
 #' The application server-side
 #'
-#' @param input,output,session Internal parameters for {shiny}.
+#' @param input,output,session Internal parameters for shiny.
 #' @keywords internal
 #' @export
 app_server <- function(input, output, session) {
@@ -63,103 +63,81 @@ app_server <- function(input, output, session) {
     session$userData$pool
   })
   
-  # identify the filter function
-  queryFunction <- reactive(ifelse(serverMode(), "dt_filter_sql", "dt_filter_local"))
-  
-  # 1) cod data ---
-  data_cod <- reactive({
-    req(ui_state$ready)
+# ------------------------------------------------------------------
+# Helper to fetch data via SQL or local, avoiding eval/call
+# ------------------------------------------------------------------
+fetch_data <- function(data_local, data_sql_name) {
+  if (serverMode()) {
+    dt_filter_sql(
+      data    = data_sql_name,
+      mode    = input$mode,
+      region1 = input$region1,
+      region2 = input$region2,
+      gender  = input$sex,
+      year    = input$time_slider,
+      db_pool = db_pool()
+    )
     
-    if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr") ) {
-      
-      dataSource <- if (serverMode()) "cod" else lemur::data_gbd2021_cod
-      
-      result <- eval(
-        call(
-          name    = queryFunction(), 
-          data    = dataSource,
-          mode    = input$mode,
-          region1 = input$region1,
-          region2 = input$region2,
-          gender  = input$sex,
-          year    = input$time_slider,
-          db_pool = db_pool()
-        )
-      ) %>%
-        mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name)) %>% 
-        arrange(region, sex, x, cause_name) %>% 
-        as_tibble()
-      
-      return(result)
-    }
-  })
+  } else {
+    dt_filter_local(
+      data    = data_local,
+      mode    = input$mode,
+      region1 = input$region1,
+      region2 = input$region2,
+      gender  = input$sex,
+      year    = input$time_slider,
+      db_pool = db_pool()
+    )
+  }
+}
 
-  # 2) sdg data ---
-  data_sdg <- reactive({
-    req(ui_state$ready)
-    
-    if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
-      
-      dataSource <- if (serverMode()) "sdg" else lemur::data_gbd2021_sdg
-      
-      result <- eval(
-        call(
-          name    = queryFunction(), 
-          data    = dataSource,
-          mode    = input$mode,
-          region1 = input$region1,
-          region2 = input$region2,
-          gender  = input$sex,
-          year    = input$time_slider,
-          db_pool = db_pool()
-        )
-      ) %>% 
-        mutate(
-          cause_name = factor(cause_name, levels = lemur::data_app_input$cause_name_sdg)) %>% 
-        arrange(region, sex, x, cause_name) %>% 
-        as_tibble()
-      
-      return(result)
-    }
-    
-    return(NULL)
-  })
+# ------------------------------------------------------------------
+# 1) cod data
+# ------------------------------------------------------------------
+data_cod <- reactive({
+  req(ui_state$ready)
   
-  # 3) life tables data
-  data_lt  <- reactive({
-    req(ui_state$ready)
-    
-    dataSource <- if (serverMode()) "lt" else lemur::data_gbd2021_lt
-    
-    lt <- eval(
-      call(
-        name    = queryFunction(), 
-        data    = dataSource,
-        mode    = input$mode,
-        region1 = input$region1,
-        region2 = input$region2,
-        gender  = input$sex,
-        year    = input$time_slider,
-        db_pool = db_pool()
-      )
-    ) 
-    
-    if (serverMode()) {
-      lt <- lt %>%  
-        rename(
-          x.int = x_int,
-          Lx = llx,
-          Tx = ttx)
-    }
-    
-    # critical fix: return a proper tibble copy with consistent ordering 
-    result <- as_tibble(lt) %>% arrange(region, sex, x) 
-    # print(result)
-    return(result)
-    
-  })
+  if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr")) {
+    fetch_data(data_gbd2021_cod, "cod") %>%
+      mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name)) %>%
+      arrange(region, sex, x, cause_name) %>%
+      as_tibble()
+  }
+}) #|> 
+   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+#
+# ------------------------------------------------------------------
+# 2) sdg data
+# ------------------------------------------------------------------
+data_sdg <- reactive({
+  req(ui_state$ready)
   
+  if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
+    fetch_data(data_gbd2021_sdg, "sdg") %>%
+      mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name_sdg)) %>%
+      arrange(region, sex, x, cause_name) %>%
+      as_tibble()
+  }
+}) #|> 
+   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+
+# ------------------------------------------------------------------
+# 3) life tables data
+# ------------------------------------------------------------------
+data_lt <- reactive({
+  req(ui_state$ready)
+  
+  lt <- fetch_data(data_gbd2021_lt, "lt")
+  
+  if (serverMode()) {
+    lt <- lt %>% rename(x.int = x_int, Lx = llx, Tx = ttx)
+  }
+  
+  # critical fix: return a proper tibble copy with consistent ordering 
+  as_tibble(lt) %>% arrange(region, sex, x)
+}) #|> 
+   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+
   # Reduction matrix -----------------------------
   data_cod_change <- reactive({
     req(ui_state$ready)
@@ -421,7 +399,7 @@ app_server <- function(input, output, session) {
     req(ui_state$ready)
     
     # We would like to zoom out if the region surface is large
-    macro_region <- lemur::data_app_input$regions
+    macro_region <- data_app_input$regions
     large_regions <- c(
       "Algeria", 
       "Australia", 
@@ -556,9 +534,6 @@ app_server <- function(input, output, session) {
     
     p3
   })
-  
-  # Reactive to track plot readiness
-  plot4_ready <- reactiveVal(FALSE)
   
   # Figure 4 - The Decomposition
   output$figure4 <- renderPlotly({

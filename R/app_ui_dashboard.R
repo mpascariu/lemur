@@ -1,9 +1,7 @@
-# ------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Wed Jun 11 10:58:37 2025
-# ------------------------------------------------- #
-
-
+# --------------------------------------------
+# Author: Marius D PASCARIU
+# Date: 2026-05-08 18:17:53
+# --------------------------------------------
 
 #' UI - dashboard page
 #' @keywords internal
@@ -160,8 +158,8 @@ side_panel <- function() {
           inputId  = "region1",
           label    = "Region",
           choices  = list(
-            Regions = lemur::data_app_input$regions, 
-            Countries = lemur::data_app_input$countries
+            Regions = data_app_input$regions, 
+            Countries = data_app_input$countries
           ),
           selected = "GLOBAL",
           width    = "90%"
@@ -172,8 +170,8 @@ side_panel <- function() {
             inputId  = "region2",
             label    = "Region 2",
             choices  = list(
-              Regions = lemur::data_app_input$regions, 
-              Countries = lemur::data_app_input$countries
+              Regions = data_app_input$regions, 
+              Countries = data_app_input$countries
             ),
             selected = "EUROPE",
             width    = "90%"
@@ -192,7 +190,7 @@ side_panel <- function() {
             `data-bs-placement` = "right",
             title = "Select the year for which the data to correspond to"
           ),
-          choices = lemur::data_app_input$period,
+          choices = data_app_input$period,
           selected = 2021,
           grid = TRUE,
           width = "90%"  # Ensure slider fills container
@@ -231,7 +229,7 @@ side_panel <- function() {
                   `data-bs-placement` = "right",
                   title = "On which age interval to change the risks? The ages outside the selected interval will not be affected."
                 ),
-                choices = lemur::data_app_input$x,
+                choices = data_app_input$x,
                 selected = c(0, 110),
                 grid = TRUE,
                 width = "90%"  # Ensure slider fills container
@@ -251,8 +249,8 @@ side_panel <- function() {
                   "The unchecked causes of death will maintain their absolute mortality impact."
                 )
               ),
-              choices = as.character(lemur::data_app_input$cause_name),
-              selected = lemur::data_app_input$cause_name,
+              choices = as.character(data_app_input$cause_name),
+              selected = data_app_input$cause_name,
               icon = icon("check"),
               status = "success",
               animation = "rotate",
@@ -403,7 +401,7 @@ chart_2 <- function() {
       selectInput(
         inputId = "fig2_x",
         label = "Ages to be displayed",
-        choices = lemur::data_app_input$x,
+        choices = data_app_input$x,
         selected = seq(0, 110, 10),
         multiple = TRUE
       )

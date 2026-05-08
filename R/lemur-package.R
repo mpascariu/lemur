@@ -1,7 +1,7 @@
-# ------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Fri Oct  3 21:12:43 2025
-# ------------------------------------------------- #
+# --------------------------------------------
+# Author: Marius D PASCARIU
+# Date: 2026-05-08 18:18:18
+# --------------------------------------------
 
 # lemur Package
 
@@ -15,8 +15,22 @@
 #' @import data.table
 #' @import sf
 #' @import markdown
-#' @import bslib
 #'
+#' @importFrom bslib 
+#' page_navbar 
+#' nav_panel 
+#' nav_menu 
+#' nav_item 
+#' nav_spacer 
+#' bs_theme 
+#' layout_columns
+#' layout_sidebar 
+#' sidebar 
+#' card 
+#' card_header 
+#' card_body 
+#' breakpoints
+#' 
 #' @importFrom pool dbPool poolClose
 
 #' @importFrom shiny 
@@ -50,6 +64,7 @@
 #' validateCssUnit
 #' onStop
 #' req
+#' bindCache
 #' 
 #' @importFrom DBI dbConnect dbSendQuery dbFetch dbDisconnect
 #' @importFrom RPostgres Postgres
