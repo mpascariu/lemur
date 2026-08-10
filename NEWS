@@ -1,3 +1,10 @@
+version 1.4.1
+- Bug fix: lemur::run_app() (or any UI/server function) failed in a fresh R
+  session with "object 'data_app_input' not found" unless library(lemur) was
+  called first. data_app_input is lazy data and R only binds data/ objects to
+  the package namespace on attach, not on namespace load via pkg::fun(). The
+  new .onLoad() binds it at load time so the app starts either way.
+
 version 1.4.0
 - Tests: introduce the first unit test suite (testthat edition 3), split by
   responsibility: test-data-processing.R, test-graphics.R, test-shiny-ui.R and

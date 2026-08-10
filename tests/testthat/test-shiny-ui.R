@@ -79,3 +79,24 @@ test_that("top, side and main panels build their regions", {
     expect_true(grepl(id, html, fixed = TRUE))
   }
 })
+
+test_that("UI can be built via lemur:: without attaching the package", {
+  # Regression: data_app_input is lazy data and R binds data/ objects to the
+  # namespace only on attach, so lemur::run_app() in a fresh session (no
+  # library(lemur)) failed with "object 'data_app_input' not found" while
+  # building the UI. .onLoad() now binds it at namespace load; this subprocess
+  # attaches nothing, so it exercises exactly that path.
+  rscript <- file.path(R.home("bin"), "Rscript.exe")
+  out <- suppressWarnings(system2(
+    rscript,
+    args = c("--vanilla", "-e", "invisible(lemur:::app_ui())"),
+    stdout = TRUE, stderr = TRUE
+  ))
+  msg <- paste(out, collapse = "\n")
+  if (grepl("no package called .?lemur.?", msg)) {
+    skip("lemur not installed in a library visible to the subprocess")
+  }
+  st <- attr(out, "status")
+  expect_true(is.null(st) || identical(st, 0L) || identical(st, 0),
+              info = paste("subprocess output:", msg))
+})
