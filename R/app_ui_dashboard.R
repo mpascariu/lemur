@@ -13,9 +13,12 @@ ui_dashbord <- function() {
       side_panel(),
       width = "400px",
     ),
-    # Main content area: always top-aligned
+    # Main content area: a vertical flex column that fills the page height,
+    # so the chart rows in main_panel() stretch to fill the window (no unused
+    # space at the bottom) and resize together with it.
     div(
-      style = "display: flex; flex-direction: column; justify-content: flex-start; min-height: 100vh;",
+      class = "html-fill-item html-fill-container",
+      style = "display: flex; flex-direction: column;",
       top_panel(),
       main_panel()
     )
@@ -35,7 +38,10 @@ top_panel <- function() {
       md = c(12, 12, 12, 12),
       sm = c(12, 12, 12, 12)
     ),
-    
+    # Keep the control row at its natural (content) height instead of
+    # stretching it to fill the page alongside the charts.
+    fill = FALSE,
+
     # Sex selection (conditionally shown)
     card(
       class = "border-0",
@@ -318,9 +324,16 @@ side_panel <- function() {
 
 #' @keywords internal
 main_panel <- function() {
-  tagList(
+  # Two chart rows stacked in a fillable column. Each row takes half of the
+  # remaining height and its cards stretch to fill it, so the charts resize
+  # with the window. On short/small screens each row keeps a minimum height
+  # and the panel scrolls instead of crushing the charts.
+  div(
+    class = "html-fill-item html-fill-container",
+    style = "display: flex; flex-direction: column; overflow-y: auto;",
     div(
-      style = "align-items: top; margin-top: 0px; margin-bottom: 0px;",
+      class = "html-fill-item html-fill-container",
+      style = "flex: 1 1 0; min-height: 320px;",
       layout_columns(
         col_widths = breakpoints(
           lg = c(7, 5),
@@ -332,9 +345,9 @@ main_panel <- function() {
         chart_2()
       )
     ),
-    
     div(
-      style = "align-items: top; margin-top: 0px; margin-bottom: 0px;",
+      class = "html-fill-item html-fill-container",
+      style = "flex: 1 1 0; min-height: 320px;",
       layout_columns(
         col_widths = breakpoints(
           lg = c(6, 6),
@@ -377,6 +390,7 @@ boxTitleInput2 <- function(title, ...) {
 chart_1 <- function(height_ = 1) {
   card(
     class = "border-0",
+    fill = TRUE,
     card_header(
       style = "background-color: #fff; border-bottom: none;",
       tags$div(
@@ -385,7 +399,8 @@ chart_1 <- function(height_ = 1) {
         )
     ),
     card_body(
-      leafletOutput(outputId = "figure1")
+      fill = TRUE,
+      leafletOutput(outputId = "figure1", height = "100%")
       )
   )
 }
@@ -396,6 +411,7 @@ chart_1 <- function(height_ = 1) {
 chart_2 <- function() {
   card(
     class = "border-0",
+    fill = TRUE,
     boxTitleInput2(
       title = "Difference in Life Expectancy at various ages",
       selectInput(
@@ -407,7 +423,8 @@ chart_2 <- function() {
       )
     ),
     card_body(
-      plotlyOutput(outputId = "figure2")
+      fill = TRUE,
+      plotlyOutput(outputId = "figure2", height = "100%")
     )
   )
 }
@@ -416,6 +433,7 @@ chart_2 <- function() {
 chart_3 <- function() {
   card(
     class = "border-0",
+    fill = TRUE,
     boxTitleInput2(
       title = "Cause of Death Distribution",
       radioGroupButtons(
@@ -431,7 +449,8 @@ chart_3 <- function() {
       )
     ),
     card_body(
-      plotlyOutput(outputId = "figure3")
+      fill = TRUE,
+      plotlyOutput(outputId = "figure3", height = "100%")
     )
   )
 }
@@ -441,6 +460,7 @@ chart_3 <- function() {
 chart_4 <- function() {
   card(
     class = "border-0",
+    fill = TRUE,
     boxTitleInput2(
       title = "Cause of Death / Age Decomposition of the Change in Life Expectancy at Birth",
       radioGroupButtons(
@@ -460,7 +480,8 @@ chart_4 <- function() {
       )
     ),
     card_body(
-      plotlyOutput(outputId = "figure4")
+      fill = TRUE,
+      plotlyOutput(outputId = "figure4", height = "100%")
     )
   )
 }

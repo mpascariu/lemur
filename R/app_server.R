@@ -539,30 +539,16 @@ data_lt <- reactive({
     df <- data_fig()
     req(df$data)
 
-    # create ggplot
-    p2 <- plot_change(
-      L1 = df$data$lt_final,
-      L2 = df$data$lt_initial,
-      age = df$fig2_x,
-      perc = df$perc) +
-      geom_point(size = 3) +
-      labs(x = "", y = "") +
-      theme(
-        axis.text = element_text(size = 10)
-      )
-    
-    # ggplot -> ggplotly
-    p2 <- ggplotly(p2, tooltip = c("x", "y")) %>%
-      plotly::layout(
-        xaxis = list(title = figure_captions()$fig2$xlab),
-        yaxis = list(title = figure_captions()$fig2$ylab)) %>%
-      plotly::layout(
-        xaxis = list(titlefont = list(size = 13), tickfont = list(size = 11)),
-        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11))
-      )
-    
-    p2
-    
+    cap <- figure_captions()
+
+    plotly_change(
+      L1   = df$data$lt_final,
+      L2   = df$data$lt_initial,
+      age  = df$fig2_x,
+      perc = df$perc,
+      xlab = cap$fig2$xlab,
+      ylab = cap$fig2$ylab
+    )
   })
   
   # Figure 3 - The COD Distribution
@@ -572,56 +558,22 @@ data_lt <- reactive({
     df <- data_fig()
     req(df$data)
 
-    if (df$mode == "mode_cod") {
-      p <- plot_cod(
-        cod  = df$data$cod_final,
-        perc = df$perc,
-        type = "barplot")
+    cap <- figure_captions()
 
-    } else if (df$mode == "mode_cntr") {
-      cod <- bind_rows(
-        df$data$cod_initial,
-        df$data$cod_final)
-
-      p <- plot_cod(
-        cod  = cod,
-        perc = df$perc,
-        type = "barplot") +
-        facet_wrap("region")
-
-    } else if (df$mode == "mode_sex") {
-      cod <- bind_rows(
-        df$data$cod_initial,
-        df$data$cod_final)
-
-      p <- plot_cod(
-        cod  = cod,
-        perc = df$perc,
-        type = "barplot") +
-        facet_wrap("sex")
-
-    } else if (df$mode %in% c("mode_sdg", "mode_sdg2")) {
-      p <- plot_cod(
-        cod  = df$data$cod_final,
-        perc = df$perc,
-        type = "barplot")
+    # The comparison modes (cntr/sex) plot initial vs final COD side by side,
+    # everything else plots the final COD distribution only.
+    cod <- if (df$mode %in% c("mode_cntr", "mode_sex")) {
+      bind_rows(df$data$cod_initial, df$data$cod_final)
+    } else {
+      df$data$cod_final
     }
-    
-    p <- p +
-      labs(x = "", y = "") +
-      scale_y_discrete(limits = rev) + 
-      theme(
-        axis.text = element_text(size = 7)
-      )
-    
-    p3 <- ggplotly(p, tooltip = c("fill", "x")) %>%
-      plotly::layout(
-        xaxis = list(title = figure_captions()$fig3)) %>%
-      plotly::layout(
-        xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
-        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
-    
-    p3
+
+    plotly_cod(
+      cod  = cod,
+      perc = df$perc,
+      xlab = cap$fig3,
+      mode = df$mode
+    )
   })
   
   # Figure 4 - The Decomposition
@@ -633,7 +585,8 @@ data_lt <- reactive({
 
     # No risk change applied: the decomposition would be all zeros, so show a
     # message instead of an empty/meaningless chart.
-    if (is.null(data_decomp())) {
+    dec <- data_decomp()
+    if (is.null(dec)) {
       return(
         plotly::plotly_empty(type = "scatter", mode = "markers") %>%
           plotly::layout(
@@ -652,22 +605,16 @@ data_lt <- reactive({
       )
     }
 
-    p4 <- plot_decompose(
-      object = data_decomp(),
+    cap <- figure_captions()
+
+    plotly_decompose(
+      object = dec,
       perc   = df$perc,
-      by     = df$fig4_dim
+      by     = df$fig4_dim,
+      xlab   = cap$fig4$xlab,
+      ylab   = cap$fig4$ylab,
+      ttip   = cap$fig4$ttip
     )
-    
-    p4 <- ggplotly(p4, tooltip = figure_captions()$fig4$ttip) %>%
-      plotly::layout(
-        xaxis = list(title = figure_captions()$fig4$xlab),
-        yaxis = list(title = figure_captions()$fig4$ylab)
-        ) %>%
-      plotly::layout(
-        xaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)),
-        yaxis = list(titlefont = list(size = 14), tickfont = list(size = 11)))
-    
-    p4
   })
   
   

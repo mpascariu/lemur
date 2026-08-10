@@ -12,11 +12,13 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 1.0.5
+**Monitor Version:** 1.2.0
 
-**Last Update:** 2026-05-01 12:16:44 CEST
+**Last Update:** 2026-08-10 20:29:11 CEST
 
 **News in previous versions:**
+- 2026-08-10 - v1.2.0 - Native plotly rendering for figures 2-4 (faster and smoother), dashboard charts fill the window and resize responsively, figure 3 labels spaced off the y-axis;
+- 2026-08-10 - v1.1.0 - Performance release: single-debounce pipeline, data.table pre-conversion, cached queries, faster interactions;
 - 2025-12-22 - v1.0.5 - Improve dashboard stability;
 - 2025-12-22 - v1.0.0 - First stable release;
 - 2025-10-19 - v0.27.1 - Implement Shiny Dependency Management;

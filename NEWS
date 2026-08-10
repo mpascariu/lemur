@@ -1,3 +1,17 @@
+version 1.2.0
+- Performance: replace the ggplot + ggplotly() conversion chain for figures 2-4
+  with native plot_ly() construction (new internal functions plotly_change(),
+  plotly_cod() and plotly_decompose()). Figure rendering drops from ~1.9 s to
+  ~0.10 s per interaction; the -50% change interaction drops to roughly half
+  of the v1.1.0 time;
+- Dashboard layout: the four chart panels now fill the browser window and
+  resize together with it instead of leaving unused space at the bottom, and
+  the dashboard remains responsive across screen resolutions (each row keeps a
+  minimum height and scrolls on short/small screens);
+- Figure 3 (Cause of Death Distribution): the cause-of-death labels are now
+  set a small visible gap off the y-axis line (ticksuffix padding) in the
+  single and faceted views.
+
 version 1.1.0
 - Performance: replace the two debounce timers (year selector + reduction
   matrix) with a single debounce point - data_fig() now bundles the prepared

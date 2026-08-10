@@ -18,6 +18,7 @@ To learn more about the package, start with the vignettes:
 
 Authors:
 \itemize{
+  \item Marius D. Pascariu \email{rpascariu@outlook.com} (\href{https://orcid.org/0000-0002-2568-6489}{ORCID}) [copyright holder]
   \item Jose Manuel Aburto (\href{https://orcid.org/0000-0002-2926-6879}{ORCID})
   \item Vladimir Canudas-Romo (\href{https://orcid.org/0000-0001-6532-0089}{ORCID})
 }
