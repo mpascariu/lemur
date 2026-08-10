@@ -1,3 +1,20 @@
+version 1.4.0
+- Tests: introduce the first unit test suite (testthat edition 3), split by
+  responsibility: test-data-processing.R, test-graphics.R, test-shiny-ui.R and
+  test-shiny-server.R add ~180 assertions covering the data-processing helpers,
+  the ggplot/plotly/leaflet figure builders and the pure-function parts of the
+  Shiny server and UI (captions, filters, DB setup, table formatting). Fixtures
+  are shared via tests/testthat/setup.R; the suite runs in a few seconds and
+  passes R CMD check with 0 errors and 0 warnings;
+- Bug fix: modify_cod_table() dropped the 6th row instead of the deaths column
+  when handed a data.table (data.table[-i] is row subsetting), leaving
+  duplicate deaths.x/deaths.y columns in the output. The column is now dropped
+  by name;
+- Bug fix: decompose_by_age() and matrix_to_long_table() wrote factor integer
+  codes (1, 2, 3) into the region/period/sex identification columns because
+  ifelse() strips factor class. The labels (e.g. "both", "Romania - Mexico")
+  are now preserved.
+
 version 1.3.1
 - The three public datasets `data_gbd2021_cod`, `data_gbd2021_lt` and
   `data_gbd2021_sdg` are no longer shipped as lazy-loadable objects in data/.

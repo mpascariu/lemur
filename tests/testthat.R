@@ -1,4 +1,4 @@
 library(testthat)
-# library(lemur)
+library(lemur)
 
-# test_check("lemur")
+test_check("lemur")

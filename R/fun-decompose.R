@@ -70,17 +70,19 @@ decompose_by_age <- function(L1, L2){
     mutate(
       x.int = factor(x.int, levels = unique(x.int)),
       decomposition = dec,
+      # NB: ifelse() on factor inputs returns integer codes, so the TRUE
+      # branch must be coerced to character to keep labels in the output.
       region = ifelse(
         L1$region == L2$region,
-        region,
+        as.character(region),
         paste(L1$region, "-", L2$region)),
       period = ifelse(
         L1$period == L2$period,
-        period,
+        as.character(period),
         paste(L1$period, "-", L2$period)),
       sex = ifelse(
         L1$sex == L2$sex,
-        sex,
+        as.character(sex),
         paste(L1$sex, "-", L2$sex)),
     )
 
@@ -267,16 +269,19 @@ matrix_to_long_table <- function(X, C1, C2){
       x.int  = factor(x.int, levels = unique(x.int)),
       cause_name = factor(cause_name, levels = levels(C1$cause_name)),
 
-      r1     = unique(C1$region),
-      r2     = unique(C2$region),
+      # NB: unique() on factor columns returns factors; ifelse() on factor
+      # inputs returns integer codes, so coerce to character first to keep
+      # labels (e.g. "both", "Romania") in the long-table output.
+      r1     = as.character(unique(C1$region)),
+      r2     = as.character(unique(C2$region)),
       region = ifelse(r1 == r2, r1, paste(r1, "-", r2)),
 
-      p1     = unique(C1$period),
-      p2     = unique(C2$period),
+      p1     = as.character(unique(C1$period)),
+      p2     = as.character(unique(C2$period)),
       period = ifelse(p1 == p2, p1, paste(p1, "-", p2)),
 
-      sex1   = unique(C1$sex),
-      sex2   = unique(C2$sex),
+      sex1   = as.character(unique(C1$sex)),
+      sex2   = as.character(unique(C2$sex)),
       sex    = ifelse(sex1 == sex2, sex1, paste(sex1, "-", sex2)),
     ) %>%
     select(

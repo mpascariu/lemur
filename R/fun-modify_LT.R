@@ -161,8 +161,11 @@ modify_cod_table <- function(cod, cod_change){
       x = as.numeric(x),
       cause_name = factor(as.character(cause_name), levels = lv)) %>%
     arrange(cause_name)
-    # remove original deaths column and join the datasets
-  out <- left_join(cod[-6], out, by = c("x", "cause_name"))
+    # remove original deaths column and join the datasets.
+    # NB: drop the column by name, not by index (cod[-6]) -- the latter
+    # removes the 6th row on a data.table (data.table[-i] is row subsetting),
+    # which silently left a duplicate deaths.x/deaths.y in the output.
+  out <- left_join(select(cod, -deaths), out, by = c("x", "cause_name"))
 
   # Exit
   return(out)

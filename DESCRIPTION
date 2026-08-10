@@ -1,6 +1,6 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 1.3.1
+Version: 1.4.0
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -43,8 +43,9 @@ Imports:
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
-Suggests: 
+Suggests:
   testthat (>= 3.0.0)
-Depends: 
+Depends:
   R (>= 4.3.0)
 Config/roxygen2/version: 8.1.0
+Config/testthat/edition: 3
