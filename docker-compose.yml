@@ -23,6 +23,10 @@ services:
     image: openanalytics/shinyproxy:2.6.0
     container_name: shinyproxy
     restart: always
+    # Make the LEMUR_DB_* variables available to ShinyProxy's own process so it
+    # can forward them to the app containers it spawns (via container-env in
+    # deploy/shinyproxy/application.yml).
+    env_file: .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
@@ -37,6 +41,9 @@ services:
   shiny:
     container_name: shiny
     build: ./
+    # Supply the LEMUR_DB_* database credentials from .env (same file the
+    # postgres service uses).
+    env_file: .env
     # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
     ports:
       - 3838:3838

@@ -3,6 +3,16 @@
 # Last update: Sun Oct 19 21:08:03 2025
 # ------------------------------------------------- #
 
+# Read a database setting from an environment variable, falling back to a
+# default when the variable is unset or empty. Every setting except the
+# password has a default so local development works out of the box; production
+# values are supplied via the deployment environment (see .env.example).
+#' @noRd
+db_setting <- function(name, default) {
+  value <- Sys.getenv(name, unset = "")
+  if (!nzchar(value)) default else value
+}
+
 # Create a global connection pool (to be reused across calls)
 #' @keywords internal
 create_db_pool <- function(run_db = TRUE) {
@@ -10,18 +20,29 @@ create_db_pool <- function(run_db = TRUE) {
     # Return NULL or a dummy pool when running locally, no DB connection needed
     return(NULL)
   }
-  
+
+  # The password deliberately has no default: if serverMode = TRUE the app
+  # must fail loudly rather than silently connect with wrong credentials.
+  password <- db_setting("LEMUR_DB_PASSWORD", "")
+  if (!nzchar(password)) {
+    stop(
+      "serverMode = TRUE but no database password is configured.\n",
+      "Set the environment variable LEMUR_DB_PASSWORD before starting the app ",
+      "(see .env.example at the repo root)."
+    )
+  }
+
   pool <- pool::dbPool(
     drv      = RPostgres::Postgres(),
-    host     = "postgres",
-    dbname   = "gbd2021",
-    user     = "lemur",
-    password = "tx*Oj3HjwAlNbNY0XrY3288E#", # yeah, i know...
-    port     = 5432,
+    host     = db_setting("LEMUR_DB_HOST", "postgres"),
+    dbname   = db_setting("LEMUR_DB_NAME", "gbd2021"),
+    user     = db_setting("LEMUR_DB_USER", "lemur"),
+    password = password,
+    port     = as.integer(db_setting("LEMUR_DB_PORT", "5432")),
     minSize  = 2,
     maxSize  = 20
   )
-  
+
   return(pool)
 }
 

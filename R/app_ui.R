@@ -126,7 +126,16 @@ golem_add_external_resources <- function() {
       type = "text/css",
       href = "www/styles.css"
     ),
-    tags$script(src = "www/addNavLink.js")
+    tags$script(src = "www/addNavLink.js"),
+    # Hide the #lemur-loading overlay when the server signals that the data is
+    # ready. Shiny doesn't emit this message; app_server.R does via
+    # session$sendCustomMessage("hideLoading", ...).
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('hideLoading', function(msg) {
+        var el = document.getElementById('lemur-loading');
+        if (el) { el.style.display = 'none'; }
+      });
+    "))
   )
 }
 

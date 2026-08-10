@@ -1,37 +1,55 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# Runs R CMD check on every push to the active branches and on pull
+# requests. The check badge turns green when the package passes, and red
+# when it fails -- so errors (and warnings) show up in the repo/PR checks.
 #
-# See https://github.com/r-lib/actions/tree/master/examples#readme for
-# additional example workflows available for the R community.
+# The package DESCRIPTION requires R >= 4.3.0, so we use the current stable
+# R release (which is well above that) rather than the old R versions the
+# previous workflow tested.
 
-name: R
+name: R CMD check
 
 on:
   push:
-    branches: [ main ]
+    branches: [v4, main]
   pull_request:
-    branches: [ main ]
+    branches: [v4, main]
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        r-version: ['3.6.3', '4.1.1']
-
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up R ${{ matrix.r-version }}
-        uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.r-version }}
-      - name: Install dependencies
+          use-public-rspm: true
+
+      # System libraries needed to install the spatial (sf) and database
+      # (RPostgres) dependencies from source on Linux.
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
         run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
-        shell: Rscript {0}
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgdal-dev libgeos-dev libproj-dev libudunits2-dev \
+            libpq-dev \
+            libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      # Installs every package in Imports/Suggests (with caching).
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: rcmdcheck
+
+      # Builds the package and runs R CMD check; fails the run on any ERROR
+      # or WARNING and uploads the check results as an artifact.
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          error-on: '"warning"'
+          upload-snapshots: true

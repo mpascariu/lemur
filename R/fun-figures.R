@@ -710,7 +710,7 @@ plotly_cod <- function(cod,
           # bundled with plotly 4.12.1 does not support ticklabelstandoff, so
           # pad with a couple of non-breaking spaces appended after each label
           # (NBSP survives SVG whitespace trimming; regular spaces do not).
-          ticksuffix = "  "
+          ticksuffix = "\u00A0\u00A0"
         )
       )
 
@@ -734,7 +734,7 @@ plotly_cod <- function(cod,
           # bundled with plotly 4.12.1 does not support ticklabelstandoff, so
           # pad with a couple of non-breaking spaces appended after each label
           # (NBSP survives SVG whitespace trimming; regular spaces do not).
-          ticksuffix = "  "
+          ticksuffix = "\u00A0\u00A0"
         )
       )
   }

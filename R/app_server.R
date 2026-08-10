@@ -38,6 +38,13 @@ app_server <- function(input, output, session) {
       ui_state$ready <- TRUE
     }
   })
+
+  # Hide the loading overlay once the UI is fully rendered
+  observe({
+    if (ui_state$ready) {
+      session$sendCustomMessage("hideLoading", list())
+    }
+  })
   
   # INPUT DATA selection
   # The source of data can be the local datasets saved in the package or the 
@@ -69,14 +76,20 @@ app_server <- function(input, output, session) {
   # not the expensive computation downstream.
   time_slider <- reactive(input$time_slider)
 
-  # Pre-convert the static datasets to data.table once at startup, so that
+  # Pre-load the static datasets as data.tables once at startup, so that
   # dt_filter_local() filters without re-converting the full tables on every
   # input change. (Not needed in server mode where the data lives in Postgres.)
+  #
+  # The data lives in inst/extdata/*_dt.rds -- lean copies of the public .rda
+  # datasets (see data-raw/build_fast_data.R): pre-factorized data.tables with
+  # gzip compression. They deserialize ~18x faster than the bzip2 .rda files
+  # (0.5s vs 8.6s for COD) and skip the as.data.table() conversion entirely.
   if (!isTRUE(getShinyOption("serverMode"))) {
+    read_fast <- function(f) readRDS(system.file("extdata", f, package = "lemur"))
     session$userData$dt <- list(
-      cod = data.table::as.data.table(data_gbd2021_cod),
-      sdg = data.table::as.data.table(data_gbd2021_sdg),
-      lt  = data.table::as.data.table(data_gbd2021_lt)
+      cod = read_fast("cod_dt.rds"),
+      lt  = read_fast("lt_dt.rds")
+      # sdg is loaded lazily -- only when the user enters an SDG mode
     )
   }
 
@@ -130,8 +143,16 @@ data_cod <- reactive({
 # ------------------------------------------------------------------
 data_sdg <- reactive({
   req(ui_state$ready)
-  
+
   if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
+    # SDG data is loaded lazily on first access: the sdg table (3.1M rows) is
+    # only needed in the two SDG modes, so we skip its ~0.6s load for every
+    # session that never uses it.
+    if (is.null(session$userData$dt[["sdg"]])) {
+      session$userData$dt[["sdg"]] <- readRDS(
+        system.file("extdata", "sdg_dt.rds", package = "lemur")
+      )
+    }
     fetch_data("sdg") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name_sdg)) %>%
       arrange(region, sex, x, cause_name) %>%

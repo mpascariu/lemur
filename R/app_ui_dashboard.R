@@ -19,6 +19,31 @@ ui_dashbord <- function() {
     div(
       class = "html-fill-item html-fill-container",
       style = "display: flex; flex-direction: column;",
+      # Loading overlay. position:fixed so it covers the viewport (and stays
+      # out of the flex flow). The server hides it via the hideLoading custom
+      # message once the UI is ready (see app_server.R). The main tables now
+      # load in ~1s, but the overlay keeps the brief gap from looking like a
+      # frozen page on slow machines.
+      tags$div(
+        id = "lemur-loading",
+        style = "position:fixed; top:0; left:0; width:100%; height:100%;
+                 background:#fff; z-index:9999; display:flex;
+                 align-items:center; justify-content:center;
+                 font-family:'Roboto Condensed',sans-serif;",
+        tags$style("
+          .lemur-spinner {
+            width: 42px; height: 42px; margin: 0 auto 14px;
+            border: 4px solid #e9ecef; border-top-color: #0d6efd;
+            border-radius: 50%; animation: lemur-spin 0.9s linear infinite;
+          }
+          @keyframes lemur-spin { to { transform: rotate(360deg); } }
+        "),
+        tags$div(
+          style = "text-align:center; color:#495057; font-size:1.2rem;",
+          tags$div(class = "lemur-spinner"),
+          "Loading data\u2026"
+        )
+      ),
       top_panel(),
       main_panel()
     )

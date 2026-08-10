@@ -12,11 +12,14 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 1.2.0
+**Monitor Version:** 1.3.0
 
-**Last Update:** 2026-08-10 20:29:11 CEST
+**Last Update:** 2026-08-10
 
 **News in previous versions:**
+- 2026-08-10 - v1.3.0 - Startup performance release: datasets now load from
+  lean gzip copies (~18x faster: ~1.3s vs ~23s), the SDG table loads only
+  when an SDG mode is used, and a loading overlay shows while the data loads;
 - 2026-08-10 - v1.2.0 - Native plotly rendering for figures 2-4 (faster and smoother), dashboard charts fill the window and resize responsively, figure 3 labels spaced off the y-axis;
 - 2026-08-10 - v1.1.0 - Performance release: single-debounce pipeline, data.table pre-conversion, cached queries, faster interactions;
 - 2025-12-22 - v1.0.5 - Improve dashboard stability;

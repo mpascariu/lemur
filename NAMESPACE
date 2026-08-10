@@ -28,93 +28,115 @@ import(leaflet)
 import(markdown)
 import(sf)
 import(shinyWidgets)
-importFrom(DBI,dbConnect)
-importFrom(DBI,dbDisconnect)
-importFrom(DBI,dbFetch)
-importFrom(DBI,dbSendQuery)
-importFrom(DT,dataTableOutput)
-importFrom(DT,renderDataTable)
+importFrom(DBI,
+  dbConnect,
+  dbDisconnect,
+  dbFetch,
+  dbSendQuery
+)
+importFrom(DT,
+  dataTableOutput,
+  renderDataTable
+)
 importFrom(MortalityLaws,LifeTable)
 importFrom(RPostgres,Postgres)
-importFrom(bslib,breakpoints)
-importFrom(bslib,bs_theme)
-importFrom(bslib,card)
-importFrom(bslib,card_body)
-importFrom(bslib,card_header)
-importFrom(bslib,layout_columns)
-importFrom(bslib,layout_sidebar)
-importFrom(bslib,nav_item)
-importFrom(bslib,nav_menu)
-importFrom(bslib,nav_panel)
-importFrom(bslib,nav_spacer)
-importFrom(bslib,page_navbar)
-importFrom(bslib,sidebar)
-importFrom(dplyr,"%>%")
-importFrom(dplyr,all_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,bind_cols)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,mutate_all)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,summarise)
-importFrom(dplyr,ungroup)
+importFrom(bslib,
+  breakpoints,
+  bs_theme,
+  card,
+  card_body,
+  card_header,
+  layout_columns,
+  layout_sidebar,
+  nav_item,
+  nav_menu,
+  nav_panel,
+  nav_spacer,
+  page_navbar,
+  sidebar
+)
+importFrom(dplyr,
+  "%>%",
+  all_of,
+  arrange,
+  bind_cols,
+  bind_rows,
+  filter,
+  group_by,
+  left_join,
+  mutate,
+  mutate_all,
+  rename,
+  select,
+  summarise,
+  ungroup
+)
 importFrom(glue,glue_data)
-importFrom(htmltools,HTML)
-importFrom(htmltools,attachDependencies)
-importFrom(htmltools,findDependencies)
-importFrom(htmltools,tagAppendAttributes)
-importFrom(htmltools,tagList)
-importFrom(htmltools,tags)
-importFrom(leaflet.extras,addFullscreenControl)
-importFrom(leaflet.extras,addResetMapButton)
-importFrom(plotly,ggplotly)
-importFrom(plotly,layout)
-importFrom(plotly,plotlyOutput)
-importFrom(plotly,renderPlotly)
-importFrom(pool,dbPool)
-importFrom(pool,poolClose)
+importFrom(htmltools,
+  HTML,
+  attachDependencies,
+  findDependencies,
+  tagAppendAttributes,
+  tagList,
+  tags
+)
+importFrom(leaflet.extras,
+  addFullscreenControl,
+  addResetMapButton
+)
+importFrom(plotly,
+  ggplotly,
+  layout,
+  plotlyOutput,
+  renderPlotly
+)
+importFrom(pool,
+  dbPool,
+  poolClose
+)
 importFrom(purrr,map)
-importFrom(shiny,actionButton)
-importFrom(shiny,addResourcePath)
-importFrom(shiny,bindCache)
-importFrom(shiny,bookmarkButton)
-importFrom(shiny,br)
-importFrom(shiny,column)
-importFrom(shiny,conditionalPanel)
-importFrom(shiny,div)
-importFrom(shiny,fluidPage)
-importFrom(shiny,fluidRow)
-importFrom(shiny,getShinyOption)
-importFrom(shiny,h3)
-importFrom(shiny,icon)
-importFrom(shiny,includeMarkdown)
-importFrom(shiny,navbarPage)
-importFrom(shiny,observe)
-importFrom(shiny,observeEvent)
-importFrom(shiny,onStop)
-importFrom(shiny,reactive)
-importFrom(shiny,reactiveValues)
-importFrom(shiny,req)
-importFrom(shiny,selectInput)
-importFrom(shiny,shinyApp)
-importFrom(shiny,shinyOptions)
-importFrom(shiny,showNotification)
-importFrom(shiny,sliderInput)
-importFrom(shiny,tabPanel)
-importFrom(shiny,tabsetPanel)
-importFrom(shiny,updateSelectInput)
-importFrom(shiny,updateSliderInput)
-importFrom(shiny,validateCssUnit)
+importFrom(shiny,
+  actionButton,
+  addResourcePath,
+  bindCache,
+  bookmarkButton,
+  br,
+  column,
+  conditionalPanel,
+  div,
+  fluidPage,
+  fluidRow,
+  getShinyOption,
+  h3,
+  icon,
+  includeMarkdown,
+  navbarPage,
+  observe,
+  observeEvent,
+  onStop,
+  reactive,
+  reactiveValues,
+  req,
+  selectInput,
+  shinyApp,
+  shinyOptions,
+  showNotification,
+  sliderInput,
+  tabPanel,
+  tabsetPanel,
+  updateSelectInput,
+  updateSliderInput,
+  validateCssUnit
+)
 importFrom(shinyjs,useShinyjs)
-importFrom(tibble,as_tibble)
-importFrom(tibble,column_to_rownames)
-importFrom(tibble,new_tibble)
-importFrom(tibble,rownames_to_column)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,pivot_wider)
-importFrom(tidyr,replace_na)
+importFrom(tibble,
+  as_tibble,
+  column_to_rownames,
+  new_tibble,
+  rownames_to_column
+)
+importFrom(tidyr,
+  pivot_longer,
+  pivot_wider,
+  replace_na
+)

@@ -1,10 +1,35 @@
+import os
+
 import psycopg2
 import datetime
 import pandas as pd
 from ast import literal_eval
 
-# sql_host = 'localhost'
-sql_host = 'postgres'
+# Database connection settings come from environment variables so that the
+# credentials never live in the source code. Production supplies them via the
+# deployment platform (docker-compose .env / cloud environment variables);
+# the defaults match the local docker-compose stack. See .env.example at the
+# repo root.
+DB_HOST = os.environ.get("LEMUR_DB_HOST", "postgres")
+DB_NAME = os.environ.get("LEMUR_DB_NAME", "gbd2021")
+DB_USER = os.environ.get("LEMUR_DB_USER", "lemur")
+DB_PASSWORD = os.environ.get("LEMUR_DB_PASSWORD", "")
+
+if not DB_PASSWORD:
+    raise RuntimeError(
+        "LEMUR_DB_PASSWORD is not set; refusing to start without a database "
+        "password. Set it in the deployment environment (see .env.example)."
+    )
+
+
+def db_connect():
+    """Open a connection to the lemur database."""
+    return psycopg2.connect(
+        database=DB_NAME,
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+    )
 
 def timestr():
     return (
@@ -20,12 +45,7 @@ def query(sql_query):
 
     # query database
     try:
-        conn = psycopg2.connect(
-            database='gbd2019',
-            host=sql_host,
-            user='lemur',
-            password='tx*Oj3HjwAlNbNY0XrY3288E#',
-        )
+        conn = db_connect()
         df = pd.read_sql(sql_query, conn)
         conn.close()
     except:
@@ -167,12 +187,7 @@ def validate(ip):
     rpm = 30
     daily_limit = rpm * 60 * 24
 
-    conn = psycopg2.connect(
-        database='gbd2019',
-        host=sql_host,
-        user='lemur',
-        password='tx*Oj3HjwAlNbNY0XrY3288E#',
-    )
+    conn = db_connect()
     cur = conn.cursor()
     sql_query = "select count(*) from api_requests where ip='{}' and date=current_date;".format(ip)
     cur.execute(sql_query)
