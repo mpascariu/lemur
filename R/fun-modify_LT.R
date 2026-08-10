@@ -15,8 +15,8 @@
 #' @return A life table in the same format as the input life table.
 #' @examples
 #' 
-#' L <- data_gbd2021_lt  # life tables
-#' D <- data_gbd2021_cod # cod data
+#' L <- data_gbd2021_lt()  # life tables
+#' D <- data_gbd2021_cod() # cod data
 #' 
 #' # Select Life Table
 #' lt <- L[L$region == "Romania" & L$sex == "both" & L$period == 2021, ]
@@ -95,7 +95,7 @@ modify_life_table <- function(lt, cod, cod_change) {
 #' @inheritParams modify_life_table
 #' @return A long table with the same format as the input data
 #' @examples
-#' D <- data_gbd2021_cod # cod data
+#' D <- data_gbd2021_cod() # cod data
 #' 
 #' # Select COD data
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
@@ -178,7 +178,7 @@ modify_cod_table <- function(cod, cod_change){
 #' @return A matrix with percentages.
 #' @examples
 #' # cod data
-#' D <- data_gbd2021_cod
+#' D <- data_gbd2021_cod()
 #' # Select COD data for 1 region
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 1990, ]
 #' # COD data in matrix format

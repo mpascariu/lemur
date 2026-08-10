@@ -205,7 +205,7 @@ plot_change <- function(L1, L2,
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
 #' #' @examples
-#' D <- data_gbd2021_cod # cod data
+#' D <- data_gbd2021_cod() # cod data
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
 #' plot_cod(cod)
 #' @export

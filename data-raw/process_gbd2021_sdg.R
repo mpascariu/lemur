@@ -351,7 +351,8 @@ data_gbd2021_sdg <- GBD %>%
 
 dt <- format(Sys.Date(), '%Y%m%d')
 save(data_gbd2021_sdg, file = paste0("data-raw/IHME_GBD2021_Data/data_gbd2021_sdg_", dt,".Rdata"))
-usethis::use_data(data_gbd2021_sdg, overwrite = TRUE)
+# The dataset is no longer shipped via data/ (it is served by
+# data_gbd2021_sdg() from inst/extdata, built by build_fast_data.R).
 
 
 

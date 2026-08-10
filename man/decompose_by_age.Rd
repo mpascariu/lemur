@@ -22,16 +22,16 @@ period of time.
 }
 \examples{
 # Data
-L <- data_gbd2021_lt
+L <- data_gbd2021_lt()
 
 # Select Life Table 1 & 2
 region1 = "Romania"
 region2 = "Mexico"
-sex     = "female"
+sex_sel = "female"
 year    = 2021
 
-L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
+L1 <- L[L$region == region1 & L$sex == sex_sel & L$period == year, ]
+L2 <- L[L$region == region2 & L$sex == sex_sel & L$period == year, ]
 
 # Age decomposition
 dec <- decompose_by_age(L1, L2)

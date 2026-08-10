@@ -29,13 +29,21 @@ Australian National University (ANU).
 
 ## Installation
 
-You can install the development version from
-[GitHub](https://github.com/mpascariu/lemur) with:
+Once you have an R session open (in RStudio or the R
+console), install the package straight from
+[GitHub](https://github.com/mpascariu/lemur):
 
 ``` r
-# install.packages("devtools")
+# 1. Install the devtools package, if you do not have it yet
+install.packages("devtools")
+
+# 2. Install lemur from GitHub (latest version on the main branch)
 devtools::install_github("mpascariu/lemur")
 ```
+
+The package bundles the GBD2021 datasets (exposed as `data_gbd2021_lt()`,
+`data_gbd2021_cod()` and `data_gbd2021_sdg()`), so you can run the examples
+on the help pages and the analysis functions without a database connection.
 
 ## Example
 
@@ -50,7 +58,7 @@ lemur::run_app()
 Screenshot](inst/app/www/app_lemur_20250928.png)](https://github.com/mpascariu/lemur)
 
 All the simulations done in the monitor can be executed using the `R`
-syntax directly in the R/Rstudio console. See the available data object
-`data_gbd2021_cod`, `data_gbd2021_lt` or the help pages of relevant
-functions like `decompose_by_cod()`, `modify_life_table()` and the
-related `plot_` functions.
+syntax directly in the R/Rstudio console. The package data is available
+via the accessor functions `data_gbd2021_cod()` and `data_gbd2021_lt()`
+or the help pages of relevant functions like `decompose_by_cod()`,
+`modify_life_table()` and the related `plot_` functions.

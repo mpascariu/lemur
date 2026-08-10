@@ -5,10 +5,10 @@
 
 # Build fast-to-load copies of the package datasets.
 #
-# The package ships the GBD2021 tables as compressed .rda files in data/,
-# which take ~22s to deserialize at app startup (bzip2 decompression is very
-# slow on large tables). This script produces lean .rds copies in
-# inst/extdata/ that the Shiny app loads instead:
+# The package ships the GBD2021 tables as pre-factorized, gzip-compressed
+# .rds files in inst/extdata/ that the Shiny app and the accessor functions
+# (data_gbd2021_cod(), data_gbd2021_lt(), data_gbd2021_sdg()) load instead of
+# lazy data objects:
 #   * data.table format -- the app already converts to data.table at startup,
 #     so this drops the conversion step entirely;
 #   * character columns factorized -- region/sex shrink the cod table from
@@ -19,13 +19,31 @@
 # Result: COD 9.6s -> 0.45s, SDG 8.3s -> ~0.5s, LT 2.1s -> ~0.15s.
 #
 # Reproduce with: Rscript data-raw/build_fast_data.R
-# The public .rda datasets in data/ are left untouched.
+#
+# Source data: the process scripts (data-raw/process_gbd2021_*.R) write
+# date-stamped .Rdata files into data-raw/IHME_GBD2021_Data/. Those are what
+# this script reads. The .rda copies those scripts used to drop in data/ are
+# gone -- keeping them out avoids shipping the same ~44 MB twice.
 
 suppressPackageStartupMessages(library(data.table))
 
-data_dir <- "data"
+data_dir <- file.path("data-raw", "IHME_GBD2021_Data")
 out_dir  <- file.path("inst", "extdata")
 dir.create(out_dir, showWarnings = FALSE)
+
+# Locate the most recent processed .Rdata for a dataset stem, e.g.
+# data_gbd2021_cod_20260810.Rdata. The date-stamped names sort
+# lexicographically in chronological order, so the last one is the newest.
+latest_rdata <- function(stem) {
+  pattern <- paste0("data_gbd2021_", stem, "_.*\\.Rdata$")
+  files <- list.files(data_dir, pattern = pattern, full.names = TRUE)
+  if (!length(files)) {
+    stop("No processed data found for '", stem, "'. Run the corresponding\n",
+         "data-raw/process_gbd2021_", stem, ".R script first (it writes a\n",
+         ".Rdata file to data-raw/IHME_GBD2021_Data/).")
+  }
+  sort(files)[length(files)]
+}
 
 # Factorize the character columns (region/sex) of a dataset and return a
 # data.table. Only character columns are converted: factorizing a numeric
@@ -40,12 +58,12 @@ factorize <- function(X) {
   dt
 }
 
-# (file name, output file stem) -> write the fast .rds
+# (source .Rdata path, output file stem) -> write the fast .rds
 make_fast <- function(file, stem) {
-  cat("Processing", file, "...\n")
+  cat("Processing", basename(file), "...\n")
   env <- new.env(parent = emptyenv())
-  load(file.path(data_dir, file), envir = env)
-  obj  <- get(ls(env)[1], envir = env)       # the single object in the .rda
+  load(file, envir = env)
+  obj  <- get(ls(env)[1], envir = env)       # the single object in the .Rdata
   fast <- factorize(obj)
   path <- file.path(out_dir, paste0(stem, "_dt.rds"))
   saveRDS(fast, path, compress = "gzip")
@@ -59,7 +77,7 @@ make_fast <- function(file, stem) {
   ))
 }
 
-# Read each public dataset from data/, then build the fast copy
-make_fast("data_gbd2021_cod.rda", "cod")
-make_fast("data_gbd2021_sdg.rda", "sdg")
-make_fast("data_gbd2021_lt.rda",  "lt")
+# Read the latest processed copy of each dataset, then build the fast .rds
+make_fast(latest_rdata("cod"), "cod")
+make_fast(latest_rdata("sdg"), "sdg")
+make_fast(latest_rdata("lt"),  "lt")

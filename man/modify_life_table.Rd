@@ -25,8 +25,8 @@ Modify life table by changing the cause of death associated risks
 }
 \examples{
 
-L <- data_gbd2021_lt  # life tables
-D <- data_gbd2021_cod # cod data
+L <- data_gbd2021_lt()  # life tables
+D <- data_gbd2021_cod() # cod data
 
 # Select Life Table
 lt <- L[L$region == "Romania" & L$sex == "both" & L$period == 2021, ]

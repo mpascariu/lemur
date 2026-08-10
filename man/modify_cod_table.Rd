@@ -22,7 +22,7 @@ A long table with the same format as the input data
 Modify COD table by changing the cause of death associated risks
 }
 \examples{
-D <- data_gbd2021_cod # cod data
+D <- data_gbd2021_cod() # cod data
 
 # Select COD data
 cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]

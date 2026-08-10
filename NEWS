@@ -1,3 +1,13 @@
+version 1.3.1
+- The three public datasets `data_gbd2021_cod`, `data_gbd2021_lt` and
+  `data_gbd2021_sdg` are no longer shipped as lazy-loadable objects in data/.
+  They are now exposed as the exported accessor functions `data_gbd2021_cod()`,
+  `data_gbd2021_lt()` and `data_gbd2021_sdg()`, which read the pre-factorized
+  data.tables from the package's inst/extdata/ directory. This removes the
+  ~44 MB duplication of the GBD2021 tables and cuts the source tarball roughly
+  in half. Code that used the bare objects must call the functions instead
+  (e.g. `data_gbd2021_lt` becomes `data_gbd2021_lt()`).
+
 version 1.3.0
 - Performance (startup): replace the bzip2 .rda datasets with lean,
   pre-factorized data.table copies stored as gzip .rds files in

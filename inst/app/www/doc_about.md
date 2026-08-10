@@ -12,11 +12,15 @@ The sustainable development goals (SDG) were set in 2015 with many specific targ
 ---
 #### Updates and news
 
-**Monitor Version:** 1.3.0
+**Monitor Version:** 1.3.1
 
 **Last Update:** 2026-08-10
 
 **News in previous versions:**
+- 2026-08-10 - v1.3.1 - Data access release: the datasets `data_gbd2021_cod`,
+  `data_gbd2021_lt` and `data_gbd2021_sdg` are now exposed as accessor
+  functions (e.g. `data_gbd2021_lt()`) instead of lazy data objects, removing
+  a ~44 MB duplicate copy of the GBD2021 tables from the package;
 - 2026-08-10 - v1.3.0 - Startup performance release: datasets now load from
   lean gzip copies (~18x faster: ~1.3s vs ~23s), the SDG table loads only
   when an SDG mode is used, and a loading overlay shows while the data loads;

@@ -16,16 +16,16 @@
 #' @references ...
 #' @examples
 #' # Data
-#' L <- data_gbd2021_lt
+#' L <- data_gbd2021_lt()
 #' 
 #' # Select Life Table 1 & 2
 #' region1 = "Romania"
 #' region2 = "Mexico"
-#' sex     = "female"
+#' sex_sel = "female"
 #' year    = 2021
-#' 
-#' L1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-#' L2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
+#'
+#' L1 <- L[L$region == region1 & L$sex == sex_sel & L$period == year, ]
+#' L2 <- L[L$region == region2 & L$sex == sex_sel & L$period == year, ]
 #' 
 #' # Age decomposition
 #' dec <- decompose_by_age(L1, L2)
@@ -122,21 +122,21 @@ decompose_by_age <- function(L1, L2){
 #' \code{DemoDecomp::stepwise_replacement} function maintained by Tim RIFFE.
 #' @references ...
 #' @examples
-#' L <- data_gbd2021_lt  # life tables
-#' D <- data_gbd2021_cod # cod data
+#' L <- data_gbd2021_lt()  # life tables
+#' D <- data_gbd2021_cod() # cod data
 #' 
 #' # Select two Life Tables
 #' region1 = "Romania"
 #' region2 = "Mexico"
-#' sex     = "male"
+#' sex_sel = "male"
 #' year    = 2021
-#' 
-#' lt1 <- L[L$region == region1 & L$sex == sex & L$period == year, ]
-#' lt2 <- L[L$region == region2 & L$sex == sex & L$period == year, ]
-#' 
+#'
+#' lt1 <- L[L$region == region1 & L$sex == sex_sel & L$period == year, ]
+#' lt2 <- L[L$region == region2 & L$sex == sex_sel & L$period == year, ]
+#'
 #' # Select COD corresponding data
-#' cod1 <- D[D$region == region1 & D$sex == sex & D$period == year, ]
-#' cod2 <- D[D$region == region2 & D$sex == sex & D$period == year, ]
+#' cod1 <- D[D$region == region1 & D$sex == sex_sel & D$period == year, ]
+#' cod2 <- D[D$region == region2 & D$sex == sex_sel & D$period == year, ]
 #' 
 #' ## Example of decomposition by age and cause of death
 #' dec  <- decompose_by_cod(L1 = lt1,
