@@ -1,4 +1,29 @@
-version 0.21.0 
+version 1.1.0
+- Performance: replace the two debounce timers (year selector + reduction
+  matrix) with a single debounce point - data_fig() now bundles the prepared
+  figure data, the reduction matrix and every input the figures/tables/
+  captions read, and the whole bundle is debounced as one snapshot. Input
+  changes now trigger exactly one consistent UI update instead of two
+  intermediate re-renders;
+- Performance: pre-convert the local datasets to data.table once at app
+  startup (dt_filter_local() now skips the conversion when handed a
+  data.table), cutting filter time roughly 9x (0.47s -> 0.05s);
+- Performance: re-enable bindCache() on the cod/sdg/lt data reactives with
+  explicit cache keys (mode, regions, sex, year, serverMode), so repeated
+  reads of the same query return instantly;
+- Performance: suspend rendering of the figure and table outputs that live in
+  hidden tabs/panels (suspendWhenHidden = TRUE);
+- Performance: skip the life-expectancy decomposition when no mortality
+  change is applied - figure 4 and the decomposition table now show a clear
+  placeholder ("No risk change applied") instead of an all-zero chart/table;
+- Bug fix: charts no longer flicker twice in a row when an input changes;
+- Bug fix: switching between WITHIN REGION and SDG modes no longer crashes
+  with "Error: non-conformable arrays" (data_fig could previously compute with
+  fresh data but a stale, wrong-shaped reduction matrix);
+- New knob: shinyOptions(lemur.debounce = <milliseconds>, default 250)
+  controls the debounce delay used by the app.
+
+version 0.21.0
 - Update application and library to GBD2021 data;
 
 version 0.15.1

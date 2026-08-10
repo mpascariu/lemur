@@ -62,11 +62,28 @@ app_server <- function(input, output, session) {
   db_pool <- reactive({
     session$userData$pool
   })
-  
+
+  # The year selector. Deliberately NOT debounced: the single debounce on
+  # data_fig() below gates the whole figure/table cascade, so dragging this
+  # slider only invalidates the cheap cache reads in data_cod/data_sdg/data_lt,
+  # not the expensive computation downstream.
+  time_slider <- reactive(input$time_slider)
+
+  # Pre-convert the static datasets to data.table once at startup, so that
+  # dt_filter_local() filters without re-converting the full tables on every
+  # input change. (Not needed in server mode where the data lives in Postgres.)
+  if (!isTRUE(getShinyOption("serverMode"))) {
+    session$userData$dt <- list(
+      cod = data.table::as.data.table(data_gbd2021_cod),
+      sdg = data.table::as.data.table(data_gbd2021_sdg),
+      lt  = data.table::as.data.table(data_gbd2021_lt)
+    )
+  }
+
 # ------------------------------------------------------------------
 # Helper to fetch data via SQL or local, avoiding eval/call
 # ------------------------------------------------------------------
-fetch_data <- function(data_local, data_sql_name) {
+fetch_data <- function(data_sql_name) {
   if (serverMode()) {
     dt_filter_sql(
       data    = data_sql_name,
@@ -74,18 +91,18 @@ fetch_data <- function(data_local, data_sql_name) {
       region1 = input$region1,
       region2 = input$region2,
       gender  = input$sex,
-      year    = input$time_slider,
+      year    = time_slider(),
       db_pool = db_pool()
     )
-    
+
   } else {
     dt_filter_local(
-      data    = data_local,
+      data    = session$userData$dt[[data_sql_name]],
       mode    = input$mode,
       region1 = input$region1,
       region2 = input$region2,
       gender  = input$sex,
-      year    = input$time_slider,
+      year    = time_slider(),
       db_pool = db_pool()
     )
   }
@@ -98,13 +115,15 @@ data_cod <- reactive({
   req(ui_state$ready)
   
   if (input$mode %in% c("mode_cod", "mode_sex", "mode_cntr")) {
-    fetch_data(data_gbd2021_cod, "cod") %>%
+    fetch_data("cod") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name)) %>%
       arrange(region, sex, x, cause_name) %>%
       as_tibble()
   }
-}) #|> 
-   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+}) |> bindCache(
+  input$mode, input$region1, input$region2, input$sex,
+  time_slider(), serverMode()
+)
 #
 # ------------------------------------------------------------------
 # 2) sdg data
@@ -113,13 +132,15 @@ data_sdg <- reactive({
   req(ui_state$ready)
   
   if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
-    fetch_data(data_gbd2021_sdg, "sdg") %>%
+    fetch_data("sdg") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name_sdg)) %>%
       arrange(region, sex, x, cause_name) %>%
       as_tibble()
   }
-}) #|> 
-   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+}) |> bindCache(
+  input$mode, input$region1, input$region2, input$sex,
+  time_slider(), serverMode()
+)
 
 # ------------------------------------------------------------------
 # 3) life tables data
@@ -127,7 +148,7 @@ data_sdg <- reactive({
 data_lt <- reactive({
   req(ui_state$ready)
   
-  lt <- fetch_data(data_gbd2021_lt, "lt")
+  lt <- fetch_data("lt")
   
   if (serverMode()) {
     lt <- lt %>% rename(x.int = x_int, Lx = llx, Tx = ttx)
@@ -135,18 +156,21 @@ data_lt <- reactive({
   
   # critical fix: return a proper tibble copy with consistent ordering 
   as_tibble(lt) %>% arrange(region, sex, x)
-}) #|> 
-   # bindCache(input$mode, input$region1, input$region2, input$sex, input$time_slider, serverMode())
+}) |> bindCache(
+  input$mode, input$region1, input$region2, input$sex,
+  time_slider(), serverMode()
+)
 
   # Reduction matrix -----------------------------
   data_cod_change <- reactive({
     req(ui_state$ready)
     
     if (input$mode == "mode_sdg") {
-      
+
+      d_sdg <- data_sdg()
       M <- build_reduction_matrix(
-        data       = data_sdg(),
-        select_cod = as.character(unique(data_sdg()$cause_name)),
+        data       = d_sdg,
+        select_cod = as.character(unique(d_sdg$cause_name)),
         select_x   = 0:110,
         cod_change = 0
       )
@@ -192,10 +216,11 @@ data_lt <- reactive({
       }
       
     } else if (input$mode == 'mode_sdg2') {
-      
+
+      d_sdg <- data_sdg()
       M <- build_reduction_matrix(
-        data       = data_sdg(),
-        select_cod = as.character(unique(data_sdg()$cause_name)),
+        data       = d_sdg,
+        select_cod = as.character(unique(d_sdg$cause_name)),
         select_x   = 0:110,
         cod_change = 0
       )
@@ -234,12 +259,25 @@ data_lt <- reactive({
     }
     
     M
+    # NOTE: deliberately NOT debounced. data_fig() is the single debounce point
+    # of the app. Debouncing this matrix too re-opens a window in which data_fig
+    # sees fresh data with a stale (wrong-shaped) reduction matrix - the cause of
+    # the "non-conformable arrays" crash when switching modes.
   })
-  
-  # Prepare data for figures depending on with mode is selected
+
+  # Prepare data for figures depending on which mode is selected.
+  #
+  # data_fig is THE single debounce point of the app. It bundles the prepared
+  # figure data together with the reduction matrix and every scalar input the
+  # figures/tables/captions read, and the whole bundle is debounced. That
+  # guarantees that after any input change the UI recomputes exactly once from
+  # one consistent snapshot: no intermediate state where a figure renders with
+  # fresh data but a stale reduction matrix (crashed with "non-conformable
+  # arrays" on mode switches) and no double re-render from two debounce timers
+  # firing in series.
   data_fig <- reactive({
     req(ui_state$ready)
-    
+
     process_data <- function(x, mode) {
       prepare_data(
         cod        = x,
@@ -251,25 +289,52 @@ data_lt <- reactive({
         mode       = mode
       )
     }
-    
-    switch(input$mode,
-           mode_cod  = process_data(x = data_cod(), mode = "cod"),
-           mode_cntr = process_data(x = data_cod(), mode = "cntr"),
-           mode_sex  = process_data(x = data_cod(), mode = "sex"),
-           mode_sdg  = process_data(x = data_sdg(), mode = "cod"),
-           mode_sdg2 = process_data(x = data_sdg(), mode = "cod")
+
+    out <- switch(input$mode,
+      mode_cod  = process_data(x = data_cod(), mode = "cod"),
+      mode_cntr = process_data(x = data_cod(), mode = "cntr"),
+      mode_sex  = process_data(x = data_cod(), mode = "sex"),
+      mode_sdg  = process_data(x = data_sdg(), mode = "cod"),
+      mode_sdg2 = process_data(x = data_sdg(), mode = "cod")
     )
-  })
+
+    list(
+      data       = out,
+      reduction  = data_cod_change(),
+      mode       = input$mode,
+      region1    = input$region1,
+      region2    = input$region2,
+      sex        = input$sex,
+      year       = input$time_slider,
+      fig2_x     = input$fig2_x,
+      perc       = input$perc,
+      cod_change = input$cod_change,
+      cod_target = input$cod_target,
+      fig4_dim   = input$fig4_dim
+    )
+  }) |> shiny::debounce(getShinyOption("lemur.debounce", default = 250))
   
   # Decompose the difference in life expectancy at birth
   data_decomp <- reactive({
     req(ui_state$ready)
-    
+
+    # Read the whole (debounced) figure snapshot once, so this reactive never
+    # observes an inconsistent mix of fresh data and a stale reduction matrix.
+    df <- data_fig()
+
+    # When no risk change is applied the initial and final life tables are
+    # identical, so the stepwise-replacement decomposition would be all zeros.
+    # Skip that computation; figure 4 and the decomposition table show a
+    # placeholder instead (see their renderers below).
+    if (!any(df$reduction != 0)) {
+      return(NULL)
+    }
+
     decompose_by_cod(
-      data_fig()$lt_initial,
-      data_fig()$lt_final,
-      data_fig()$cod_initial,
-      data_fig()$cod_final
+      df$data$lt_initial,
+      df$data$lt_final,
+      df$data$cod_initial,
+      df$data$cod_final
     )
   })
   
@@ -278,31 +343,39 @@ data_lt <- reactive({
   # Define table and figure captions
   table_captions <- reactive({
     req(ui_state$ready)
-    
+
+    # Take every argument from the debounced data_fig() snapshot so the table
+    # captions always describe exactly the data being displayed.
+    df <- data_fig()
+
     generate_table_captions(
-      input$mode,
-      input$region1,
-      input$region2,
-      input$time_slider,
-      input$sex,
-      input$cod_change
+      df$mode,
+      df$region1,
+      df$region2,
+      df$year,
+      df$sex,
+      df$cod_change
     )
   })
   
   figure_captions <- reactive({
     req(ui_state$ready)
-    
+
+    # All arguments come from the debounced data_fig() snapshot, so captions
+    # always describe exactly the data the figures show.
+    df <- data_fig()
+
     generate_figure_captions(
-      input$mode,
-      input$region1,
-      input$region2,
-      input$fig2_x,
-      input$perc,
-      input$cod_change,
-      input$cod_target,
-      data_fig()$lt_initial,
-      data_fig()$lt_final,
-      input$fig4_dim
+      df$mode,
+      df$region1,
+      df$region2,
+      df$fig2_x,
+      df$perc,
+      df$cod_change,
+      df$cod_target,
+      df$data$lt_initial,
+      df$data$lt_final,
+      df$fig4_dim
     )
   })
   
@@ -314,8 +387,8 @@ data_lt <- reactive({
   output$lt_initial  = DT::renderDataTable({
     req(data_fig())
     
-    data_fig()$lt_initial %>% 
-      select(-region, -period, -sex) %>% 
+    data_fig()$data$lt_initial %>%
+      select(-region, -period, -sex) %>%
       rename(
         `Age Interval` = x.int,
         `Age, (x)` = x
@@ -328,8 +401,8 @@ data_lt <- reactive({
   output$lt_final = DT::renderDataTable({
     req(data_fig())
     
-    data_fig()$lt_final %>% 
-      select(-region, -period, -sex) %>% 
+    data_fig()$data$lt_final %>%
+      select(-region, -period, -sex) %>%
       rename(
         `Age Interval` = x.int,
         `Age (x)` = x) %>% 
@@ -341,8 +414,8 @@ data_lt <- reactive({
   output$cod_initial = DT::renderDataTable({
     req(data_fig())
     
-    data_fig()$cod_initial %>% 
-      select(-region, -period, -sex) %>% 
+    data_fig()$data$cod_initial %>%
+      select(-region, -period, -sex) %>%
       pivot_wider(
         names_from = cause_name,
         values_from = deaths) %>% 
@@ -355,8 +428,8 @@ data_lt <- reactive({
   output$cod_final = DT::renderDataTable({
     req(data_fig())
     
-    data_fig()$cod_final %>% 
-      select(-region, -period, -sex) %>% 
+    data_fig()$data$cod_final %>%
+      select(-region, -period, -sex) %>%
       pivot_wider(
         names_from = cause_name,
         values_from = deaths) %>% 
@@ -367,9 +440,22 @@ data_lt <- reactive({
   })
   
   output$decomposition_data <- DT::renderDataTable({
-    req(data_decomp())
-    
-    data_decomp() %>% 
+    req(data_fig())
+
+    # No risk change applied: nothing to decompose, show a note instead of an
+    # all-zero table.
+    if (is.null(data_decomp())) {
+      return(
+        DT::datatable(
+          data.frame(Note = "No risk change applied - adjust a risk to see the decomposition."),
+          caption = table_captions()[5],
+          rownames = FALSE,
+          options = list(pageLength = 1)
+        )
+      )
+    }
+
+    data_decomp() %>%
       select(-region, -period, -sex, -x.int) %>% 
       mutate(decomposition = round(decomposition, 6)) %>% 
       pivot_wider(
@@ -382,11 +468,12 @@ data_lt <- reactive({
   })
   
   output$reduction_matrix <- DT::renderDataTable({
-    req(data_cod_change())
-    
-    data_cod_change() %>% 
+    df <- data_fig()
+    req(df$reduction)
+
+    df$reduction %>%
       as_tibble() %>%
-      mutate(`Age Group` = data_fig()$lt_initial$x.int, .before = 1) %>% 
+      mutate(`Age Group` = df$data$lt_initial$x.int, .before = 1) %>%
       format_datatable(
         caption = table_captions()[6]
       )
@@ -449,14 +536,15 @@ data_lt <- reactive({
   output$figure2 <- renderPlotly({
     # Stop execution if no dataset is selected
     req(ui_state$ready)
-    req(data_fig())
+    df <- data_fig()
+    req(df$data)
 
     # create ggplot
     p2 <- plot_change(
-      L1 = data_fig()$lt_final,
-      L2 = data_fig()$lt_initial,
-      age = input$fig2_x,
-      perc = input$perc) +
+      L1 = df$data$lt_final,
+      L2 = df$data$lt_initial,
+      age = df$fig2_x,
+      perc = df$perc) +
       geom_point(size = 3) +
       labs(x = "", y = "") +
       theme(
@@ -481,40 +569,41 @@ data_lt <- reactive({
   output$figure3 <- renderPlotly({
     # Stop execution if no dataset is selected
     req(ui_state$ready)
-    req(data_fig())
-    
-    if (input$mode == "mode_cod") {
+    df <- data_fig()
+    req(df$data)
+
+    if (df$mode == "mode_cod") {
       p <- plot_cod(
-        cod  = data_fig()$cod_final,
-        perc = input$perc,
+        cod  = df$data$cod_final,
+        perc = df$perc,
         type = "barplot")
-      
-    } else if (input$mode == "mode_cntr") {
+
+    } else if (df$mode == "mode_cntr") {
       cod <- bind_rows(
-        data_fig()$cod_initial,
-        data_fig()$cod_final)
-      
+        df$data$cod_initial,
+        df$data$cod_final)
+
       p <- plot_cod(
         cod  = cod,
-        perc = input$perc,
+        perc = df$perc,
         type = "barplot") +
         facet_wrap("region")
-      
-    } else if (input$mode == "mode_sex") {
+
+    } else if (df$mode == "mode_sex") {
       cod <- bind_rows(
-        data_fig()$cod_initial,
-        data_fig()$cod_final)
-      
+        df$data$cod_initial,
+        df$data$cod_final)
+
       p <- plot_cod(
         cod  = cod,
-        perc = input$perc,
+        perc = df$perc,
         type = "barplot") +
         facet_wrap("sex")
-      
-    } else if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
+
+    } else if (df$mode %in% c("mode_sdg", "mode_sdg2")) {
       p <- plot_cod(
-        cod  = data_fig()$cod_final,
-        perc = input$perc,
+        cod  = df$data$cod_final,
+        perc = df$perc,
         type = "barplot")
     }
     
@@ -539,12 +628,34 @@ data_lt <- reactive({
   output$figure4 <- renderPlotly({
     # Stop execution if no dataset is selected
     req(ui_state$ready)
-    req(data_decomp())
-    
+    df <- data_fig()
+    req(df$data)
+
+    # No risk change applied: the decomposition would be all zeros, so show a
+    # message instead of an empty/meaningless chart.
+    if (is.null(data_decomp())) {
+      return(
+        plotly::plotly_empty(type = "scatter", mode = "markers") %>%
+          plotly::layout(
+            xaxis = list(visible = FALSE),
+            yaxis = list(visible = FALSE),
+            annotations = list(
+              list(
+                text = "No risk change applied.<br>Adjust a risk to see the decomposition.",
+                showarrow = FALSE,
+                x = 0.5, y = 0.5,
+                xref = "paper", yref = "paper",
+                font = list(size = 14)
+              )
+            )
+          )
+      )
+    }
+
     p4 <- plot_decompose(
       object = data_decomp(),
-      perc   = input$perc,
-      by     = input$fig4_dim
+      perc   = df$perc,
+      by     = df$fig4_dim
     )
     
     p4 <- ggplotly(p4, tooltip = figure_captions()$fig4$ttip) %>%
@@ -593,7 +704,18 @@ data_lt <- reactive({
   observeEvent(input$reset, {
     reset_inputs(session)
   })
-  
+
+  # ----------------------------------------------------------------------------
+  # OUTPUT VISIBILITY
+  # Don't spend time rendering outputs that sit in hidden tabs/panels (e.g. the
+  # data tables under the "Data" tab while the dashboard is being viewed).
+  invisible(lapply(
+    c("lt_initial", "lt_final", "cod_initial", "cod_final",
+      "decomposition_data", "reduction_matrix",
+      "figure1", "figure2", "figure3", "figure4"),
+    function(id) shiny::outputOptions(output, id, suspendWhenHidden = TRUE)
+  ))
+
 }
 
 

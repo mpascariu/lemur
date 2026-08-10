@@ -36,8 +36,12 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year, db_pool)
   # we use data.table method to filter here because is faster
   # and we will do this all a lot
   p  <- db_pool
-  dt <- as.data.table(data)
-  dt <- dt[period == year]
+  # The app pre-converts the static datasets to data.table once at startup;
+  # skip the conversion here when that's already the case.
+  if (!is.data.table(data)) {
+    data <- as.data.table(data)
+  }
+  dt <- data[period == year]
   dt <- dt[region %in% c(region1, region2)]
   
   if (mode != "mode_sex") {
