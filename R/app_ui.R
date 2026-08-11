@@ -20,7 +20,7 @@ app_ui <- function() {
 
 
 
-#' UI -  List the first level UI elements here
+#' UI - list the first-level UI elements here
 #' @keywords internal
 #' @export
 ui_tabs <- function() {
@@ -79,7 +79,7 @@ ui_tabs <- function() {
 
 
 
-#' UI - markdown pages
+#' Markdown pages
 #' @keywords internal
 #' @export
 tab_md <- function(title, file) {
@@ -115,7 +115,6 @@ golem_add_external_resources <- function() {
   )
   
   tags$head(
-    golem::activate_js(),
     shinyjs::useShinyjs(),
     tags$link(
       href = "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap",

@@ -54,9 +54,6 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year, db_pool)
   
   if(mode != "mode_cntr") region2 <- region1
   
-  # we use data.table method to filter here because is faster
-  # and we will do this all a lot
-  p  <- db_pool
   # The app pre-converts the static datasets to data.table once at startup;
   # skip the conversion here when that's already the case.
   if (!is.data.table(data)) {
@@ -69,13 +66,13 @@ dt_filter_local <- function(data, mode, region1, region2, gender, year, db_pool)
     dt <- dt[sex == gender]
   }
   
-  return(as_tibble(dt))
+  return(as.data.frame(dt))
 }
 
 
 
-#' Query data from a PostgresSQL. 
-#' This would replace the local data and the dt_filter_local() function
+#' Query data from a PostgreSQL database.
+#' Replaces the local data and the dt_filter_local() function.
 #' @keywords internal
 dt_filter_sql <- function(data, mode, region1, region2, gender, year, db_pool) {
   
@@ -96,11 +93,11 @@ dt_filter_sql <- function(data, mode, region1, region2, gender, year, db_pool) {
   
   tryCatch({
     res <- DBI::dbGetQuery(db_pool, query, params = params)
-    return(tibble::as_tibble(res))
+    return(as.data.frame(res))
     
   }, error = function(e) {
     message("Database query error: ", e$message)
-    return(tibble::tibble())
+    return(data.frame())
   })
 }
 

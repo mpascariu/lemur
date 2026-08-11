@@ -5,9 +5,9 @@
 
 #' Modify life table by changing the cause of death associated risks
 #'
-#' @param lt Life table;
+#' @param lt Life table.
 #' @param cod Causes of death matrix containing death counts corresponding
-#' to the population and time period of the life table;
+#' to the population and time period of the life table.
 #' @param cod_change Numerical scalar, vector or matrix.
 #' The changes to be applied to the causes of death rate, m[c,x],
 #' in order to reduce or increase the mortality estimates given by the life
@@ -58,7 +58,8 @@ modify_life_table <- function(lt, cod, cod_change) {
   # death counts by cod from a long dataset
   lv  <- as.character(unique(cod$cause_name))
   cod <- build_cod_matrix(cod)[, lv]
-  qx  <- replace_na(lt$qx, 0)
+  qx  <- lt$qx
+  qx[is.na(qx)] <- 0
 
   # Modify cod matrix by applying a change
   mod_cod <- modify_cod(cod, cod_change)
@@ -69,10 +70,10 @@ modify_life_table <- function(lt, cod, cod_change) {
   # all-cause reduced qx
   qx_r <- 1 - apply(pxi_r, 1, prod)
 
-  # Build life-table from qx_r using standard procedure
-  # from {MortalityLaws}. The sex argument is not required since we have the
-  # a[x] which would give us a more accurate construction.
-  LT <- LifeTable(
+  # Build the life table from qx_r using the standard demographic procedure.
+  # The `ax` column from the input table is used directly, which gives a more
+  # accurate construction and removes the need for {MortalityLaws}.
+  LT <- life_table_from_qx(
     x   = lt$x,
     qx  = qx_r,
     ax  = lt$ax
@@ -82,9 +83,9 @@ modify_life_table <- function(lt, cod, cod_change) {
   # The output should have the same format as the input life table
   out <- lt %>%
     select(
-      -all_of(names(LT$lt))
+      -all_of(names(LT))
     ) %>%
-    bind_cols(LT$lt)
+    bind_cols(LT)
 
   return(out)
 }
@@ -102,7 +103,7 @@ modify_life_table <- function(lt, cod, cod_change) {
 #' cod_change = -50
 #' 
 #' # Example 1:
-#' # Modify by 50% all COD values. This is trivial and not need really.
+#' # Modify all COD values by 50%. This is trivial and not really needed.
 #' modify_cod_table(cod, cod_change = -50)
 #' 
 #' 
@@ -131,16 +132,15 @@ modify_cod_table <- function(cod, cod_change){
   #build cod matrix
   cod2 <- cod %>%
     select(x, cause_name, deaths) %>%
+    as.data.table() %>%
     # and build a matrix
-    pivot_wider(
-      names_from = cause_name,
-      values_from = deaths
-    ) %>%
+    dcast(x ~ cause_name, value.var = "deaths") %>%
+    as.data.frame() %>%
     arrange(x)  %>%
     # replace na with 0
     mutate_all(~replace(., is.na(.), 0)) %>%
     # name rows
-    column_to_rownames("x") %>%
+    df_rownames_from("x") %>%
     as.matrix()
 
   lv <- as.character(unique(cod$cause_name))
@@ -152,11 +152,14 @@ modify_cod_table <- function(cod, cod_change){
   # Go from matrix to long table
   out <- mod_cod %>%
     as.data.frame() %>%
-    rownames_to_column(., var = "x") %>%
-    pivot_longer(
-      cols = -x,
-      names_to = "cause_name",
-      values_to = "deaths") %>%
+    df_add_rownames("x") %>%
+    # data.table's melt() only accepts a data.table input (no data.frame
+    # method), so coerce before reshaping.
+    as.data.table() %>%
+    melt(id.vars = "x",
+         variable.name = "cause_name",
+         value.name = "deaths") %>%
+    as.data.frame() %>%
     mutate(
       x = as.numeric(x),
       cause_name = factor(as.character(cause_name), levels = lv)) %>%
@@ -175,7 +178,7 @@ modify_cod_table <- function(cod, cod_change){
 #' Format COD data
 #'
 #' Transform the COD count data from a long table to a matrix
-#' containing percentages, with ages as rows and cod's as columns.
+#' containing percentages, with ages as rows and CODs as columns.
 #'
 #' @param cod COD long table
 #' @return A matrix with percentages.
@@ -199,17 +202,21 @@ build_cod_matrix <- function(cod) {
     mutate(perc = deaths / sum(deaths)) %>%
     ungroup() %>%
     select(x, cause_name, perc) %>%
+    # data.table's dcast() only accepts a data.table input; the dplyr verbs
+    # above return a tibble, so coerce before reshaping.
+    as.data.table() %>%
     # and build a matrix
-    pivot_wider(
-      names_from = cause_name,
-      values_from = perc
-    ) %>%
+    dcast(x ~ cause_name, value.var = "perc") %>%
+    as.data.frame() %>%
     arrange(x)  %>%
     # replace na with 0
     mutate_all(~replace(., is.na(.), 0)) %>%
     # name rows
-    column_to_rownames("x") %>%
+    df_rownames_from("x") %>%
     as.matrix()
+  # dcast sorts the columns; restore the appearance order of cause_name so the
+  # matrix column order matches the input data.
+  M <- M[, as.character(unique(cod$cause_name))]
 
   L <- rowSums(M) < 0.999
   if (any(L)) {
@@ -223,7 +230,7 @@ build_cod_matrix <- function(cod) {
 #' Modify COD values by changing the cause of death associated risks
 #'
 #' @inheritParams modify_life_table
-#' @return A long table with the same format as the input cod
+#' @return A matrix with ages as rows and causes of death as columns.
 #' @keywords internal
 modify_cod <- function(cod, cod_change) {
 

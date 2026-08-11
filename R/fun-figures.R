@@ -1,14 +1,12 @@
-# ------------------------------------------------- #
-# Author: Marius D. Pascariu
-# Last update: Wed Oct  1 22:48:21 2025
-# ------------------------------------------------- #
 
 # Figure 1.
 
-#' Plot map
-#' @param location Geographical location
-#' @param zoom The zoom level
-#' @param data data
+#' Plot an interactive map
+#' @param location Geographical location.
+#' @param zoom The zoom level.
+#' @param data An \code{sf} object with the map polygons.
+#' Default: \code{lemur::data_sf}.
+#' @return A leaflet widget.
 #' @examples
 #' plot_map(location = "Mexico")
 #'
@@ -35,17 +33,21 @@ plot_map <- function(location,
   ")
   )
 
-  tooltip <- glue::glue_data(
-    data,
-    "<strong>{name}</strong><br>
-  Population: {number(population_2021, accuracy = 1)}<br>
-  Life Expectancy - Females: {number(e0f_2021, accuracy = 0.1)}<br>
-  Life Expectancy - Males: {number(e0m_2021, accuracy = 0.1)}<br>
-  Total Fertility Rate: {number(tfr_2021, accuracy = 0.01)}<br>
+  tooltip <- sprintf(
+    "<strong>%s</strong><br>
+  Population: %s<br>
+  Life Expectancy - Females: %s<br>
+  Life Expectancy - Males: %s<br>
+  Total Fertility Rate: %s<br>
   <i>(Year: 2021)</i><br>
-  "
+  ",
+    data$name,
+    number(data$population_2021, accuracy = 1),
+    number(data$e0f_2021, accuracy = 0.1),
+    number(data$e0m_2021, accuracy = 0.1),
+    number(data$tfr_2021, accuracy = 0.01)
   ) %>%
-    purrr::map(htmltools::HTML)
+    lapply(HTML)
 
   dt <- data[data$name == location, ]
 
@@ -95,102 +97,43 @@ plot_map <- function(location,
 #'
 #' @inheritParams decompose_by_cod
 #' @inheritParams plot_cod
-#' @inheritParams ggplot2::labs
+#' @param title Optional plot title.
+#' @param subtitle Optional plot subtitle.
 #' @param age Reference ages.
+#' @return A plotly widget.
 #' @export
 plot_change <- function(L1, L2,
                         age = seq(0, 110, by = 10),
                         perc = FALSE,
                         title = NULL,
-                        subtitle = ""
-                        ) {
+                        subtitle = "") {
 
   check_null(L1, "Life Table 1")
   check_null(L2, "Life Table 2")
-  
-  x = ex = value = `Life Expectancy Difference` = Age <- NULL
 
-  # Data -------
-  cols <- c("black", "red", "green")
+  # Native plotly figure (same data prep as the ggplot version this
+  # function replaced)
+  p <- plotly_change(L1, L2, age = age, perc = perc)
 
-  d <- L1 %>%
-    mutate(
-      value = ex - L2$ex,
-      col = "black",
-      col = replace(col, value < -0.0001, "red"),
-      col = replace(col, value >  0.0001, "green"),
-      col = factor(col, cols),
-      ) %>%
-    filter(x %in% age)
-
-  if (perc) {
-    d <- mutate(d, value = value/ex * 100)
-    xlab <- "Difference in Life Expectancy\n[%]"
-
-  } else {
-    xlab <- "Difference in Life Expectancy\n(Years)"
-
+  # Title
+  if (!is.null(title)) {
+    p <- plotly::layout(p, title = list(text = title))
   }
 
-  dmax <- max(abs(d$value))
-  d <- d %>%
-    mutate(
-      value = round(value, 3)) %>%
-    rename(
-      `Life Expectancy Difference` = value,
-      Age = x)
-  
-  if (L1$region[1] != L2$region[1] | (L1$region[1] == L2$region[1] & L1$sex[1] != L2$sex[1])) {
-    label_losses = "<--- Negative gap"
-    label_gains  = "Positive gap --->"
-  } else {
-    label_losses = "<--- Losses"
-    label_gains  = "Gains --->"
+  # Subtitle: a paper-referenced annotation. plotly::layout(annotations = ...)
+  # replaces existing annotations, so append to the ones already set by
+  # plotly_change (label_losses / label_gains) instead of overwriting them.
+  if (nzchar(subtitle)) {
+    sub_ann <- list(
+      x = 0, y = 1.0,
+      xref = "paper", yref = "paper",
+      xanchor = "left", yanchor = "top",
+      text = subtitle,
+      showarrow = FALSE,
+      font = list(size = 12)
+    )
+    p$x$layout$annotations <- c(p$x$layout$annotations, list(sub_ann))
   }
-  
-  # -------------
-  # Figure
-  
-  p <- d %>%
-    ggplot(aes(
-      x     = `Life Expectancy Difference`,
-      y     = Age,
-      color = col)) +
-    geom_segment(
-      xend     = 0,
-      yend     = d$Age,
-      linetype = 2,
-      color    = 1,
-      linewidth = 0.2) +
-    geom_point(
-      size = 2) +
-    geom_vline(
-      xintercept = 0,
-      linewidth  = 0.8) +
-    geom_text(
-      x = min(-0.01, (-dmax * 1.05)/2), 
-      y = 110, 
-      label = label_losses,
-      color = "black") + 
-    geom_text(
-      x = max(0.01, (dmax * 1.05)/2), 
-      y = 110, 
-      label = label_gains,
-      color = "black") + 
-    scale_x_continuous(
-      limits = c(-dmax, dmax) * 1.05,
-      labels = label_number_si(accuracy = 0.01)) +
-    scale_color_manual(
-      name   = "",
-      values = cols,
-      drop   = FALSE
-    ) +
-    labs(
-      title    = title,
-      subtitle = subtitle,
-      x        = xlab,
-      y        = "Age\n(Years)") +
-    plot_theme()
 
   return(p)
 }
@@ -204,119 +147,75 @@ plot_change <- function(L1, L2,
 #' @param perc Logical. If TRUE data will be displayed as percentages else
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
-#' #' @examples
+#' @return A plotly widget.
+#' @examples
 #' D <- data_gbd2021_cod() # cod data
 #' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
 #' plot_cod(cod)
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
-  
+
   check_null(cod, "cod data")
-  
+
   region = period = sex = cause_name <- NULL
   deaths = Deaths = COD <- NULL
 
-  # Data preparation
-  dt <- cod %>%
-    group_by(
-      region,
-      period,
-      sex,
-      cause_name) %>%
-    summarise(Deaths = sum(deaths)) %>%
-    mutate(sex = toupper(sex)) %>%
-    rename(COD = cause_name) %>%
-    arrange(Deaths) %>%
-    ungroup()
-
-  # compute percentages of each disease for
-  # given age-region-period-sex and across ages
-  if (perc) {
-    dt <- dt %>%
-      group_by(
-        region,
-        sex) %>%
-      mutate(
-        Deaths = Deaths / sum(Deaths) * 100,
-        Deaths = round(Deaths, 2)
-      ) %>%
-      ungroup()
-
-    x_lab <- "Proportion of the Total No. of Deaths\n[%]"
-
-  } else {
-    dt <- dt %>% mutate(
-      Deaths = round(Deaths, 0)
-      ) %>%
-      ungroup()
-
-    x_lab <- "Number of Deaths\n"
-
-  }
-
-
-  # Define the aesthetics
-
+  # Barplot: delegate to the native plotly version (same data prep as the
+  # ggplot version this function replaced)
   if (type == "barplot") {
-    p <- dt %>%
-      ggplot(
-        aes(x = Deaths, y = COD, fill = COD)
-      ) +
-      geom_bar(
-        stat = "identity",
-        width = 0.9,
-        position = position_stack(reverse = FALSE)) +
-      scale_x_continuous(
-        trans = "identity",
-        labels = label_number_si(accuracy = 1)) +
-      plot_theme()
+    p <- plotly_cod(cod, perc = perc)
 
   } else if (type == "piechart") {
-    p <- dt %>%
-      ggplot(
-        aes(x = "", y = Deaths, fill = COD)) +
-      geom_bar(
-        stat = "identity",
-        width = 0.9,
-        color = "white") +
-      coord_polar("y", start=0) +
-      scale_y_continuous(
-        trans = "identity",
-        labels = label_number_si(accuracy = 1)) +
-      plot_theme() +
-      theme(legend.position = "right")
+    # Native plotly pie chart (mirror of the old coord_polar barplot)
+    dt <- cod %>%
+      group_by(region, period, sex, cause_name) %>%
+      summarise(Deaths = sum(deaths)) %>%
+      rename(COD = cause_name) %>%
+      ungroup()
 
+    if (perc) {
+      dt <- dt %>%
+        group_by(region, sex) %>%
+        mutate(Deaths = Deaths / sum(Deaths) * 100) %>%
+        ungroup()
+    }
+
+    # Sort by COD alphabetically so the positional marker colours
+    # align with epidemiology_palette() (pie charts don't match by name).
+    dt <- dt %>% arrange(as.character(COD))
+
+    p <- plotly::plot_ly(
+      data = dt,
+      labels = ~COD,
+      values = ~Deaths,
+      type = "pie",
+      textinfo = "label+percent",
+      marker = list(
+        colors = unname(epidemiology_palette()[as.character(dt$COD)]),
+        line = list(color = "white", width = 1)
+      )
+    )
+
+  } else {
+    stop("type must be one of 'barplot' or 'piechart'")
   }
 
-  # ggplot
-  p <- p +
-    scale_fill_manual(
-      name = "",
-      values = glasbey(),
-      drop = FALSE
-    ) +
-    labs(
-      x = x_lab,
-      y = "")
-
-  # exit
   return(p)
 }
-
-
 
 # ----------------------------------------------------------------------------
 # Figure 4.
 
-#' Plot function for decompose
+#' Plot a decomposition object
 #'
-#' @param object An object of class decompose
-#' @param by dimensions on which to build the plot.
-#' Options: "both", "age", "cod".
+#' @param object An object of class \code{decompose}.
+#' @param by The dimensions on which to build the plot.
+#' One of "both", "age" or "cod".
 #' @inheritParams plot_cod
 #' @seealso
 #' \code{\link{decompose_by_cod}}
 #' \code{\link{decompose_by_age}}
+#' @return A plotly widget.
 #' @examples
 #' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
 #' @export
@@ -325,168 +224,21 @@ plot_decompose <- function(object,
                            by = "both") {
 
   check_null(object, "decomposition data")
-  
-  region = period = sex = COD = cause_name = sign_ <- NULL
-  x = x.int = `Age Interval` = `Change in LE` = decomposition <- NULL
 
-  if (!("cause_name" %in% names(object))) {
-    by = "age"
-  }
-  
-  object <- rename(object, `Age Interval` = x.int)
+  # Delegate to plotly_decompose, which builds the decomposition figure
+  p <- plotly_decompose(object, perc = perc, by = by)
 
-  levels(object$`Age Interval`) <- 
-    c("0", 
-      "1",
-      "2-4",
-      "5-9",
-      "10-14",
-      "15-19",
-      "20-24",
-      "25-29",
-      "30-34",
-      "35-39",
-      "40-44",
-      "45-49",
-      "50-54",
-      "55-59",
-      "60-64",
-      "65-69",
-      "70-74",
-      "75-79",
-      "80-84",
-      "85-89",
-      "90-94",
-      "95-99",
-      "100-104",
-      "105-109",
-      "+110")
-
-  # input data
-  if(by == "age") {
-    object <- object %>%
-      group_by(
-        region,
-        period,
-        sex,
-        `Age Interval`,
-        x) %>%
-      summarise(decomposition = sum(decomposition)) %>%
-      ungroup()
-
-  } else if (by == "cod") {
-    object <- object %>%
-      rename(COD = cause_name) %>%
-      group_by(
-        region,
-        period,
-        sex,
-        COD) %>%
-      summarise(decomposition = sum(decomposition)) %>%
-      ungroup()
-
-  } else {
-    object <- rename(object, COD = cause_name)
-
-  }
-  # compute % is necessary
-  if (perc) {
-    ylab <- "Change in Life Expectancy at Birth\n[%]"
-    d <- object %>%
-      mutate(
-        sign_ = sign(decomposition),
-        `Change in LE` = decomposition / sum(decomposition),
-        `Change in LE` = abs(`Change in LE`) * sign_,
-        `Change in LE` = round(`Change in LE`, 4)
-      )
-
-  } else {
-    ylab <- "Change in Life Expectancy at Birth\n(Years)"
-    d <- object %>%
-      rename(`Change in LE` = decomposition) %>%
-      mutate(`Change in LE` = round(`Change in LE`, 4))
-
-  }
-
-  # Define the aesthetics
-  if(by == "both") {
-    aess <- aes(x = `Age Interval`, y = `Change in LE`, fill = COD)
-    xlab <- "Age Group\n(Years)"
-
-  } else if (by == "age") {
-    aess <- aes(x = `Age Interval`, y = `Change in LE`)
-    xlab <- "Age Group\n(Years)"
-
-  } else {
-    aess <- aes(y = sex, x = `Change in LE`, fill = COD)
-    xlab <- "Causes of Death\nDecomposition"
-  }
-
-  if (by == "cod") {
-    p <- d %>%
-      ggplot(aess) +
-      geom_bar(
-        position = "stack",
-        stat = "identity" ,
-        width = 0.5) +
-      geom_vline(xintercept = 0) +
-      scale_x_continuous(
-        trans = "identity",
-        labels = label_number_si(accuracy = 0.01)) +
-      plot_theme() +
-      theme(
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        )
-
-  } else {
-
-    p <- d %>%
-      ggplot(aess) +
-      geom_bar(
-        stat = "identity",
-        width = 0.9,
-        position = position_stack(reverse = FALSE)) +
-      geom_hline(yintercept = 0) +
-      scale_y_continuous(
-        trans = "identity",
-        labels = label_number_si(accuracy = 0.01)) +
-      plot_theme() +
-      theme(
-        axis.text.x = element_text(angle = 45, hjust = 1)
-      )
-
-  }
-
-  p <- p +
-    scale_fill_manual(
-      name = "",
-      values = glasbey(),
-      drop = FALSE
-    ) +
-    labs(
-      x = xlab,
-      y = ylab
-    )
-
-  # Exit
   return(p)
 }
-
-
-
 
 
 # ----------------------------------------------------------------------------
 # Native plotly versions of Figures 2-4.
 #
-# The Shiny app used to build these figures with ggplot2 and then convert them
-# to plotly with ggplotly(). That conversion is by far the most expensive part
-# of the figure pipeline. The functions below build the plotly object directly
-# with plot_ly(), skipping the conversion entirely. They are internal to the
-# package - the exported plot_*() functions above remain the public API. The
-# data preparation in each mirrors the ggplot version so the two look alike.
-
+# plotly_change(), plotly_cod() and plotly_decompose() all build the plotly
+# objects directly with plot_ly() - no ggplot2 involved. plotly_decompose()
+# rebuilds the v1.0.6 ggplot decomposition chart natively: one bar trace per
+# cause stacked with barmode = "relative". 
 #' Native plotly version of plot_change (app internal)
 #' @inheritParams plot_change
 #' @param xlab,ylab Axis titles. If \code{NULL} the same defaults as
@@ -657,11 +409,12 @@ plotly_cod <- function(cod,
     if (is.null(xlab)) xlab <- "Number of Deaths\n"
   }
 
-  # y axis order: the data is sorted by ascending Deaths, then autorange is
-  # reversed below so the largest cause is displayed on top (the native
-  # equivalent of scale_y_discrete(limits = rev)). unique() is needed because
-  # in the comparison modes each cause appears once per region/sex.
-  dt$COD <- factor(dt$COD, levels = unique(dt$COD[order(dt$Deaths)]))
+  # y axis order follows epidemiology_palette() so COD categories appear
+  # in their semantic-group order (cardiovascular, cancers, respiratory, ...).
+  # Filter to names actually present in the data (palette may include
+  # fine-grained SDG causes not in the current COD view).
+  pal_order <- names(epidemiology_palette())
+  dt$COD <- factor(dt$COD, levels = intersect(pal_order, unique(dt$COD)))
 
   xbr  <- pretty(c(0, max(dt$Deaths)), n = 5)
   xtic <- label_number_si(accuracy = 1)(xbr)
@@ -672,7 +425,7 @@ plotly_cod <- function(cod,
       x = ~Deaths,
       y = ~COD,
       color = ~COD,
-      colors = glasbey(),
+      colors = epidemiology_palette(),
       type = "bar",
       orientation = "h",
       showlegend = FALSE,
@@ -686,8 +439,28 @@ plotly_cod <- function(cod,
     g   <- if (mode == "mode_cntr") "region" else "sex"
     spl <- lapply(split(dt, dt[[g]]), one_plot)
     p   <- plotly::subplot(spl, shareY = TRUE, nrows = 1, margin = 0.04)
+
+    # Dynamic panel labels from the split names (country names or sexes)
+    nms  <- names(spl)
+    npan <- length(nms)
+    panel_labels <- lapply(seq_len(npan), function(i) {
+      list(
+        x          = (i - 0.5) / npan,
+        y          = 1.0,
+        text       = nms[i],
+        xref       = "paper",
+        yref       = "paper",
+        xanchor    = "center",
+        yanchor    = "bottom",
+        showarrow  = FALSE,
+        font       = list(size = 13)
+      )
+    })
+
     p   <- p %>%
       plotly::layout(
+        annotations = panel_labels,
+        margin      = list(t = 50),
         barmode = "stack",
         xaxis = list(
           title     = xlab,
@@ -706,10 +479,6 @@ plotly_cod <- function(cod,
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
           autorange = "reversed",
-          # Keep the COD labels a little off the y-axis line. The plotly build
-          # bundled with plotly 4.12.1 does not support ticklabelstandoff, so
-          # pad with a couple of non-breaking spaces appended after each label
-          # (NBSP survives SVG whitespace trimming; regular spaces do not).
           ticksuffix = "\u00A0\u00A0"
         )
       )
@@ -730,10 +499,6 @@ plotly_cod <- function(cod,
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
           autorange = "reversed",
-          # Keep the COD labels a little off the y-axis line. The plotly build
-          # bundled with plotly 4.12.1 does not support ticklabelstandoff, so
-          # pad with a couple of non-breaking spaces appended after each label
-          # (NBSP survives SVG whitespace trimming; regular spaces do not).
           ticksuffix = "\u00A0\u00A0"
         )
       )
@@ -831,163 +596,224 @@ plotly_decompose <- function(object,
       mutate(`Change in LE` = round(`Change in LE`, 4))
   }
 
-  # plotly draws categorical axes in order of appearance, so make sure the
-  # age groups stay ordered by the numeric age (ggplot orders by factor level)
-  if (by != "cod") {
-    d <- d %>% arrange(x)
+  # ---- Native plotly bars (no ggplot2) ------------------------------------
+  # Figure 4 is built one bar trace per cause with barmode = "relative",
+  # which stacks positive segments up (or right) from zero and negative
+  # segments down (or left) from zero.
+  cod_present <- function(cc) {
+    rev(intersect(levels(d$COD), unique(as.character(cc))))
   }
 
-  # tooltip selection
-  if (by == "age") {
-    hov <- "x+y"
-  } else {
-    hov <- paste(unique(c(ttip[ttip %in% c("x", "y")], "name")), collapse = "+")
+  if (is.null(xlab)) {
+    xlab <- if (by == "cod") "Causes of Death\nDecomposition"
+            else "Age Group\n(Years)"
   }
+
+  # Tooltip fields: "fill" is the cause, which native plotly renders as the
+  # trace name; the remaining ttip fields pass through as hoverinfo, with the
+  # trace name appended so the tooltip shows the cause on top of the value.
+  # by = "cod" draws horizontal bars, so the value axis is x there (y is the
+  # cause category): the "y" field maps onto "x" so the tooltip shows the
+  # value, not the (already named) cause row.
+  hi_flds <- setdiff(ttip, "fill")
+  if (by == "cod") hi_flds[hi_flds == "y"] <- "x"
+  hi <- paste(hi_flds, collapse = "+")
+  if (by != "age" && "fill" %in% ttip) hi <- paste(hi, "name", sep = "+")
+  if (hi == "") hi <- NULL
+
+  d_pos <- d[d$`Change in LE` > 0, ]
+  d_neg <- d[d$`Change in LE` < 0, ]
+
+  rng  <- if (nrow(d)) range(d$`Change in LE`) else c(-1, 1)
+  vbr  <- pretty(rng, n = 6)
+  vtic <- label_number_si(accuracy = 0.01)(vbr)
 
   if (by == "cod") {
-    if (is.null(xlab)) xlab <- "Causes of Death\nDecomposition"
-    p <- plotly::plot_ly(
-      data = d,
-      x = ~`Change in LE`,
-      y = ~sex,
-      color = ~COD,
-      colors = glasbey(),
-      type = "bar",
-      orientation = "h",
+    # Horizontal bars, one per cause: each cause sits on its own category of
+    # the y axis, so the axis ticks, tick labels and horizontal gridlines span
+    # the full plot height (drawn all at y = sex, the constant "both", they
+    # collapsed into a band around the middle of the panel). The signed
+    # per-cause total sits on the value axis (x) with SI tick labels and a zero
+    # line instead of a geom_vline() scatter trace. Bar width 0.5 as in v1.0.6.
+    p <- plotly::plot_ly()
+    for (cod in cod_present(d_pos$COD)) {
+      tmp <- d_pos[d_pos$COD == cod, ]
+      p <- plotly::add_bars(
+        p, data = tmp,
+        x = ~`Change in LE`, y = ~COD,
+        name = cod, orientation = "h", width = 0.5,
+        marker = list(color = unname(epidemiology_palette()[cod])),
+        hoverinfo = hi)
+    }
+    for (cod in cod_present(d_neg$COD)) {
+      tmp <- d_neg[d_neg$COD == cod, ]
+      p <- plotly::add_bars(
+        p, data = tmp,
+        x = ~`Change in LE`, y = ~COD,
+        name = cod, orientation = "h", width = 0.5, showlegend = FALSE,
+        marker = list(color = unname(epidemiology_palette()[cod])),
+        hoverinfo = hi)
+    }
+    p <- plotly::layout(
+      p,
+      barmode = "relative",
       showlegend = FALSE,
-      hoverinfo = hov
-    ) %>%
-      plotly::layout(
-        barmode = "stack",
-        shapes = list(list(
-          type = "line",
-          x0 = 0, x1 = 0,
-          y0 = -0.5, y1 = max(0.5, length(unique(d$sex)) - 0.5),
-          line = list(color = "black", width = 1)
-        )),
-        xaxis = list(
-          title     = xlab,
-          titlefont = list(size = 14),
-          tickfont  = list(size = 11)
-        ),
-        yaxis = list(
-          title = "",
-          titlefont = list(size = 14),
-          tickfont  = list(size = 11),
-          showticklabels = FALSE
-        )
+      xaxis = list(
+        title          = xlab,
+        titlefont      = list(size = 14),
+        tickfont       = list(size = 11),
+        tickvals       = vbr,
+        ticktext       = vtic,
+        zeroline       = TRUE,
+        zerolinewidth  = 1,
+        zerolinecolor  = "black"
+      ),
+      yaxis = list(
+        title           = "",
+        titlefont       = list(size = 14),
+        tickfont        = list(size = 11),
+        categoryorder   = "array",
+        categoryarray   = levels(d$COD),
+        ticks           = "outside"
       )
+    )
 
   } else {
-    if (is.null(xlab)) xlab <- "Age Group\n(Years)"
+    # Vertical stacked bar: one trace per cause (by = "both") or a single
+    # grey trace (by = "age", which has no cause column). The value axis (y)
+    # carries the SI tick labels and a zero line instead of a geom_hline()
+    # scatter trace.
+    p <- plotly::plot_ly()
     if (by == "both") {
-      # color = ~COD makes plotly split the data into one stacked trace per
-      # cause, equivalent to the ggplot fill = COD mapping.
-      p <- plotly::plot_ly(
-        data = d,
-        x = ~`Age Interval`,
-        y = ~`Change in LE`,
-        type = "bar",
-        color = ~COD,
-        colors = glasbey(),
-        showlegend = FALSE,
-        hoverinfo = hov
-      )
+      for (cod in cod_present(d_pos$COD)) {
+        tmp <- d_pos[d_pos$COD == cod, ]
+        p <- plotly::add_bars(
+          p, data = tmp,
+          x = ~`Age Interval`, y = ~`Change in LE`,
+          name = cod,
+          marker = list(color = unname(epidemiology_palette()[cod])),
+          hoverinfo = hi)
+      }
+      for (cod in cod_present(d_neg$COD)) {
+        tmp <- d_neg[d_neg$COD == cod, ]
+        p <- plotly::add_bars(
+          p, data = tmp,
+          x = ~`Age Interval`, y = ~`Change in LE`,
+          name = cod, showlegend = FALSE,
+          marker = list(color = unname(epidemiology_palette()[cod])),
+          hoverinfo = hi)
+      }
     } else {
+      # Age-only decomposition: the v1.0.6 ggplot default fill (grey35) as a
+      # single trace.
       p <- plotly::plot_ly(
         data = d,
-        x = ~`Age Interval`,
-        y = ~`Change in LE`,
-        type = "bar",
-        showlegend = FALSE,
-        hoverinfo = hov
-      )
+        x = ~`Age Interval`, y = ~`Change in LE`, type = "bar",
+        marker = list(color = "#595959"),
+        hoverinfo = hi)
     }
-    p <- p %>%
-      plotly::layout(
-        barmode = "stack",
-        shapes = list(list(
-          type = "line",
-          x0 = -0.5, x1 = length(levels(d$`Age Interval`)) - 0.5,
-          y0 = 0, y1 = 0,
-          line = list(color = "black", width = 1)
-        )),
-        xaxis = list(
-          title     = xlab,
-          titlefont = list(size = 14),
-          tickfont  = list(size = 11),
-          tickangle = -45
-        ),
-        yaxis = list(
-          title     = ylab,
-          titlefont = list(size = 14),
-          tickfont  = list(size = 11)
-        )
+    p <- plotly::layout(
+      p,
+      barmode = "relative",
+      showlegend = FALSE,
+      bargap = 0.1,
+      xaxis = list(
+        title     = xlab,
+        titlefont = list(size = 14),
+        tickfont  = list(size = 11),
+        tickangle = 45
+      ),
+      yaxis = list(
+        title          = ylab,
+        titlefont      = list(size = 14),
+        tickfont       = list(size = 11),
+        tickvals       = vbr,
+        ticktext       = vtic,
+        zeroline       = TRUE,
+        zerolinewidth  = 1,
+        zerolinecolor  = "black"
       )
+    )
   }
 
   return(p)
 }
 
 
-
-
 # ----------------------------------------------------------------------------
 # Extras
 
-#' Plot theme
-#' \code{ggplot2} custom theme used in the package.
-#' @export
-plot_theme <- function() {
-  theme_light() +
-    theme(
-      axis.title       = element_text(size = 12, colour = "black", face = "bold"),
-      axis.text        = element_text(size = 12, colour = "black"),
-      plot.margin      = margin(0, 5, 1, 10),
-      text             = element_text(size = 14),
-      legend.position  = "none",
-      strip.text.x     = element_text(size = 12, colour = "black", face = "bold"),
-      strip.background = element_rect(fill = "gray87"),
-    )
-}
-
-#' glasbey color palette - rearranged
-#' pals::glasbey()
+#' Epidemiology cause-of-death colour palette
+#'
+#' Returns a named vector mapping cause-of-death categories to
+#' semantically grouped colours (cardiovascular greens, cancers purples,
+#' respiratory blues, infectious blacks/grays, etc.). The named palette is
+#' matched by name in \pkg{plotly} \code{color}, ensuring that the same COD
+#' always receives the same colour regardless of factor-level reordering.
 #' @keywords internal
-glasbey <- function() {
+epidemiology_palette <- function() {
   c(
-    "#000033", 
-    "#0000FF",
-    "#FF0000", 
-    "#FF00B6",
-    "#A10300",
-    "#FFD300",
-    "#783FC1",
-    "#005300",
-    "#00FF00",
-    "#02AD24",
-    "#14F9FF",
-    "#1F9698",
-    "#201A01",
-    "#720055",
-    "#766C95",
-    "#FE8F42",
-    "#858567",
-    "#886C00",
-    "#93D4FF",
-    "#9A4D42",
-    "#B1CC71",
-    "#C8FF00",
-    "#DC5E93",
-    "#DD00FF",
-    "#F1085C",
-    "#F2F318",
-    "#FFACFD",
-    "#FFB79F",
-    "#00479E",
-    "#004CFF"
+    # --- GROUP 1: CARDIOVASCULAR (The Vivid Lime-to-Green Anchor) ---
+    "Cardiovascular Diseases"                     = "#00FF00", # Blinding Lime Green
+    "Ischemic Heart Disease"                      = "#00CC00", # Rich Vivid Green
+    "Other Cardiovascular"                        = "#A9DFBF", # Soft Mint (Fading out)
+    
+    # --- GROUP 2: STROKE (The Electric Purple-Blue Anchor) ---
+    "Stroke"                                      = "#651FFF", # Deep Electric Violet
+    
+    # --- GROUP 3: NEOPLASMS / CANCERS (The Oncology Purple Anchor) ---
+    "Neoplasms"                                   = "#311B92", # Midnight Royal Purple
+    "Lung Cancer"                                 = "#4A148C", # Dark Amethyst
+    "Colon and Rectum Cancer"                     = "#8E24AA", # Medium Magenta-Purple
+    "Other Neoplasms"                             = "#E1BEE7", # Soft Lavender (Fading out)
+    
+    # --- GROUP 4: RESPIRATORY DISEASES (The Electric Cyan Anchor) ---
+    "Chronic Respiratory diseases"                = "#00FFFF", # Blinding Cyan
+    "COVID-19"                                    = "#00BFFF", # Deep Electric Blue
+    "Respiratory Infections (excl. COVID)"        = "#005F9E", # Cobalt Blue
+    "Respiratory Infections (excl. Tuberculosis)" = "#002F6C", # Deep Dark Navy
+    
+    # --- GROUP 5: COMMUNICABLE / INFECTIOUS (The Pitch Black Core) ---
+    "HIV/ AIDS / STD"                             = "#111111", # Absolute Pitch Black
+    "Infections (excl. Respiratory)"              = "#333333", # Dark Charcoal
+    "Enteric Infections"                          = "#555555", # Medium Slate Gray
+    "Malaria"                                     = "#777777", # Cool Steel Gray
+    "Tuberculosis"                                = "#999999", # Muted Silver
+    "Neglected Tropical Diseases (excl. Malaria)" = "#CCCCCC", # Pale Gray (Fading out)
+    "Other Communicable"                          = "#EEEEEE", # Ghost White (Fading out)
+    
+    # --- GROUP 6: METABOLIC & ORGAN DISEASES (The Hot Neon Pink Anchor) ---
+    # Association: Endocrine systems, insulin spikes, and high-intensity magenta tracking.
+    "Diabetes and Kidney Diseases"                = "#FF007F", # Blinding Hot Pink
+    "Diabetes mellitus"                           = "#FF409F", # Neon Rose
+    "Kidney disease (excl. Diabetes)"             = "#FF80BF", # Bubblegum Pink
+    "Digestive Diseases"                          = "#FFB3D9", # Cotton Candy Pink (Fading out)
+    
+    # --- GROUP 7: NEUROLOGICAL BUFFER (The Blinding Neon Yellow) ---
+    # Association: Electrical brain mapping. Sits as a strong buffer block.
+    "Neurological Disorders"                      = "#FFEA00", # Electric Neon Yellow
+    
+    # --- GROUP 8: MATERNAL & NEONATAL (The Vivid Ruby Red/Coral Anchor) ---
+    # Association: Highly distinct from the pinks. Vitality, blood, childbirth, and early development.
+    "Maternal and Neonatal"                       = "#D50000", # Vivid Ruby Red
+    "Maternal disorders"                          = "#FF1744", # Bright Torch Red
+    "Neonatal disorders"                          = "#FF8A80", # Soft Coral Pastel (Fading out)
+    
+    # --- GROUP 9: INJURIES, VIOLENCE & CATCH-ALL (Trauma Orange & Earth Tones) ---
+    "Injuries"                                    = "#FF5722", # High-Contrast Safety Orange
+    "Injuries (excl. Poisonings)"                 = "#E64A19", # Dark Trauma Rust
+    "Transport Injuries"                          = "#FFA726", # Warning Amber
+    "Poisonings"                                  = "#FFCC80", # Pale Toxic Apricot
+    "Exposure to forces of nature"                = "#FFF9C4", # Pale Desert Sand (Fading out)
+    "Self-Harm and Violence"                      = "#795548", # Muted Soil Brown
+    "Self-harm"                                   = "#A1887F", # Light Earth Gray
+    "Interpersonal Violence"                      = "#D7CCC8", # Fading Warm Stone
+    "Other Non-Communicable"                      = "#B0BEC5"  # Cool Concrete Gray (Fading out)
   )
 }
+
+
+
 
 #' @keywords internal
 check_null <- function(data, data_name = "data") {

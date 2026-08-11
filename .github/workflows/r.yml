@@ -1,10 +1,12 @@
-# Runs R CMD check on every push to the active branches and on pull
-# requests. The check badge turns green when the package passes, and red
-# when it fails -- so errors (and warnings) show up in the repo/PR checks.
+# Runs R CMD check --as-cran on every push to the active branches and on
+# pull requests, mirroring CRAN's own checks: the same platforms CRAN runs
+# on (Windows, macOS and Linux) and both the current stable R release and
+# R-devel.
 #
-# The package DESCRIPTION requires R >= 4.3.0, so we use the current stable
-# R release (which is well above that) rather than the old R versions the
-# previous workflow tested.
+# The check badge turns green when the package passes on every platform, and
+# red when any platform reports an ERROR or WARNING (--as-cran surfaces the
+# same problems CRAN's checkers would, e.g. malformed docs, line endings,
+# missing data documentation, or namespace issues).
 
 name: R CMD check
 
@@ -13,26 +15,47 @@ on:
     branches: [v4, main]
   pull_request:
     branches: [v4, main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   R-CMD-check:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} / R ${{ matrix.r-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # release R on all three platforms CRAN checks, plus R-devel on
+        # Linux (the platform where devel is cheapest to build sf/RPostgres).
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        r-version: [release]
+        include:
+          - os: ubuntu-latest
+            r-version: devel
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      # 'checking CRAN incoming feasibility' talks to CRAN's live PACKAGES
+      # index and validates submission logistics (is this version already on
+      # CRAN, does the maintainer match) rather than package correctness. It
+      # needs network access and is slow/flaky on CI, so it is disabled here;
+      # every other --as-cran check still runs.
+      _R_CHECK_CRAN_INCOMING_: 'false'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: r-lib/actions/setup-pandoc@v2
+
       - uses: r-lib/actions/setup-r@v2
         with:
+          r-version: ${{ matrix.r-version }}
           use-public-rspm: true
 
       # System libraries needed to install the spatial (sf) and database
-      # (RPostgres) dependencies from source on Linux.
+      # (RPostgres) dependencies from source on Linux. Windows and macOS use
+      # pre-compiled binaries instead, so no system packages are required.
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
@@ -47,9 +70,12 @@ jobs:
         with:
           extra-packages: rcmdcheck
 
-      # Builds the package and runs R CMD check; fails the run on any ERROR
-      # or WARNING and uploads the check results as an artifact.
+      # Builds the package and runs R CMD check with the same --as-cran
+      # checks CRAN runs; fails the run on any ERROR or WARNING and uploads
+      # the check results as an artifact. The manual is skipped in CI to
+      # avoid a LaTeX dependency on the runners.
       - uses: r-lib/actions/check-r-package@v2
         with:
           error-on: '"warning"'
+          args: 'c("--no-manual", "--as-cran")'
           upload-snapshots: true

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fun-utils.R
 \name{number}
 \alias{number}
-\title{scales::number - function}
+\title{scales::number (vendored)}
 \usage{
 number(
   x,
@@ -17,6 +17,6 @@ number(
 )
 }
 \description{
-scales::number - function
+scales::number (vendored)
 }
 \keyword{internal}

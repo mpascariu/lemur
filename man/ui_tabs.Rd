@@ -2,11 +2,11 @@
 % Please edit documentation in R/app_ui.R
 \name{ui_tabs}
 \alias{ui_tabs}
-\title{UI -  List the first level UI elements here}
+\title{UI - list the first-level UI elements here}
 \usage{
 ui_tabs()
 }
 \description{
-UI -  List the first level UI elements here
+UI - list the first-level UI elements here
 }
 \keyword{internal}

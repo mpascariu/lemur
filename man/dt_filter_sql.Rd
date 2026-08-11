@@ -2,13 +2,13 @@
 % Please edit documentation in R/app_data_filters.R
 \name{dt_filter_sql}
 \alias{dt_filter_sql}
-\title{Query data from a PostgresSQL. 
-This would replace the local data and the dt_filter_local() function}
+\title{Query data from a PostgreSQL database.
+Replaces the local data and the dt_filter_local() function.}
 \usage{
 dt_filter_sql(data, mode, region1, region2, gender, year, db_pool)
 }
 \description{
-Query data from a PostgresSQL. 
-This would replace the local data and the dt_filter_local() function
+Query data from a PostgreSQL database.
+Replaces the local data and the dt_filter_local() function.
 }
 \keyword{internal}

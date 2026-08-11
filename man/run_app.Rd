@@ -11,8 +11,8 @@ run_app(..., lb = TRUE, serverMode = FALSE)
 
 \item{lb}{Launch browser. Default: TRUE.}
 
-\item{serverMode}{If TRUE the app will use data stored on the server, 
-otherwise the datsets saved in the package. Default: FALSE.}
+\item{serverMode}{If TRUE, the app uses data stored on the server;
+otherwise, the datasets saved in the package. Default: FALSE.}
 }
 \description{
 Run the Shiny Application

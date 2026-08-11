@@ -2,19 +2,23 @@
 % Please edit documentation in R/fun-figures.R
 \name{plot_map}
 \alias{plot_map}
-\title{Plot map}
+\title{Plot an interactive map}
 \usage{
 plot_map(location, zoom = 5, data = lemur::data_sf)
 }
 \arguments{
-\item{location}{Geographical location}
+\item{location}{Geographical location.}
 
-\item{zoom}{The zoom level}
+\item{zoom}{The zoom level.}
 
-\item{data}{data}
+\item{data}{An \code{sf} object with the map polygons.
+Default: \code{lemur::data_sf}.}
+}
+\value{
+A leaflet widget.
 }
 \description{
-Plot map
+Plot an interactive map
 }
 \examples{
 plot_map(location = "Mexico")

@@ -14,13 +14,13 @@ plotly_decompose(
 )
 }
 \arguments{
-\item{object}{An object of class decompose}
+\item{object}{An object of class \code{decompose}.}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{by}{dimensions on which to build the plot.
-Options: "both", "age", "cod".}
+\item{by}{The dimensions on which to build the plot.
+One of "both", "age" or "cod".}
 
 \item{xlab, ylab}{Axis titles. If \code{NULL} the same defaults as
 \code{\link{plot_decompose}} are used.}

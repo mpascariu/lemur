@@ -14,7 +14,7 @@ A matrix with percentages.
 }
 \description{
 Transform the COD count data from a long table to a matrix
-containing percentages, with ages as rows and cod's as columns.
+containing percentages, with ages as rows and CODs as columns.
 }
 \examples{
 # cod data

@@ -6,9 +6,9 @@
 
 #' Run the Shiny Application
 #'
-#' @param lb Launch browser. Default: TRUE. 
-#' @param serverMode If TRUE the app will use data stored on the server, 
-#' otherwise the datsets saved in the package. Default: FALSE.
+#' @param lb Launch browser. Default: TRUE.
+#' @param serverMode If TRUE, the app uses data stored on the server;
+#' otherwise, the datasets saved in the package. Default: FALSE.
 #' @param ... A series of options to be used inside the app.
 #' @examples 
 #' \dontrun{
@@ -18,14 +18,13 @@
 run_app <- function(..., lb = TRUE, serverMode = FALSE) {
   shinyOptions(serverMode = serverMode)
   
-  with_golem_options(
-    app = shinyApp(
-      ui = app_ui, 
-      server = app_server, 
-      options = list(launch.browser = lb),
-      enableBookmarking = "server",
-      uiPattern = "/"
-    ), 
-    golem_opts = list(...)
+  # `...` is accepted for backward compatibility with the old golem-based
+  # launch (golem_opts), but the app no longer consumes any such options.
+  shinyApp(
+    ui = app_ui,
+    server = app_server,
+    options = list(launch.browser = lb),
+    enableBookmarking = "server",
+    uiPattern = "/"
   )
 }

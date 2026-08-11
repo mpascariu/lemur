@@ -7,10 +7,10 @@
 modify_life_table(lt, cod, cod_change)
 }
 \arguments{
-\item{lt}{Life table;}
+\item{lt}{Life table.}
 
 \item{cod}{Causes of death matrix containing death counts corresponding
-to the population and time period of the life table;}
+to the population and time period of the life table.}
 
 \item{cod_change}{Numerical scalar, vector or matrix.
 The changes to be applied to the causes of death rate, m[c,x],

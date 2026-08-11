@@ -9,7 +9,7 @@
 # 1 or 2 simple functions from a third party library.
 
 
-#' scales::label_number_si - function 
+#' scales::label_number_si (vendored)
 #' @keywords internal 
 label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
   sep <- if (is.null(unit)) "" else " "
@@ -28,7 +28,7 @@ label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
   }
 }
 
-#' scales::number - function 
+#' scales::number (vendored)
 #' @keywords internal 
 number <- function (x, accuracy = NULL, scale = 1, prefix = "", suffix = "", 
           big.mark = " ", decimal.mark = ".", trim = TRUE, ...) 
@@ -50,24 +50,86 @@ number <- function (x, accuracy = NULL, scale = 1, prefix = "", suffix = "",
 }
 
 
+#' @title Color editor for sliderInput
+#'
+#' @description Edit the color of Shiny's slider inputs.
+#'
+#' @param color The color to apply. Can be a vector of colors to customize more
+#' than one slider. Pass the name of a color such as 'Chartreuse' or 'Chocolate',
+#' or its HEX notation such as \code{'#7FFF00'} or \code{'#D2691E'}.
+#' @param sliderId The \code{id} of the customized slider(s). Can be a vector
+#' like \code{c(1, 2)} to modify the first two sliders, or a single value
+#' (e.g. 2) to modify one slider.
+#'
+#' @note See \url{https://www.w3schools.com/colors/colors_names.asp} for an overview of all colors.
+#'
+#' @seealso \code{\link[shinyWidgets]{chooseSliderSkin}} to update the global skin of your sliders.
+#'
+#' @export
+setSliderColor_ <- function(color, sliderId) {
+  stopifnot(!is.null(color))
+  stopifnot(is.character(color))
+  stopifnot(is.numeric(sliderId))
+  stopifnot(!is.null(sliderId))
+  stopifnot(length(color) >= length(sliderId))
+
+  sliderId <- sliderId - 1
+
+  sliderCol <- lapply(seq_along(sliderId), function(j) {
+    i <- sliderId[j]
+    paste0(
+      ".js-irs-", i, " .irs-single,",
+      " .js-irs-", i, " .irs-from,",
+      " .js-irs-", i, " .irs-to,",
+      " .js-irs-", i, " .irs-bar-edge,",
+      " .js-irs-", i,
+      " .irs-bar{  border-color: transparent;background: ", color[j],
+      "; border-top: 1px solid ", color[j],
+      "; border-bottom: 1px solid ", color[j],
+      ";}"
+    )
+  })
+
+  tags$head(tags$style(HTML(paste(sliderCol, collapse = "\n"))))
+}
+
 # Hack CRAN check warnings related to tidyverse coding style
 globalVariables(
   c(
     ".",
     "cause_name",
-    "cause_name", 
-    "deaths", 
-    "decomposition", 
+    "deaths",
+    "decomposition",
     "llx",
-    "period", 
-    "region", 
+    "period",
+    "region",
     "sex",
     "ttx",
-    "x", 
+    "x",
     "x.int",
     "x_int"
   )
 )
+
+# Move a column into the row names of a data frame. Base replacement for
+# tibble::column_to_rownames() (see fun-modify_LT.R / build_cod_matrix).
+#' @keywords internal
+df_rownames_from <- function(df, col) {
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  row.names(df) <- df[[col]]
+  df[[col]] <- NULL
+  df
+}
+
+# Move the row names of a data frame into a new leading column. Base
+# replacement for tibble::rownames_to_column().
+#' @keywords internal
+df_add_rownames <- function(df, col) {
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  df[[col]] <- row.names(df)
+  row.names(df) <- NULL
+  df
+}
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS used in the Server

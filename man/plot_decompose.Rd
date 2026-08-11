@@ -2,21 +2,24 @@
 % Please edit documentation in R/fun-figures.R
 \name{plot_decompose}
 \alias{plot_decompose}
-\title{Plot function for decompose}
+\title{Plot a decomposition object}
 \usage{
 plot_decompose(object, perc = FALSE, by = "both")
 }
 \arguments{
-\item{object}{An object of class decompose}
+\item{object}{An object of class \code{decompose}.}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{by}{dimensions on which to build the plot.
-Options: "both", "age", "cod".}
+\item{by}{The dimensions on which to build the plot.
+One of "both", "age" or "cod".}
+}
+\value{
+A plotly widget.
 }
 \description{
-Plot function for decompose
+Plot a decomposition object
 }
 \examples{
 # See example in the ?decompose_by_cod or ?decompose_by_age help pages

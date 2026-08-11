@@ -3,21 +3,21 @@
 \name{matrix_to_long_table}
 \alias{matrix_to_long_table}
 \title{Format matrix into a long table
-and add the identification columns from cod data}
+and add the identification columns from COD data}
 \usage{
 matrix_to_long_table(X, C1, C2)
 }
 \arguments{
-\item{X}{Matrix with cod decomposition data;}
+\item{X}{A matrix with COD decomposition data.}
 
 \item{C1}{Causes of death data containing death counts corresponding
-to the region/time period 1. Format: long table;}
+to the region/time period 1. Format: long table.}
 
 \item{C2}{Causes of death data containing death counts corresponding
-to the region/time period 2. Format: long table;}
+to the region/time period 2. Format: long table.}
 }
 \description{
 Format matrix into a long table
-and add the identification columns from cod data
+and add the identification columns from COD data
 }
 \keyword{internal}

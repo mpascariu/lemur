@@ -8,7 +8,7 @@ plotly_cod(cod, perc = FALSE, xlab = NULL, mode = "mode_cod")
 }
 \arguments{
 \item{cod}{Causes of death matrix containing death counts corresponding
-to the population and time period of the life table;}
+to the population and time period of the life table.}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}

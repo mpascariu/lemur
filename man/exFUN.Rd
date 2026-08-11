@@ -7,12 +7,12 @@
 exFUN(x, cod)
 }
 \arguments{
-\item{x}{vector of ages}
+\item{x}{A vector of ages.}
 
-\item{cod}{Matrix containing cause-specific death rates}
+\item{cod}{A matrix containing cause-specific death rates.}
 }
 \value{
-life expectancy at birth (or min age)
+Life expectancy at birth (or at the minimum age).
 }
 \description{
 Life expectancy function

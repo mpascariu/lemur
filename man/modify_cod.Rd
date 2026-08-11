@@ -8,7 +8,7 @@ modify_cod(cod, cod_change)
 }
 \arguments{
 \item{cod}{Causes of death matrix containing death counts corresponding
-to the population and time period of the life table;}
+to the population and time period of the life table.}
 
 \item{cod_change}{Numerical scalar, vector or matrix.
 The changes to be applied to the causes of death rate, m[c,x],
@@ -16,7 +16,7 @@ in order to reduce or increase the mortality estimates given by the life
 table. Accepted input: any value greater than -100. See examples.}
 }
 \value{
-A long table with the same format as the input cod
+A matrix with ages as rows and causes of death as columns.
 }
 \description{
 Modify COD values by changing the cause of death associated risks

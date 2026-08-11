@@ -8,12 +8,14 @@ in life expectancy between any two regions/time periods}
 decompose_by_age(L1, L2)
 }
 \arguments{
-\item{L1}{Life table corresponding to the region/time period 1;}
+\item{L1}{Life table corresponding to the region/time period 1.}
 
-\item{L2}{Life table corresponding to the region/time period 2;}
+\item{L2}{Life table corresponding to the region/time period 2.}
 }
 \value{
-A numerical vector.
+A data.frame with the age-specific decomposition values, with
+columns \code{region}, \code{period}, \code{sex}, \code{x.int}, \code{x}
+and \code{decomposition}.
 }
 \description{
 Decompose the difference in life expectancy (at the smallest available age)
@@ -40,5 +42,9 @@ dec
 plot_decompose(dec)
 }
 \references{
-...
+Andreev EM, Shkolnikov VM, and Begun AZ. Algorithm for
+decomposition of differences between aggregate demographic measures and its
+application to life expectancies, healthy life expectancies,
+parity-progression ratios and total fertility rates. Demographic Research 7:
+499-522. 2002.
 }

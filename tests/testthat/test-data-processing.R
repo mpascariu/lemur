@@ -103,10 +103,10 @@ test_that("modify_cod_table preserves structure and modifies deaths", {
   expect_equal(names(out_dt), names(D_romania))
   expect_equal(out_dt$deaths, D_romania$deaths / 2)
 
-  # tibble input (the app path)
-  out_tb <- modify_cod_table(tibble::as_tibble(D_romania), cod_change = -50)
-  expect_equal(out_tb$deaths, D_romania$deaths / 2)
-  expect_equal(levels(out_tb$cause_name), levels(D_romania$cause_name))
+  # data.frame input (the app path)
+  out_df <- modify_cod_table(as.data.frame(D_romania), cod_change = -50)
+  expect_equal(out_df$deaths, D_romania$deaths / 2)
+  expect_equal(levels(out_df$cause_name), levels(D_romania$cause_name))
 
   # zero change leaves deaths untouched
   out0 <- modify_cod_table(D_romania, cod_change = 0)
@@ -182,7 +182,7 @@ test_that("matrix_to_long_table converts a matrix to a long table", {
               dimnames = list(c("0", "10"), c("Stroke", "COVID-19")))
   out <- matrix_to_long_table(X, D_romania, D_mexico)
 
-  expect_s3_class(out, "tbl_df")
+  expect_s3_class(out, "data.frame")
   expect_equal(nrow(out), 4)
   expect_true(all(c("region", "period", "sex", "x.int", "x", "cause_name", "decomposition") %in% names(out)))
   expect_equal(sort(out$decomposition), c(0.1, 0.2, 0.3, 0.4))
@@ -228,7 +228,7 @@ test_that("dt_filter_local filters by region, sex and year", {
   # single region
   r <- dt_filter_local(D_full, "mode_cod", "Romania", "Romania", "both", 2021, NULL)
   expect_equal(nrow(r), 450)
-  expect_s3_class(r, "tbl_df")
+  expect_s3_class(r, "data.frame")
 
   # two regions
   r2 <- dt_filter_local(D_full, "mode_cntr", "Romania", "Mexico", "both", 2021, NULL)
@@ -242,5 +242,5 @@ test_that("dt_filter_local filters by region, sex and year", {
   # a plain data.frame input is converted internally
   r4 <- dt_filter_local(as.data.frame(D_full), "mode_cod", "Romania", "Romania", "both", 2021, NULL)
   expect_equal(nrow(r4), 450)
-  expect_s3_class(r4, "tbl_df")
+  expect_s3_class(r4, "data.frame")
 })

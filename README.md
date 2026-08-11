@@ -14,12 +14,12 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 
 <!-- badges: end -->
 
-The life expectancy monitoring tool allows the user to selected
+The life expectancy monitoring tool allows the user to select
 mortality changes over the entire lifespan or at specific ages, as well
 as for overall mortality or for specific causes of death. For example,
 how would life expectancy look if cardiovascular mortality were to be
 reduced by 50%? Or how would life expectancy look if infant mortality
-was eliminated? The tool facilitates assessing changes and comparisons
+were eliminated? The tool facilitates assessing changes and comparisons
 in life expectancy under those selected scenarios of mortality change.
 Furthermore, the tool lets the user compare cause-of-death profiles and
 life expectancies across time, countries and sexes.
@@ -33,12 +33,14 @@ Once you have an R session open (in RStudio or the R
 console), install the package straight from
 [GitHub](https://github.com/mpascariu/lemur):
 
+lemur requires **R version 4.3.0 or newer**.
+
 ``` r
-# 1. Install the devtools package, if you do not have it yet
-install.packages("devtools")
+# 1. Install the pak package, if you do not have it yet
+install.packages("pak")
 
 # 2. Install lemur from GitHub (latest version on the main branch)
-devtools::install_github("mpascariu/lemur")
+pak::pak("mpascariu/lemur")
 ```
 
 The package bundles the GBD2021 datasets (exposed as `data_gbd2021_lt()`,

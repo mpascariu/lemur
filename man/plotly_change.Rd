@@ -14,9 +14,9 @@ plotly_change(
 )
 }
 \arguments{
-\item{L1}{Life table corresponding to the region/time period 1;}
+\item{L1}{Life table corresponding to the region/time period 1.}
 
-\item{L2}{Life table corresponding to the region/time period 2;}
+\item{L2}{Life table corresponding to the region/time period 2.}
 
 \item{age}{Reference ages.}
 

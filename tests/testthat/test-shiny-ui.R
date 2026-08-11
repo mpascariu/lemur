@@ -86,7 +86,8 @@ test_that("UI can be built via lemur:: without attaching the package", {
   # library(lemur)) failed with "object 'data_app_input' not found" while
   # building the UI. .onLoad() now binds it at namespace load; this subprocess
   # attaches nothing, so it exercises exactly that path.
-  rscript <- file.path(R.home("bin"), "Rscript.exe")
+  rscript <- file.path(R.home("bin"),
+                       if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
   out <- suppressWarnings(system2(
     rscript,
     args = c("--vanilla", "-e", "invisible(lemur:::app_ui())"),

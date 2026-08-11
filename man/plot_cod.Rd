@@ -8,17 +8,21 @@ plot_cod(cod, perc = FALSE, type = "barplot")
 }
 \arguments{
 \item{cod}{Causes of death matrix containing death counts corresponding
-to the population and time period of the life table;}
+to the population and time period of the life table.}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{type}{Options: "barplot" or "piechart".
-#' @examples
-D <- data_gbd2021_cod() # cod data
-cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
-plot_cod(cod)}
+\item{type}{Options: "barplot" or "piechart".}
+}
+\value{
+A plotly widget.
 }
 \description{
 Plot function for COD data
+}
+\examples{
+D <- data_gbd2021_cod() # cod data
+cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
+plot_cod(cod)
 }

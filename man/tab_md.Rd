@@ -2,11 +2,11 @@
 % Please edit documentation in R/app_ui.R
 \name{tab_md}
 \alias{tab_md}
-\title{UI - markdown pages}
+\title{Markdown pages}
 \usage{
 tab_md(title, file)
 }
 \description{
-UI - markdown pages
+Markdown pages
 }
 \keyword{internal}

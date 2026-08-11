@@ -12,8 +12,14 @@
 #' period of time.
 #'
 #' @inheritParams decompose_by_cod
-#' @return A numerical vector.
-#' @references ...
+#' @return A data.frame with the age-specific decomposition values, with
+#' columns \code{region}, \code{period}, \code{sex}, \code{x.int}, \code{x}
+#' and \code{decomposition}.
+#' @references Andreev EM, Shkolnikov VM, and Begun AZ. Algorithm for
+#' decomposition of differences between aggregate demographic measures and its
+#' application to life expectancies, healthy life expectancies,
+#' parity-progression ratios and total fertility rates. Demographic Research 7:
+#' 499-522. 2002.
 #' @examples
 #' # Data
 #' L <- data_gbd2021_lt()
@@ -87,7 +93,8 @@ decompose_by_age <- function(L1, L2){
     )
 
   # Add a new S3 class and exit
-  out <- new_tibble(out, nrow = nrow(out), class = "decompose")
+  out <- as.data.frame(out)
+  class(out) <- c("decompose", "data.frame")
   return(out)
 }
 
@@ -95,34 +102,37 @@ decompose_by_age <- function(L1, L2){
 #' Perform decomposition of age- and cause-specific mortality contributions
 #' in life expectancy between any two regions/time periods
 #'
-#' @param L1 Life table corresponding to the region/time period 1;
-#' @param L2 Life table corresponding to the region/time period 2;
+#' @param L1 Life table corresponding to the region/time period 1.
+#' @param L2 Life table corresponding to the region/time period 2.
 #' @param C1 Causes of death data containing death counts corresponding
-#' to the region/time period 1. Format: long table;
+#' to the region/time period 1. Format: long table.
 #' @param C2 Causes of death data containing death counts corresponding
-#' to the region/time period 2. Format: long table;
-#' @param symmetrical logical. default TRUE as recommended by authors. Shall
-#'  we average the results of replacing 1 with 2 and 2 with 1?
-#'  The symmetrical argument toggles whether or not we replace cod1 with cod2
-#' (FALSE), or take the arithmetic average or replacement in both directions.
-#' Defaults are set to symmetrically replace from the bottom up,
-#' per the authors' suggestion.
-#' @param direction character. One of "up", "down", or "both". Default "up",
-#' as recommended by authors. It refers to whether we go from the bottom up or
-#' top down, or take the arithmetic average of these when replacing vector
-#' elements. Although the total difference will always sum correctly,
-#' the calculated contribution from individual components can vary greatly
-#' depending on the order in general.
-#' @details This implements the algorithm described in Andreev et al (2002),
+#' to the region/time period 2. Format: long table.
+#' @param symmetrical logical. Whether to average the results of replacing 1
+#'  with 2 and 2 with 1. When FALSE, cod1 is replaced by cod2 only; when TRUE,
+#'  the arithmetic average of the replacement in both directions is used.
+#'  Defaults are set to symmetrically replace from the bottom up, per the
+#'  authors' suggestion.
+#' @param direction character. One of "up", "down" or "both". Default "up",
+#' as recommended by the authors. It refers to whether we replace vector
+#' elements from the bottom up or top down, or take the arithmetic average of
+#' these. Although the total difference will always sum correctly, the
+#' contribution from individual components can vary with the order of
+#' replacement.
+#' @details This implements the algorithm described in Andreev et al. (2002),
 #' with defaults set to approximate their recommendations for replacement
 #' ordering and result averaging.
-#' @return A long tibble in the same format as the cod input data. The output
-#' containS the column \code{decomposition} that indicates the change in life
-#' expectancy by age and/or cause of death between the two life tables provided
-#' as input. Measure unit: years.
-#' @source The code of this function is based on the implementation of the
-#' \code{DemoDecomp::stepwise_replacement} function maintained by Tim RIFFE.
-#' @references ...
+#' @return A long data.frame in the same format as the cod input data. The
+#' column \code{decomposition} indicates the change in life expectancy by age
+#' and/or cause of death between the two life tables provided as input.
+#' Unit: years.
+#' @source The code of this function is based on
+#' \code{DemoDecomp::stepwise_replacement}, maintained by Tim Riffe.
+#' @references Andreev EM, Shkolnikov VM, and Begun AZ. Algorithm for
+#' decomposition of differences between aggregate demographic measures and its
+#' application to life expectancies, healthy life expectancies,
+#' parity-progression ratios and total fertility rates. Demographic Research 7:
+#' 499-522. 2002.
 #' @examples
 #' L <- data_gbd2021_lt()  # life tables
 #' D <- data_gbd2021_cod() # cod data
@@ -216,15 +226,16 @@ decompose_by_cod <- function(L1,
   out <- matrix_to_long_table(dec, C1, C2)
 
   # Add a new S3 class and exit
-  out <- new_tibble(out, nrow = nrow(out), class = "decompose")
+  out <- as.data.frame(out)
+  class(out) <- c("decompose", "data.frame")
   return(out)
 }
 
 
 #' Life expectancy function
-#' @param x vector of ages
-#' @param cod Matrix containing cause-specific death rates
-#' @return life expectancy at birth (or min age)
+#' @param x A vector of ages.
+#' @param cod A matrix containing cause-specific death rates.
+#' @return Life expectancy at birth (or at the minimum age).
 #' @keywords internal
 exFUN <- function(x, cod){
   dim(cod) <- c(length(x),length(cod)/length(x))
@@ -243,11 +254,11 @@ exFUN <- function(x, cod){
 }
 
 
-#'Format matrix into a long table
-#'and add the identification columns from cod data
-#'@param X Matrix with cod decomposition data;
-#'@inheritParams decompose_by_cod
-#'@keywords internal
+#' Format matrix into a long table
+#' and add the identification columns from COD data
+#' @param X A matrix with COD decomposition data.
+#' @inheritParams decompose_by_cod
+#' @keywords internal
 matrix_to_long_table <- function(X, C1, C2){
 
   region = period = x = x.int = cause_name = decomposition <- NULL
@@ -255,11 +266,14 @@ matrix_to_long_table <- function(X, C1, C2){
 
   X %>%
     as.data.frame() %>%
-    rownames_to_column(var = "x") %>%
-    pivot_longer(
-      cols = -x,
-      names_to = "cause_name",
-      values_to = "decomposition") %>%
+    df_add_rownames("x") %>%
+    # data.table's melt() only accepts a data.table input (no data.frame
+    # method), so coerce before reshaping.
+    as.data.table() %>%
+    melt(id.vars = "x",
+         variable.name = "cause_name",
+         value.name = "decomposition") %>%
+    as.data.frame() %>%
     # add columns with info from cod tables
     # if info differs in the two cod tables we merge them
     mutate(

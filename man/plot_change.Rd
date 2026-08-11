@@ -14,19 +14,21 @@ plot_change(
 )
 }
 \arguments{
-\item{L1}{Life table corresponding to the region/time period 1;}
+\item{L1}{Life table corresponding to the region/time period 1.}
 
-\item{L2}{Life table corresponding to the region/time period 2;}
+\item{L2}{Life table corresponding to the region/time period 2.}
 
 \item{age}{Reference ages.}
 
 \item{perc}{Logical. If TRUE data will be displayed as percentages else
 as absolute values. Default: FALSE.}
 
-\item{title}{The text for the title.}
+\item{title}{Optional plot title.}
 
-\item{subtitle}{The text for the subtitle for the plot which will be
-displayed below the title.}
+\item{subtitle}{Optional plot subtitle.}
+}
+\value{
+A plotly widget.
 }
 \description{
 Plot the difference in life expectancy of two life tables

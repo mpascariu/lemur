@@ -131,7 +131,7 @@ data_cod <- reactive({
     fetch_data("cod") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name)) %>%
       arrange(region, sex, x, cause_name) %>%
-      as_tibble()
+      as.data.frame()
   }
 }) |> bindCache(
   input$mode, input$region1, input$region2, input$sex,
@@ -156,7 +156,7 @@ data_sdg <- reactive({
     fetch_data("sdg") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name_sdg)) %>%
       arrange(region, sex, x, cause_name) %>%
-      as_tibble()
+      as.data.frame()
   }
 }) |> bindCache(
   input$mode, input$region1, input$region2, input$sex,
@@ -175,8 +175,8 @@ data_lt <- reactive({
     lt <- lt %>% rename(x.int = x_int, Lx = llx, Tx = ttx)
   }
   
-  # critical fix: return a proper tibble copy with consistent ordering 
-  as_tibble(lt) %>% arrange(region, sex, x)
+  # critical fix: return a proper data.frame copy with consistent ordering
+  as.data.frame(lt) %>% arrange(region, sex, x)
 }) |> bindCache(
   input$mode, input$region1, input$region2, input$sex,
   time_slider(), serverMode()
@@ -343,11 +343,17 @@ data_lt <- reactive({
     # observes an inconsistent mix of fresh data and a stale reduction matrix.
     df <- data_fig()
 
-    # When no risk change is applied the initial and final life tables are
-    # identical, so the stepwise-replacement decomposition would be all zeros.
-    # Skip that computation; figure 4 and the decomposition table show a
-    # placeholder instead (see their renderers below).
-    if (!any(df$reduction != 0)) {
+    # In the within-region and SDG modes, when no risk change is applied the
+    # initial and final life tables are identical, so the stepwise-replacement
+    # decomposition would be all zeros. Skip that computation; figure 4 and the
+    # decomposition table show a placeholder instead (see their renderers below).
+    # In the comparison modes (between regions, sex gap) the two populations
+    # being compared are different even with a zero risk reduction, so the
+    # decomposition is meaningful: it shows the difference between the regions
+    # or between the sexes, and the risk reduction modifies both life tables
+    # before they are compared.
+    if (!any(df$reduction != 0) &&
+        !(df$mode %in% c("mode_cntr", "mode_sex"))) {
       return(NULL)
     }
 
@@ -437,9 +443,10 @@ data_lt <- reactive({
     
     data_fig()$data$cod_initial %>%
       select(-region, -period, -sex) %>%
-      pivot_wider(
-        names_from = cause_name,
-        values_from = deaths) %>% 
+      as.data.table() %>%
+      dcast(x ~ cause_name, value.var = "deaths") %>%
+      as.data.frame() %>%
+
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[3]
@@ -451,9 +458,10 @@ data_lt <- reactive({
     
     data_fig()$data$cod_final %>%
       select(-region, -period, -sex) %>%
-      pivot_wider(
-        names_from = cause_name,
-        values_from = deaths) %>% 
+      as.data.table() %>%
+      dcast(x ~ cause_name, value.var = "deaths") %>%
+      as.data.frame() %>%
+
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[4]
@@ -463,8 +471,9 @@ data_lt <- reactive({
   output$decomposition_data <- DT::renderDataTable({
     req(data_fig())
 
-    # No risk change applied: nothing to decompose, show a note instead of an
-    # all-zero table.
+    # Within-region/SDG modes with no risk change: nothing to decompose, show a
+    # note instead of an all-zero table. (Comparison modes always show the
+    # between-population decomposition, even at zero risk change.)
     if (is.null(data_decomp())) {
       return(
         DT::datatable(
@@ -479,9 +488,10 @@ data_lt <- reactive({
     data_decomp() %>%
       select(-region, -period, -sex, -x.int) %>% 
       mutate(decomposition = round(decomposition, 6)) %>% 
-      pivot_wider(
-        names_from = cause_name,
-        values_from = decomposition) %>% 
+      as.data.table() %>%
+      dcast(x ~ cause_name, value.var = "decomposition") %>%
+      as.data.frame() %>%
+
       rename(`Age (x)` = x,) %>% 
       format_datatable(
         caption = table_captions()[5]
@@ -493,7 +503,7 @@ data_lt <- reactive({
     req(df$reduction)
 
     df$reduction %>%
-      as_tibble() %>%
+      as.data.frame() %>%
       mutate(`Age Group` = df$data$lt_initial$x.int, .before = 1) %>%
       format_datatable(
         caption = table_captions()[6]
@@ -604,8 +614,10 @@ data_lt <- reactive({
     df <- data_fig()
     req(df$data)
 
-    # No risk change applied: the decomposition would be all zeros, so show a
-    # message instead of an empty/meaningless chart.
+    # In the within-region and SDG modes with no risk change there is nothing
+    # to decompose, so show a message instead of an empty/meaningless chart.
+    # (In the between-regions and sex-gap modes the decomposition always shows
+    # the difference between the two populations, even at zero risk change.)
     dec <- data_decomp()
     if (is.null(dec)) {
       return(

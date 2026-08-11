@@ -8,7 +8,7 @@ modify_cod_table(cod, cod_change)
 }
 \arguments{
 \item{cod}{Causes of death matrix containing death counts corresponding
-to the population and time period of the life table;}
+to the population and time period of the life table.}
 
 \item{cod_change}{Numerical scalar, vector or matrix.
 The changes to be applied to the causes of death rate, m[c,x],
@@ -29,7 +29,7 @@ cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
 cod_change = -50
 
 # Example 1:
-# Modify by 50\% all COD values. This is trivial and not need really.
+# Modify all COD values by 50\%. This is trivial and not really needed.
 modify_cod_table(cod, cod_change = -50)
 
 

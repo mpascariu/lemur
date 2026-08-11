@@ -2,11 +2,11 @@
 % Please edit documentation in R/fun-utils.R
 \name{label_number_si}
 \alias{label_number_si}
-\title{scales::label_number_si - function}
+\title{scales::label_number_si (vendored)}
 \usage{
 label_number_si(accuracy = 1, unit = NULL, sep = NULL, ...)
 }
 \description{
-scales::label_number_si - function
+scales::label_number_si (vendored)
 }
 \keyword{internal}
