@@ -49,12 +49,14 @@ vignettes/*.pdf
 # Excel Data
 
 data-raw/IHME_GBD2021_Data/*.zip
-data-raw/IHME_GBD2021_Data/CoD_Level_1/*.zip
-data-raw/IHME_GBD2021_Data/CoD_Level_2/*.zip
-data-raw/IHME_GBD2021_Data/CoD_Level_3/*.zip
+data-raw/IHME_GBD2021_Data/CoD_Level_1/*
+data-raw/IHME_GBD2021_Data/CoD_Level_2/*
+data-raw/IHME_GBD2021_Data/CoD_Level_3/*
 data-raw/IHME_GBD2021_Data/PoD/*.zip
 data-raw/IHME_GBD2021_Data/Fertility/*.zip
 data-raw/IHME_GBD2021_Data/Population/*.zip
 data-raw/IHME_GBD2021_Data/*.Rdata
+data-raw/IHME_GBD2023_Data/*
 data-raw/*.Rdata
-docs/*.*
+# docs/ is the GitHub Pages site (deployed from the main branch, /docs
+# folder) -- docs/index.html must stay committed

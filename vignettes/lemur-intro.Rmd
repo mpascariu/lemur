@@ -1,0 +1,451 @@
+---
+title: "Introduction to lemur R library"
+author: "MD Pascariu, JM Aburto, V Canudas-Romo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to lemur}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width = 7.2,
+  fig.height = 4.6,
+  out.width = "100%",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+```{r setup, echo = FALSE}
+library(lemur)
+library(dplyr)
+
+# helpers used by the display chunks and the prose facts below
+cause_share <- function(cod, causes) {
+  100 * sum(cod$deaths[cod$cause_name %in% causes]) / sum(cod$deaths)
+}
+lt_row <- function(lt, cod) c(
+  e0     = lt$ex[lt$x == 0],
+  q0     = lt$qx[lt$x == 0],
+  l65    = lt$lx[lt$x == 65],
+  e65    = lt$ex[lt$x == 65],
+  deaths = sum(cod$deaths)
+)
+
+# facts quoted in the prose below
+n_regions <- n_distinct(data_gbd2021_lt()$region)
+n_causes  <- n_distinct(data_gbd2021_cod()$cause_name)
+n_ages    <- n_distinct(data_gbd2021_lt()$x)
+years     <- paste(range(as.numeric(levels(data_gbd2021_lt()$period))), collapse = " to ")
+```
+
+# What is lemur?
+
+`lemur` ("Life expectancy monitor upscaled in R") is an R package and
+Shiny application for scenario analysis of mortality. Given the cause-of-death
+distribution of a population, you ask *"what if?"* questions -- *what would
+life expectancy be if cardiovascular mortality fell by 50%?* -- and the
+package recomputes the life table, shows you the gains and losses at every
+age, and decomposes the change by age and cause of death. It also compares
+cause-of-death profiles and life tables between regions, sexes and time
+periods.
+
+Everything runs on the bundled Global Burden of Disease 2021 (GBD2021)
+estimates from IHME: `r n_regions` regions from `r years`, three sex
+categories (male, female and the two sexes combined) and `r n_causes` broad
+cause groups, arranged in abridged life tables of `r n_ages` age groups.
+
+The tool is hosted by the **HASS Digital Research Hub (HDRH)** at the
+Australian National University (ANU).
+
+# Installation
+
+Once you have an R session open (in RStudio or the R console), install the
+package straight from [GitHub](https://github.com/mpascariu/lemur):
+
+lemur requires **R version 4.3.0 or newer**.
+
+``` r
+# 1. Install the pak package, if you do not have it yet
+install.packages("pak")
+
+# 2. Install lemur from GitHub (latest version on the main branch)
+pak::pak("mpascariu/lemur")
+```
+
+The package bundles the GBD2021 datasets (exposed as `data_gbd2021_lt()`,
+`data_gbd2021_cod()` and `data_gbd2021_sdg()`), so you can run the examples
+on the help pages and the analysis functions without a database connection.
+
+# The data
+
+The three accessor functions return pre-factorized `data.table`s:
+
+* `data_gbd2021_lt()` -- one abridged life table per region, sex and year,
+  with the classic columns `mx`, `qx`, `ax`, `lx`, `dx`, `Lx`, `Tx` and `ex`.
+* `data_gbd2021_cod()` -- death counts by region, sex, year, age group and
+  cause (`deaths` column).
+* `data_gbd2021_sdg()` -- the same, grouped into the cause categories used
+  for tracking the UN Sustainable Development Goals.
+
+Let's look at Romania in 2021 (both sexes combined). An excerpt of the life
+table -- survivors `lx`, deaths `dx`, probability of dying `qx` and remaining
+life expectancy `ex` -- at selected ages:
+
+```{r lt-excerpt}
+library(lemur)
+
+# helper used throughout this document, defined at first use
+slice_table <- function(tbl, region, sex = "both", year = 2021) {
+  filter(tbl, region == .env$region, sex == .env$sex, period == .env$year)
+}
+
+lt_ro  <- slice_table(data_gbd2021_lt(), "Romania")
+cod_ro <- slice_table(data_gbd2021_cod(), "Romania")
+cardio <- c("Ischemic Heart Disease", "Stroke", "Other Cardiovascular")
+total_deaths <- sum(cod_ro$deaths)
+```
+
+```{r lt-excerpt-table, echo = FALSE}
+lt_ro %>%
+  filter(x %in% c(0, 1, 10, 20, 40, 60, 80, 100)) %>%
+  select(x.int, x, mx, qx, lx, dx, ex) %>%
+  mutate(across(c(mx, qx), ~ round(.x, 5)),
+         across(c(lx, dx), ~ format(round(.x), big.mark = ",")),
+         ex = round(ex, 2)) %>%
+  knitr::kable(format = "html")
+```
+
+Life expectancy at birth in Romania in 2021 was
+**`r round(lt_ro$ex[lt_ro$x == 0], 2)` years**, with
+`r format(round(lt_ro$lx[lt_ro$x == 65]), big.mark = ",")` of every 100,000
+newborns surviving to age 65. The corresponding cause-of-death table counts
+`r format(total_deaths, big.mark = ",")` deaths in that year, distributed
+over `r n_causes` causes and `r n_ages` age groups.
+
+```{r cod-slice, echo = FALSE}
+cod_by_cause <- cod_ro %>%
+  group_by(cause_name) %>%
+  summarise(Deaths = sum(deaths)) %>%
+  ungroup() %>%
+  mutate(Share = round(100 * Deaths / total_deaths, 1)) %>%
+  arrange(desc(Deaths))
+
+top_cause     <- cod_by_cause$cause_name[1]
+top_share     <- cod_by_cause$Share[1]
+cardio_before <- round(cause_share(cod_ro, cardio), 1)
+
+cod_by_cause %>%
+  head(8) %>%
+  knitr::kable(format = "html", digits = 1)
+```
+
+The largest single block -- `r top_cause` -- accounts for `r top_share`% of
+all deaths. (2021 was a pandemic year, so COVID-19 tops the list.) This is
+the kind of target a scenario analysis will aim at.
+
+# Workflow I -- "What if" scenario analysis
+
+The core idea: mortality at age *x* from cause *c* can be reduced or
+increased by a factor, and the all-cause life table is rebuilt from the
+modified cause-specific risks. This is what the Shiny app does every time you
+move a slider, and the same functions are exported for use in scripts.
+
+The pipeline has three steps:
+
+1. `build_cod_matrix()` turns the long cause-of-death table into an
+   age × cause matrix of death *shares* (each row sums to 1).
+2. `modify_cod_table()` (or `modify_life_table()`) applies a percentage
+   change -- as a scalar, a vector, or a full age × cause matrix.
+3. The modified risks are converted back into a life table.
+
+Let's model a realistic question: **what if cardiovascular mortality in
+Romania in 2021 were halved, at every age?** In the GBD classification,
+cardiovascular deaths are split across three cause groups -- ischaemic heart
+disease, stroke and other cardiovascular -- together worth
+`r cardio_before`% of all deaths. The change is a matrix of zeros with -50 in
+the three cardiovascular columns:
+
+```{r scenario}
+causes <- as.character(unique(cod_ro$cause_name))
+ages   <- unique(lt_ro$x)
+
+M <- matrix(0, nrow = length(ages), ncol = length(causes),
+            dimnames = list(ages, causes))
+M[, cardio] <- -50
+
+scenario <- prepare_data(
+  cod = cod_ro, lt = lt_ro,
+  region1 = "Romania", region2 = "Romania", sex = "both",
+  cod_change = M, mode = "cod"
+)
+lt_after  <- scenario$lt_final
+cod_after <- scenario$cod_final
+```
+
+```{r scenario-facts, echo = FALSE}
+# numbers quoted in the prose below
+e0_before    <- lt_ro$ex[lt_ro$x == 0]
+e0_after     <- lt_after$ex[lt_after$x == 0]
+gain_e0      <- round(e0_after - e0_before, 2)
+deaths_saved <- round(total_deaths - sum(cod_after$deaths), -3)
+cardio_after <- round(cause_share(cod_after, cardio), 1)
+
+# remaining life expectancy gained at age x
+gain_at <- function(age)
+  lt_after$ex[lt_after$x == age] - lt_ro$ex[lt_ro$x == age]
+```
+
+`prepare_data()` is the exact function the app runs: it filters the inputs,
+applies the change and returns the initial and final life tables and
+cause-of-death tables. The result:
+
+```{r scenario-summary, echo = FALSE}
+rows_before <- lt_row(lt_ro, cod_ro)
+rows_after  <- lt_row(lt_after, cod_after)
+
+data.frame(
+  Indicator = c("Life expectancy at birth (years)",
+                "Probability of death before age 1",
+                "Survivors to age 65 (per 100,000)",
+                "Life expectancy at 65 (years)",
+                "Total deaths (all causes)"),
+  Before = c(round(rows_before[["e0"]], 2),
+             round(rows_before[["q0"]], 4),
+             round(rows_before[["l65"]]),
+             round(rows_before[["e65"]], 2),
+             format(round(rows_before[["deaths"]]), big.mark = ",")),
+  After = c(round(rows_after[["e0"]], 2),
+            round(rows_after[["q0"]], 4),
+            round(rows_after[["l65"]]),
+            round(rows_after[["e65"]], 2),
+            format(round(rows_after[["deaths"]]), big.mark = ","))
+) %>%
+  knitr::kable(format = "html")
+```
+
+Life expectancy at birth rises by **`r gain_e0` years** (`r round(e0_before, 1)`
+→ `r round(e0_after, 1)`), and roughly `r format(deaths_saved, big.mark = ",")`
+fewer deaths occur in a year. Note that the *deaths* drop by about half of
+the cardiovascular deaths -- the other causes are untouched.
+
+Where does this gain in life expectancy come from? `plot_change()` plots the
+remaining life expectancy of the first life table minus the second at every
+age: a marker to the right of the dashed zero line is a gain, a marker to the
+left a loss.
+
+```{r fig-change, fig.cap = "Age-specific gains in remaining life expectancy from halving cardiovascular mortality (Romania, 2021)."}
+plot_change(L1 = lt_after, L2 = lt_ro,
+            title = "Halving cardiovascular mortality: gains by age",
+            subtitle = "Romania, 2021, both sexes")
+```
+
+The gains are strikingly uniform: halving cardiovascular mortality adds
+`r round(gain_at(0), 2)` years of remaining life expectancy at birth,
+`r round(gain_at(30), 2)` at age 30, `r round(gain_at(60), 2)` at 60 and
+still `r round(gain_at(80), 2)` years at 80, before tapering to
+`r round(gain_at(100), 2)` at age 100. Because the reduction applies
+proportionally at *every* age, the saved person-years accrue to the whole
+population rather than piling up in old age; the gain fades only where little
+life remains to be gained. The cause-of-death profile after the change tells
+the other half of the story:
+
+```{r fig-cod, fig.cap = "Cause-of-death profile of Romania 2021 (both sexes), after a 50% reduction of cardiovascular mortality."}
+plot_cod(cod_after, perc = TRUE)
+```
+
+Compare this with the initial distribution: the cardiovascular share of all
+deaths falls from `r cardio_before`% to `r cardio_after`%. Every other cause
+keeps its death count exactly -- only the three cardiovascular columns
+changed. That is the "what if" contract: a small set of levers moved,
+everything else held constant.
+
+Finally, we can *decompose* the `r gain_e0`-year gain into age-by-cause
+contributions with `decompose_by_cod()` and draw the result with
+`plot_decompose()`:
+
+```{r fig-decomp-scenario, fig.cap = "Decomposition of the life-expectancy gain: contribution of each cause at each age (stacked bars, positive above the zero line)."}
+dec_scenario <- decompose_by_cod(lt_ro, lt_after, cod_ro, cod_after)
+plot_decompose(dec_scenario, by = "both")
+```
+
+```{r peak-sc, echo = FALSE}
+peak_sc <- dec_scenario %>%
+  group_by(x.int) %>%
+  summarise(contribution = sum(decomposition)) %>%
+  slice_max(contribution, with_ties = FALSE)
+```
+
+As expected, the entire gain is attributed to the three modified causes.
+Positive values favor the second population passed -- here the post-change
+table -- which is why the whole figure lies above the zero line. The stack
+shows the *age pattern*: the age group contributing the most is
+`r peak_sc$x.int` (`r round(peak_sc$contribution, 2)` years), the ages where
+cardiovascular deaths are concentrated. Each bar is the sum of the per-cause
+contributions, and the sum of the whole figure equals the total gain to the
+last decimal.
+
+# Workflow II -- decomposing differences between populations
+
+The same toolkit answers *comparative* questions: **why does male life
+expectancy differ between Romania and Mexico in 2021?** First, the gap:
+
+```{r compare}
+lt1  <- slice_table(data_gbd2021_lt(), "Romania", sex = "male")
+lt2  <- slice_table(data_gbd2021_lt(), "Mexico",  sex = "male")
+cod1 <- slice_table(data_gbd2021_cod(), "Romania", sex = "male")
+cod2 <- slice_table(data_gbd2021_cod(), "Mexico",  sex = "male")
+```
+
+```{r compare-facts, echo = FALSE}
+e0_1 <- lt1$ex[lt1$x == 0]
+e0_2 <- lt2$ex[lt2$x == 0]
+gap  <- e0_2 - e0_1
+```
+
+Male life expectancy at birth is `r round(e0_1, 2)` years in Romania and
+`r round(e0_2, 2)` years in Mexico -- a gap of **`r round(abs(gap), 2)` years**,
+favoring `r if (gap > 0) "Mexico" else "Romania"`. `decompose_by_age()` splits
+this gap into age contributions (using the direct-indirect method of Andreev,
+Shkolnikov and Begun, 2002):
+
+```{r age-dec}
+dec_age <- decompose_by_age(lt1, lt2)
+```
+
+```{r age-dec-table, echo = FALSE}
+best  <- dec_age[which.max(dec_age$decomposition), ]
+worst <- dec_age[which.min(dec_age$decomposition), ]
+
+dec_age %>%
+  select(x.int, decomposition) %>%
+  mutate(decomposition = round(decomposition, 3)) %>%
+  knitr::kable(format = "html")
+```
+
+The sign convention is simple: positive values favor the second population
+passed to the function -- here Mexico -- and negative ones favor the first
+(Romania). The age pattern shows where the advantage is won and where it is
+lost: the `r best$x.int` age group contributes the most in Mexico's favor
+(`r round(best$decomposition, 3)` years), while the `r worst$x.int` group
+works the other way (`r round(worst$decomposition, 3)` years, favoring
+Romania). The column sums exactly to the total gap.
+
+`decompose_by_cod()` refines this by cause, using stepwise replacement: it
+replaces the mortality of one population with the other's, cause by cause and
+age by age, and reads off the life-expectancy effect of each replacement.
+The `symmetrical = TRUE` (default) and `direction = "up"` arguments follow
+the recommendations of Andreev et al. (2002), averaging the two replacement
+directions.
+
+```{r cod-dec}
+dec <- decompose_by_cod(lt1, lt2, cod1, cod2)
+```
+
+```{r cod-dec-table, echo = FALSE}
+by_cause <- dec %>%
+  group_by(cause_name) %>%
+  summarise(contribution = sum(decomposition)) %>%
+  ungroup()
+
+top_abs <- which.max(abs(by_cause$contribution))
+top_pos <- which.max(by_cause$contribution)
+
+by_cause %>%
+  mutate(contribution = round(contribution, 3)) %>%
+  arrange(desc(abs(contribution))) %>%
+  head(6) %>%
+  knitr::kable(format = "html")
+```
+
+In absolute terms the largest single contribution is
+`r by_cause$cause_name[top_abs]` (`r round(by_cause$contribution[top_abs], 2)`
+years, in Romania's favor): Mexico's male COVID-19 mortality in 2021 far
+exceeds Romania's. The largest factor pulling the other way is
+`r by_cause$cause_name[top_pos]` (`r round(by_cause$contribution[top_pos], 2)`
+years, in Mexico's favor) -- Romanian males' stroke mortality sits well above
+Mexico's. The full picture -- each cause at each age -- is best seen in the
+stacked plot:
+
+```{r fig-decomp-cmp, fig.cap = "Decomposition of the male life-expectancy gap between Romania and Mexico, 2021: contributions by cause and age."}
+plot_decompose(dec, by = "both")
+```
+
+Reading the bars: segments above the zero line favor the second population
+(Mexico), segments below favor the first (Romania). The colours follow the
+package-wide cause palette, so the same cause carries the same colour in
+every figure. Summing every segment recovers the total gap to the last
+decimal -- the decomposition is exact, not an approximation.
+
+Cause-of-death *differences* can also be viewed directly with `plot_cod()`
+in comparison mode, or collapsed to a single horizontal bar with
+`plot_decompose(by = "cod")`:
+
+```{r fig-decomp-cod, fig.cap = "The same decomposition collapsed to one horizontal bar per cause."}
+plot_decompose(dec, by = "cod")
+```
+
+# The Shiny application
+
+Everything above is wrapped in an interactive dashboard, launched with a
+single call:
+
+``` r
+lemur::run_app()          # local data mode (bundled GBD2021 data)
+```
+
+```{r app-screenshot, echo = FALSE, fig.cap = "The interactive dashboard, launched with lemur::run_app()."}
+knitr::include_graphics("../inst/app/www/app_lemur_20260812.png")
+```
+
+The dashboard offers five analysis modes:
+
+| Mode | Question it answers |
+|------|---------------------|
+| Scenario (within region) | What if a set of causes is reduced in one region? |
+| Region comparison | How do two regions differ, and why? |
+| Sex comparison | What explains the male-female gap in one region? |
+| SDG targets | What if the UN SDG targets on premature mortality were met? |
+| SDG by cause | The same, with finer per-cause controls |
+
+In every mode, moving a slider or ticking a cause re-runs the pipeline shown
+above; a 250 ms debounce batches input changes into a single consistent
+update, cached reactives avoid recomputing unchanged queries, and all charts
+render natively in plotly (roughly 0.1 s per interaction). A "Data" tab
+exposes the underlying tables -- initial and final life tables, death counts,
+the decomposition and the reduction matrix -- and the "Methods" tab explains
+the algorithms. The map tab shows the selected region on an interactive
+leaflet map with 2021 population, life expectancy and fertility indicators.
+
+The SDG modes use the bundled `data_gbd2021_sdg()` table, which groups the
+same death counts into the SDG cause categories:
+
+```{r sdg-slice, echo = FALSE}
+slice_table(data_gbd2021_sdg(), "Romania") %>%
+  group_by(cause_name) %>%
+  summarise(Deaths = sum(deaths)) %>%
+  ungroup() %>%
+  arrange(desc(Deaths)) %>%
+  knitr::kable(format = "html", digits = 0)
+```
+
+This makes it easy to ask, for instance, how much life expectancy would
+improve if the SDG 3.4 target -- a one-third reduction of premature mortality
+from non-communicable diseases -- were achieved in a given region.
+
+# Next steps
+
+* Every exported function has a worked example: `?modify_life_table`,
+  `?decompose_by_cod`, `?plot_decompose`, `?data_gbd2021_lt`.
+* The decomposition methods follow Andreev, Shkolnikov and Begun (2002),
+  *Algorithm for decomposition of differences between aggregate demographic
+  measures*, Demographic Research 7, 499-522.
+* The data are the Global Burden of Disease Study 2021 results (GBD 2021),
+  Institute for Health Metrics and Evaluation (IHME), 2022
+  (<https://vizhub.healthdata.org/gbd-results/>). The package is being
+  updated to GBD 2023 data.
+* Source code, issues and releases: <https://github.com/mpascariu/lemur>.

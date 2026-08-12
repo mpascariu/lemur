@@ -1,3 +1,25 @@
+version 1.8.0
+- Vignette renamed to lemur-intro (a unique name that cannot clash with
+  other packages) and published as a web page on GitHub Pages
+  (https://mpascariu.github.io/lemur/).
+- README is now a landing page -- pitch, installation, and links to the web
+  documentation; the full worked analysis moved to the vignette.
+
+version 1.7.0
+- Figure 4 (plotly_decompose, by = "both" and by = "age"): the y-axis now
+  spans from the most-negative to the most-positive per-age sum of the
+  contributions, using for each side the age that brings the largest outcome,
+  so every stacked bar sits exactly between the two axis bounds.
+- Tests: the figure-4 regression suite and its comments now match the
+  committed epidemiology_palette() colour order (cold-to-warm: the respiratory
+  group on top, the maternal/neonatal group at the bottom).
+- New HTML vignette (vignettes/lemur-intro.Rmd): a ~10 min tour of the
+  package and the Shiny app -- what-if scenarios, cause-of-death profiles,
+  life tables and exact age-by-cause decompositions -- with interactive
+  plotly charts and summary tables computed live from the bundled data.
+- The vignette is published as a web page on GitHub Pages
+  (https://mpascariu.github.io/lemur/); README links to it.
+
 version 1.6.0
 - Figure 3 (plot_cod): mode_cntr and mode_sex subplots now show dynamic panel
   labels (country or sex) above each panel.

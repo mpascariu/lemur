@@ -8,11 +8,11 @@
 ^builds$
 ^.github$
 ^.claude$
+^CLAUDE\.md$
 ^\.env\.example$
 dev_history.R
 $run_dev.*
 ^LICENSE\.md$
-^README\.Rmd$
 ^CODE_OF_CONDUCT\.md$
 ^Dockerfile$
 ^\.dockerignore$

@@ -88,9 +88,17 @@ test_that("UI can be built via lemur:: without attaching the package", {
   # attaches nothing, so it exercises exactly that path.
   rscript <- file.path(R.home("bin"),
                        if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
+  # Run the probe from a script file rather than `Rscript -e`: system2() passes
+  # arguments through the shell on unix (`sh -c`), and R does not shell-quote
+  # parentheses, so `-e "invisible(lemur:::app_ui())"` died on macOS/linux with
+  # "syntax error near unexpected token `('". A script file never reaches the
+  # shell command line, so it is safe on every platform.
+  probe <- tempfile(fileext = ".R")
+  writeLines("invisible(lemur:::app_ui())", probe)
+  on.exit(unlink(probe), add = TRUE)
   out <- suppressWarnings(system2(
     rscript,
-    args = c("--vanilla", "-e", "invisible(lemur:::app_ui())"),
+    args = c("--vanilla", probe),
     stdout = TRUE, stderr = TRUE
   ))
   msg <- paste(out, collapse = "\n")

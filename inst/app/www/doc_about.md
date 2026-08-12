@@ -12,11 +12,12 @@ The Sustainable Development Goals (SDGs) were set in 2015 with many specific tar
 ---
 #### Updates and news
 
-**Monitor Version:** 1.6.0
+**Monitor Version:** 1.7.0
 
 **Last Update:** 2026-08-12
 
 **News in previous versions:**
+- 2026-08-12 - v1.7.0 - Figure 4 y-axis now spans from the most-negative to the most-positive per-age sum of the contributions, so every stacked bar sits exactly between the two axis bounds;
 - 2026-08-12 - v1.6.0 - Figure 3 panel labels and colour consistency across figures 3 and 4; figure 4 is now built entirely with native plotly, dropping the ggplot2 dependency;
 - 2026-08-11 - v1.5.0 - Performance release: the app is leaner under the hood and all charts now render natively with plotly for smoother interactivity;
 - 2026-08-11 - v1.4.1 - Bug fix: the app now opens reliably even in a fresh R session;

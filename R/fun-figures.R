@@ -599,9 +599,19 @@ plotly_decompose <- function(object,
   # ---- Native plotly bars (no ggplot2) ------------------------------------
   # Figure 4 is built one bar trace per cause with barmode = "relative",
   # which stacks positive segments up (or right) from zero and negative
-  # segments down (or left) from zero.
-  cod_present <- function(cc) {
-    rev(intersect(levels(d$COD), unique(as.character(cc))))
+  # segments down (or left) from zero. Cause order follows
+  # epidemiology_palette() -- the same colour order as figure 3 -- NOT the COD
+  # factor levels, so reading either stack away from zero follows the palette:
+  # the cold respiratory group (Chronic Respiratory diseases first) on top, the
+  # warm maternal/neonatal group at the bottom. The positive bucket adds traces
+  # in REVERSE palette order (the last palette cause sits adjacent to zero, the
+  # first -- Chronic Respiratory diseases -- ends up at the top of the positive
+  # stack); the negative
+  # bucket adds traces in FORWARD palette order so the cause adjacent to zero
+  # is also the first palette cause, and reading down from the zero line
+  # follows figure 3.
+  pal_order <- function(cc) {
+    intersect(names(epidemiology_palette()), unique(as.character(cc)))
   }
 
   if (is.null(xlab)) {
@@ -629,28 +639,35 @@ plotly_decompose <- function(object,
   vtic <- label_number_si(accuracy = 0.01)(vbr)
 
   if (by == "cod") {
-    # Horizontal bars, one per cause: each cause sits on its own category of
-    # the y axis, so the axis ticks, tick labels and horizontal gridlines span
-    # the full plot height (drawn all at y = sex, the constant "both", they
-    # collapsed into a band around the middle of the panel). The signed
-    # per-cause total sits on the value axis (x) with SI tick labels and a zero
-    # line instead of a geom_vline() scatter trace. Bar width 0.5 as in v1.0.6.
+    # A single horizontal stacked bar: every present cause is a segment of the
+    # one bar -- positive contributions stack right from zero, negative left.
+    # All traces share a single constant y category, so barmode = "relative"
+    # assembles them into one bar. Trace order mirrors the vertical by = "both"
+    # stacks: the positive bucket adds traces in REVERSE palette order (the
+    # last palette cause sits adjacent to zero, the first -- Chronic Respiratory
+    # diseases -- at the far right end of the bar); the
+    # negative bucket adds traces in FORWARD palette order so the cause adjacent
+    # to zero is also the first palette cause. Reading either half away from
+    # the zero line follows figure 3. The signed per-cause total is the bar's x
+    # extent, with SI tick labels and a zero line instead of a geom_vline()
+    # scatter trace.
+    y_cat <- "Causes of Death"   # single y category -> one horizontal bar
     p <- plotly::plot_ly()
-    for (cod in cod_present(d_pos$COD)) {
+    for (cod in rev(pal_order(d_pos$COD))) {
       tmp <- d_pos[d_pos$COD == cod, ]
       p <- plotly::add_bars(
         p, data = tmp,
-        x = ~`Change in LE`, y = ~COD,
-        name = cod, orientation = "h", width = 0.5,
+        x = ~`Change in LE`, y = y_cat,
+        name = cod, orientation = "h", width = 0.8,
         marker = list(color = unname(epidemiology_palette()[cod])),
         hoverinfo = hi)
     }
-    for (cod in cod_present(d_neg$COD)) {
+    for (cod in pal_order(d_neg$COD)) {
       tmp <- d_neg[d_neg$COD == cod, ]
       p <- plotly::add_bars(
         p, data = tmp,
-        x = ~`Change in LE`, y = ~COD,
-        name = cod, orientation = "h", width = 0.5, showlegend = FALSE,
+        x = ~`Change in LE`, y = y_cat,
+        name = cod, orientation = "h", width = 0.8, showlegend = FALSE,
         marker = list(color = unname(epidemiology_palette()[cod])),
         hoverinfo = hi)
     }
@@ -672,8 +689,6 @@ plotly_decompose <- function(object,
         title           = "",
         titlefont       = list(size = 14),
         tickfont        = list(size = 11),
-        categoryorder   = "array",
-        categoryarray   = levels(d$COD),
         ticks           = "outside"
       )
     )
@@ -685,7 +700,7 @@ plotly_decompose <- function(object,
     # scatter trace.
     p <- plotly::plot_ly()
     if (by == "both") {
-      for (cod in cod_present(d_pos$COD)) {
+      for (cod in rev(pal_order(d_pos$COD))) {
         tmp <- d_pos[d_pos$COD == cod, ]
         p <- plotly::add_bars(
           p, data = tmp,
@@ -694,7 +709,7 @@ plotly_decompose <- function(object,
           marker = list(color = unname(epidemiology_palette()[cod])),
           hoverinfo = hi)
       }
-      for (cod in cod_present(d_neg$COD)) {
+      for (cod in pal_order(d_neg$COD)) {
         tmp <- d_neg[d_neg$COD == cod, ]
         p <- plotly::add_bars(
           p, data = tmp,
@@ -712,6 +727,23 @@ plotly_decompose <- function(object,
         marker = list(color = "#595959"),
         hoverinfo = hi)
     }
+    # y-axis range: from the sum of the negative contributions to the sum of
+    # the positive contributions, using for each side the age that brings the
+    # largest outcome. Every stacked bar spans (per-age negative sum,
+    # per-age positive sum); the most extreme of those per-age sums set the
+    # axis bounds so no bar is ever clipped. Ticks are recomputed from the
+    # bounds so the grid spans the whole range.
+    neg_lo <- -1
+    pos_hi <- 1
+    if (nrow(d)) {
+      neg_by_age <- tapply(pmin(d$`Change in LE`, 0), d$`Age Interval`, sum, na.rm = TRUE)
+      pos_by_age <- tapply(pmax(d$`Change in LE`, 0), d$`Age Interval`, sum, na.rm = TRUE)
+      neg_lo <- min(neg_by_age, na.rm = TRUE)
+      pos_hi <- max(pos_by_age, na.rm = TRUE)
+    }
+    vbr  <- pretty(c(neg_lo, pos_hi), n = 6)
+    vtic <- label_number_si(accuracy = 0.01)(vbr)
+
     p <- plotly::layout(
       p,
       barmode = "relative",
@@ -727,6 +759,7 @@ plotly_decompose <- function(object,
         title          = ylab,
         titlefont      = list(size = 14),
         tickfont       = list(size = 11),
+        range          = c(neg_lo, pos_hi),
         tickvals       = vbr,
         ticktext       = vtic,
         zeroline       = TRUE,
@@ -753,27 +786,25 @@ plotly_decompose <- function(object,
 #' @keywords internal
 epidemiology_palette <- function() {
   c(
-    # --- GROUP 1: CARDIOVASCULAR (The Vivid Lime-to-Green Anchor) ---
-    "Cardiovascular Diseases"                     = "#00FF00", # Blinding Lime Green
-    "Ischemic Heart Disease"                      = "#00CC00", # Rich Vivid Green
-    "Other Cardiovascular"                        = "#A9DFBF", # Soft Mint (Fading out)
+    # ==================== COLD COLORS (TOP) ====================
     
-    # --- GROUP 2: STROKE (The Electric Purple-Blue Anchor) ---
+    # --- GROUP 1: RESPIRATORY DISEASES (The Crisp Cyan/Ice Anchor) ---
+    # Association: Clean oxygen, crisp air, clinical lung ventilation.
+    "Chronic Respiratory diseases"                = "#00FFFF", # Blinding Cyan
+    "COVID-19"                                    = "#00BFFF", # Deep Electric Blue
+    "Respiratory Infections (excl. COVID)"        = "#005F9E", # Cobalt Blue
+    "Respiratory Infections (excl. Tuberculosis)" = "#002F6C", # Deep Dark Navy (Fading into darks)
+    
+    # --- GROUP 2: STROKE & CANCERS (The Deep Brain/Oncology Blue-Purples) ---
+    # Association: Universally recognized oncology deep purples and brain perfusion violets.
     "Stroke"                                      = "#651FFF", # Deep Electric Violet
-    
-    # --- GROUP 3: NEOPLASMS / CANCERS (The Oncology Purple Anchor) ---
     "Neoplasms"                                   = "#311B92", # Midnight Royal Purple
     "Lung Cancer"                                 = "#4A148C", # Dark Amethyst
     "Colon and Rectum Cancer"                     = "#8E24AA", # Medium Magenta-Purple
     "Other Neoplasms"                             = "#E1BEE7", # Soft Lavender (Fading out)
     
-    # --- GROUP 4: RESPIRATORY DISEASES (The Electric Cyan Anchor) ---
-    "Chronic Respiratory diseases"                = "#00FFFF", # Blinding Cyan
-    "COVID-19"                                    = "#00BFFF", # Deep Electric Blue
-    "Respiratory Infections (excl. COVID)"        = "#005F9E", # Cobalt Blue
-    "Respiratory Infections (excl. Tuberculosis)" = "#002F6C", # Deep Dark Navy
-    
-    # --- GROUP 5: COMMUNICABLE / INFECTIOUS (The Pitch Black Core) ---
+    # --- GROUP 3: COMMUNICABLE / INFECTIOUS (The Cold Pitch-Black Core) ---
+    # Association: Biological threats passing through a cold, stark dark-to-light slate scale.
     "HIV/ AIDS / STD"                             = "#111111", # Absolute Pitch Black
     "Infections (excl. Respiratory)"              = "#333333", # Dark Charcoal
     "Enteric Infections"                          = "#555555", # Medium Slate Gray
@@ -782,35 +813,50 @@ epidemiology_palette <- function() {
     "Neglected Tropical Diseases (excl. Malaria)" = "#CCCCCC", # Pale Gray (Fading out)
     "Other Communicable"                          = "#EEEEEE", # Ghost White (Fading out)
     
-    # --- GROUP 6: METABOLIC & ORGAN DISEASES (The Hot Neon Pink Anchor) ---
-    # Association: Endocrine systems, insulin spikes, and high-intensity magenta tracking.
-    "Diabetes and Kidney Diseases"                = "#FF007F", # Blinding Hot Pink
-    "Diabetes mellitus"                           = "#FF409F", # Neon Rose
-    "Kidney disease (excl. Diabetes)"             = "#FF80BF", # Bubblegum Pink
-    "Digestive Diseases"                          = "#FFB3D9", # Cotton Candy Pink (Fading out)
+    # ==================== MIDPOINT NEUTRALS ====================
     
-    # --- GROUP 7: NEUROLOGICAL BUFFER (The Blinding Neon Yellow) ---
-    # Association: Electrical brain mapping. Sits as a strong buffer block.
+    # --- GROUP 4: NEUROS & CATCH-ALLS (The Cool Slate Neutral Buffer) ---
+    # Association: Cool concrete tones to separate heavy infectious darks from burning warm tones.
+    "Other Non-Communicable"                      = "#B0BEC5", # Cool Concrete Gray
+    "Self-Harm and Violence"                      = "#795548", # Muted Soil Brown
+    "Self-harm"                                   = "#A1887F", # Light Earth Gray
+    "Interpersonal Violence"                      = "#D7CCC8", # Fading Warm Stone
+    
+    # ==================== WARM COLORS (BOTTOM) ====================
+    
+    # --- GROUP 5: CARDIOVASCULAR (The Vivid Lime-to-Forest Anchor) ---
+    # Association: Switched to bright green/lime to act as the primary bridge into warm colors.
+    "Cardiovascular Diseases"                     = "#00FF00", # Blinding Lime Green
+    "Ischemic Heart Disease"                      = "#00CC00", # Rich Vivid Green
+    "Other Cardiovascular"                        = "#A9DFBF", # Soft Mint (Fading out)
+    
+    # --- GROUP 6: NEUROLOGICAL BUFFER (The Blinding Warning Yellow) ---
+    # Association: High-energy electrical impulses of the central nervous system.
     "Neurological Disorders"                      = "#FFEA00", # Electric Neon Yellow
     
-    # --- GROUP 8: MATERNAL & NEONATAL (The Vivid Ruby Red/Coral Anchor) ---
-    # Association: Highly distinct from the pinks. Vitality, blood, childbirth, and early development.
-    "Maternal and Neonatal"                       = "#D50000", # Vivid Ruby Red
-    "Maternal disorders"                          = "#FF1744", # Bright Torch Red
-    "Neonatal disorders"                          = "#FF8A80", # Soft Coral Pastel (Fading out)
-    
-    # --- GROUP 9: INJURIES, VIOLENCE & CATCH-ALL (Trauma Orange & Earth Tones) ---
+    # --- GROUP 7: INJURIES & EXTERNAL TRAUMA (The High-Visibility Safety Orange) ---
+    # Association: Emergency response, hazard warnings, and physical impact trauma.
     "Injuries"                                    = "#FF5722", # High-Contrast Safety Orange
     "Injuries (excl. Poisonings)"                 = "#E64A19", # Dark Trauma Rust
     "Transport Injuries"                          = "#FFA726", # Warning Amber
     "Poisonings"                                  = "#FFCC80", # Pale Toxic Apricot
     "Exposure to forces of nature"                = "#FFF9C4", # Pale Desert Sand (Fading out)
-    "Self-Harm and Violence"                      = "#795548", # Muted Soil Brown
-    "Self-harm"                                   = "#A1887F", # Light Earth Gray
-    "Interpersonal Violence"                      = "#D7CCC8", # Fading Warm Stone
-    "Other Non-Communicable"                      = "#B0BEC5"  # Cool Concrete Gray (Fading out)
+    
+    # --- GROUP 8: METABOLIC & ORGAN DISEASES (The Hot Neon Pink Anchor) ---
+    # Association: Endocrine systems, severe diabetes mellitus tracking. Highly distinct from reds.
+    "Diabetes and Kidney Diseases"                = "#FF007F", # Blinding Hot Pink
+    "Diabetes mellitus"                           = "#FF409F", # Neon Rose
+    "Kidney disease (excl. Diabetes)"             = "#FF80BF", # Bubblegum Pink
+    "Digestive Diseases"                          = "#FFB3D9", # Cotton Candy Pink (Fading out)
+    
+    # --- GROUP 9: MATERNAL & NEONATAL (The Burning Ruby Red Anchor) ---
+    # Association: Deep arterial red, vitality, uterine biology, and newborn life.
+    "Maternal and Neonatal"                       = "#D50000", # Vivid Ruby Red
+    "Maternal disorders"                          = "#FF1744", # Bright Torch Red
+    "Neonatal disorders"                          = "#FF8A80"  # Soft Coral Pastel (Fading out)
   )
 }
+
 
 
 
