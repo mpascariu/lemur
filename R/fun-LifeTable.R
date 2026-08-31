@@ -72,15 +72,15 @@ life_table_from_qx <- function(x, qx, ax, lx0 = 1e5) {
 
   data.frame(
     x.int = paste0("[", x, ",", c(x[-1], "+"), ")"),
-    x     = x,
-    mx    = mx,
-    qx    = qx,
-    ax    = ax,
-    lx    = lx,
-    dx    = dx,
-    Lx    = Lx,
-    Tx    = Tx,
-    ex    = ex
+    x  = x,
+    mx = mx,
+    qx = qx,
+    ax = ax,
+    lx = lx,
+    dx = dx,
+    Lx = Lx,
+    Tx = Tx,
+    ex = ex
   )
 }
 

@@ -25,8 +25,8 @@ Modify life table by changing the cause of death associated risks
 }
 \examples{
 
-L <- data_gbd2021_lt()  # life tables
-D <- data_gbd2021_cod() # cod data
+L <- data_gbd_lt()  # life tables
+D <- data_gbd_cod() # cod data
 
 # Select Life Table
 lt <- L[L$region == "Romania" & L$sex == "both" & L$period == 2021, ]
@@ -55,11 +55,11 @@ lt_reduced2
 # Say, we want to decrease the cod's risk only between age 45 and 75
 # with values between 24\% and 40\%.
 
-# we have to build a matrix with 25 rows and 18 columns (AGEs x CODs)
-# to indicate the change for each combination
-M <- matrix(24:40, nrow = 25, ncol = 18, byrow = TRUE)
+# we have to build a matrix (AGES x CODs) to indicate the change for each
+# combination -- here reducing mortality by 24\%-40\% between ages 45 and 75
+M <- matrix(0, nrow = length(unique(cod$x)), ncol = length(unique(cod$cause_name)))
 dimnames(M) <- list(unique(cod$x), unique(cod$cause_name))
-M[!(rownames(M) \%in\% 45:75), ] <- 0
+M[rownames(M) \%in\% 45:75, ] <- seq(24, 40, length.out = length(unique(cod$cause_name)))
 
 lt_reduced3 <- modify_life_table(lt, cod, cod_change = -M)
 lt_reduced3

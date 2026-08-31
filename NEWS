@@ -1,3 +1,8 @@
+version 2.0.0 - "2023 refresh"
+- Data updated to the Global Burden of Disease 2023 (GBD 2023) round; the
+  calendar-year-2023 data is now included (deaths and life tables span
+  1990-2023). Ages run 0-95 with the 95+ interval open.
+
 version 1.8.0
 - Vignette renamed to lemur-intro (a unique name that cannot clash with
   other packages) and published as a web page on GitHub Pages

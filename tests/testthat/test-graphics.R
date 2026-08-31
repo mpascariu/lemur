@@ -54,7 +54,7 @@ test_that("plot_change returns a plotly widget and handles percentages", {
   p_perc <- suppressWarnings(plot_change(L_romania, L_mexico, perc = TRUE))
   expect_s3_class(p_perc, "plotly")
 
-  p_age <- suppressWarnings(plot_change(L_romania, L_mexico, age = c(0, 50, 110)))
+  p_age <- suppressWarnings(plot_change(L_romania, L_mexico, age = c(0, 50, 95)))
   expect_s3_class(p_age, "plotly")
 
   # NULL input is caught by check_null

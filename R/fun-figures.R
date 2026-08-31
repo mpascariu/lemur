@@ -7,9 +7,9 @@
 #' @param data An \code{sf} object with the map polygons.
 #' Default: \code{lemur::data_sf}.
 #' @return A leaflet widget.
-#' @examples
-#' plot_map(location = "Mexico")
-#'
+#' @example inst/examples/plot_map.R
+
+
 #' @export
 plot_map <- function(location,
                      zoom = 5,
@@ -103,7 +103,7 @@ plot_map <- function(location,
 #' @return A plotly widget.
 #' @export
 plot_change <- function(L1, L2,
-                        age = seq(0, 110, by = 10),
+                        age = seq(0, 95, by = 10),
                         perc = FALSE,
                         title = NULL,
                         subtitle = "") {
@@ -148,10 +148,10 @@ plot_change <- function(L1, L2,
 #' as absolute values. Default: FALSE.
 #' @param type Options: "barplot" or "piechart".
 #' @return A plotly widget.
-#' @examples
-#' D <- data_gbd2021_cod() # cod data
-#' cod <- D[D$region == "Romania" & D$sex == "both" & D$period == 2021, ]
-#' plot_cod(cod)
+#' @example inst/examples/plot_cod.R
+
+
+
 #' @export
 plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 
@@ -216,8 +216,8 @@ plot_cod <- function(cod, perc = FALSE, type = "barplot") {
 #' \code{\link{decompose_by_cod}}
 #' \code{\link{decompose_by_age}}
 #' @return A plotly widget.
-#' @examples
-#' # See example in the ?decompose_by_cod or ?decompose_by_age help pages
+#' @example inst/examples/plot_decompose.R
+
 #' @export
 plot_decompose <- function(object,
                            perc = FALSE,
@@ -245,7 +245,7 @@ plot_decompose <- function(object,
 #'   \code{\link{plot_change}} are used.
 #' @keywords internal
 plotly_change <- function(L1, L2,
-                          age = seq(0, 110, by = 10),
+                          age = seq(0, 95, by = 10),
                           perc = FALSE,
                           xlab = NULL,
                           ylab = NULL) {
@@ -555,10 +555,7 @@ plotly_decompose <- function(object,
       "80-84",
       "85-89",
       "90-94",
-      "95-99",
-      "100-104",
-      "105-109",
-      "+110")
+      "+95")
 
   # input data (mirror of plot_decompose)
   if (by == "age") {

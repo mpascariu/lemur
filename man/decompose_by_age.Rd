@@ -24,7 +24,7 @@ period of time.
 }
 \examples{
 # Data
-L <- data_gbd2021_lt()
+L <- data_gbd_lt()
 
 # Select Life Table 1 & 2
 region1 = "Romania"

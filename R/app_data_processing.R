@@ -1,6 +1,5 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri May  1 11:43:29 2026
 # ------------------------------------------------- #
 
 # Consolidated function for preparing data across all comparison modes

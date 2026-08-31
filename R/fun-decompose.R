@@ -1,8 +1,6 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Apr  6 20:27:33 2025
 # ------------------------------------------------- #
-
 
 #' Perform decomposition of age-specific mortality contributions
 #' in life expectancy between any two regions/time periods
@@ -20,24 +18,7 @@
 #' application to life expectancies, healthy life expectancies,
 #' parity-progression ratios and total fertility rates. Demographic Research 7:
 #' 499-522. 2002.
-#' @examples
-#' # Data
-#' L <- data_gbd2021_lt()
-#' 
-#' # Select Life Table 1 & 2
-#' region1 = "Romania"
-#' region2 = "Mexico"
-#' sex_sel = "female"
-#' year    = 2021
-#'
-#' L1 <- L[L$region == region1 & L$sex == sex_sel & L$period == year, ]
-#' L2 <- L[L$region == region2 & L$sex == sex_sel & L$period == year, ]
-#' 
-#' # Age decomposition
-#' dec <- decompose_by_age(L1, L2)
-#' dec
-#' 
-#' plot_decompose(dec)
+#' @example inst/examples/decompose_by_age.R
 #' @export
 decompose_by_age <- function(L1, L2){
 
@@ -133,32 +114,7 @@ decompose_by_age <- function(L1, L2){
 #' application to life expectancies, healthy life expectancies,
 #' parity-progression ratios and total fertility rates. Demographic Research 7:
 #' 499-522. 2002.
-#' @examples
-#' L <- data_gbd2021_lt()  # life tables
-#' D <- data_gbd2021_cod() # cod data
-#' 
-#' # Select two Life Tables
-#' region1 = "Romania"
-#' region2 = "Mexico"
-#' sex_sel = "male"
-#' year    = 2021
-#'
-#' lt1 <- L[L$region == region1 & L$sex == sex_sel & L$period == year, ]
-#' lt2 <- L[L$region == region2 & L$sex == sex_sel & L$period == year, ]
-#'
-#' # Select COD corresponding data
-#' cod1 <- D[D$region == region1 & D$sex == sex_sel & D$period == year, ]
-#' cod2 <- D[D$region == region2 & D$sex == sex_sel & D$period == year, ]
-#' 
-#' ## Example of decomposition by age and cause of death
-#' dec  <- decompose_by_cod(L1 = lt1,
-#'                          L2 = lt2,
-#'                          C1 = cod1,
-#'                          C2 = cod2)
-#' 
-#' dec
-#' 
-#' plot_decompose(dec)
+#' @example inst/examples/decompose_by_cod.R
 #' @export
 decompose_by_cod <- function(L1,
                              L2,
@@ -279,7 +235,9 @@ matrix_to_long_table <- function(X, C1, C2){
     mutate(
       x      = as.numeric(x),
       x.int  = as.character(cut(x, breaks = c(unique(x), Inf), right = FALSE)),
-      x.int  = ifelse(x.int == "[110,Inf)", "[110,+)", x.int),
+      # the terminal open interval is e.g. "[95,Inf)" -> "[95,+)" (no fixed
+      # last age, so it keeps working if the age grid ever changes)
+      x.int  = sub("Inf\\)$", "+)", x.int),
       x.int  = factor(x.int, levels = unique(x.int)),
       cause_name = factor(cause_name, levels = levels(C1$cause_name)),
 

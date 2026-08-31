@@ -1,8 +1,0 @@
-default:
-  golem_name: lemur
-  golem_version: 0.0.1
-  app_prod: no
-production:
-  app_prod: yes
-dev:
-  golem_wd: !expr here::here()

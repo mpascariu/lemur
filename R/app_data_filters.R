@@ -1,6 +1,5 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Sun Oct 19 21:08:03 2025
 # ------------------------------------------------- #
 
 # Read a database setting from an environment variable, falling back to a

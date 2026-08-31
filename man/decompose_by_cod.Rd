@@ -51,8 +51,8 @@ with defaults set to approximate their recommendations for replacement
 ordering and result averaging.
 }
 \examples{
-L <- data_gbd2021_lt()  # life tables
-D <- data_gbd2021_cod() # cod data
+L <- data_gbd_lt()  # life tables
+D <- data_gbd_cod() # cod data
 
 # Select two Life Tables
 region1 = "Romania"

@@ -37,10 +37,10 @@ lt_row <- function(lt, cod) c(
 )
 
 # facts quoted in the prose below
-n_regions <- n_distinct(data_gbd2021_lt()$region)
-n_causes  <- n_distinct(data_gbd2021_cod()$cause_name)
-n_ages    <- n_distinct(data_gbd2021_lt()$x)
-years     <- paste(range(as.numeric(levels(data_gbd2021_lt()$period))), collapse = " to ")
+n_regions <- n_distinct(data_gbd_lt()$region)
+n_causes  <- n_distinct(data_gbd_cod()$cause_name)
+n_ages    <- n_distinct(data_gbd_lt()$x)
+years     <- paste(range(as.numeric(levels(data_gbd_lt()$period))), collapse = " to ")
 ```
 
 # What is lemur?
@@ -54,10 +54,11 @@ age, and decomposes the change by age and cause of death. It also compares
 cause-of-death profiles and life tables between regions, sexes and time
 periods.
 
-Everything runs on the bundled Global Burden of Disease 2021 (GBD2021)
-estimates from IHME: `r n_regions` regions from `r years`, three sex
-categories (male, female and the two sexes combined) and `r n_causes` broad
-cause groups, arranged in abridged life tables of `r n_ages` age groups.
+Everything runs on the bundled Global Burden of Disease 2023 (GBD 2023)
+estimates from IHME: `r n_regions` regions from `r years` (the
+calendar-year-2023 data included), three sex categories (male, female and the
+two sexes combined) and `r n_causes` broad cause groups, arranged in abridged
+life tables of `r n_ages` age groups.
 
 The tool is hosted by the **HASS Digital Research Hub (HDRH)** at the
 Australian National University (ANU).
@@ -77,19 +78,20 @@ install.packages("pak")
 pak::pak("mpascariu/lemur")
 ```
 
-The package bundles the GBD2021 datasets (exposed as `data_gbd2021_lt()`,
-`data_gbd2021_cod()` and `data_gbd2021_sdg()`), so you can run the examples
-on the help pages and the analysis functions without a database connection.
+The package bundles the GBD 2023 datasets (exposed as `data_gbd_lt()`,
+`data_gbd_cod()` and `data_gbd_sdg()`), covering deaths and life tables from
+1990 to 2023, so you can run the examples on the help pages and the analysis
+functions without a database connection.
 
 # The data
 
 The three accessor functions return pre-factorized `data.table`s:
 
-* `data_gbd2021_lt()` -- one abridged life table per region, sex and year,
+* `data_gbd_lt()` -- one abridged life table per region, sex and year,
   with the classic columns `mx`, `qx`, `ax`, `lx`, `dx`, `Lx`, `Tx` and `ex`.
-* `data_gbd2021_cod()` -- death counts by region, sex, year, age group and
+* `data_gbd_cod()` -- death counts by region, sex, year, age group and
   cause (`deaths` column).
-* `data_gbd2021_sdg()` -- the same, grouped into the cause categories used
+* `data_gbd_sdg()` -- the same, grouped into the cause categories used
   for tracking the UN Sustainable Development Goals.
 
 Let's look at Romania in 2021 (both sexes combined). An excerpt of the life
@@ -104,8 +106,8 @@ slice_table <- function(tbl, region, sex = "both", year = 2021) {
   filter(tbl, region == .env$region, sex == .env$sex, period == .env$year)
 }
 
-lt_ro  <- slice_table(data_gbd2021_lt(), "Romania")
-cod_ro <- slice_table(data_gbd2021_cod(), "Romania")
+lt_ro  <- slice_table(data_gbd_lt(), "Romania")
+cod_ro <- slice_table(data_gbd_cod(), "Romania")
 cardio <- c("Ischemic Heart Disease", "Stroke", "Other Cardiovascular")
 total_deaths <- sum(cod_ro$deaths)
 ```
@@ -295,10 +297,10 @@ The same toolkit answers *comparative* questions: **why does male life
 expectancy differ between Romania and Mexico in 2021?** First, the gap:
 
 ```{r compare}
-lt1  <- slice_table(data_gbd2021_lt(), "Romania", sex = "male")
-lt2  <- slice_table(data_gbd2021_lt(), "Mexico",  sex = "male")
-cod1 <- slice_table(data_gbd2021_cod(), "Romania", sex = "male")
-cod2 <- slice_table(data_gbd2021_cod(), "Mexico",  sex = "male")
+lt1  <- slice_table(data_gbd_lt(), "Romania", sex = "male")
+lt2  <- slice_table(data_gbd_lt(), "Mexico",  sex = "male")
+cod1 <- slice_table(data_gbd_cod(), "Romania", sex = "male")
+cod2 <- slice_table(data_gbd_cod(), "Mexico",  sex = "male")
 ```
 
 ```{r compare-facts, echo = FALSE}
@@ -395,11 +397,11 @@ Everything above is wrapped in an interactive dashboard, launched with a
 single call:
 
 ``` r
-lemur::run_app()          # local data mode (bundled GBD2021 data)
+lemur::run_app()          # local data mode (bundled GBD data)
 ```
 
 ```{r app-screenshot, echo = FALSE, fig.cap = "The interactive dashboard, launched with lemur::run_app()."}
-knitr::include_graphics("../inst/app/www/app_lemur_20260812.png")
+knitr::include_graphics(system.file("app/www/app_lemur_20260812.png", package = "lemur"))
 ```
 
 The dashboard offers five analysis modes:
@@ -421,11 +423,11 @@ the decomposition and the reduction matrix -- and the "Methods" tab explains
 the algorithms. The map tab shows the selected region on an interactive
 leaflet map with 2021 population, life expectancy and fertility indicators.
 
-The SDG modes use the bundled `data_gbd2021_sdg()` table, which groups the
+The SDG modes use the bundled `data_gbd_sdg()` table, which groups the
 same death counts into the SDG cause categories:
 
 ```{r sdg-slice, echo = FALSE}
-slice_table(data_gbd2021_sdg(), "Romania") %>%
+slice_table(data_gbd_sdg(), "Romania") %>%
   group_by(cause_name) %>%
   summarise(Deaths = sum(deaths)) %>%
   ungroup() %>%
@@ -437,15 +439,15 @@ This makes it easy to ask, for instance, how much life expectancy would
 improve if the SDG 3.4 target -- a one-third reduction of premature mortality
 from non-communicable diseases -- were achieved in a given region.
 
-# Next steps
+# References
 
 * Every exported function has a worked example: `?modify_life_table`,
-  `?decompose_by_cod`, `?plot_decompose`, `?data_gbd2021_lt`.
+  `?decompose_by_cod`, `?plot_decompose`, `?data_gbd_lt`.
 * The decomposition methods follow Andreev, Shkolnikov and Begun (2002),
   *Algorithm for decomposition of differences between aggregate demographic
   measures*, Demographic Research 7, 499-522.
-* The data are the Global Burden of Disease Study 2021 results (GBD 2021),
-  Institute for Health Metrics and Evaluation (IHME), 2022
-  (<https://vizhub.healthdata.org/gbd-results/>). The package is being
-  updated to GBD 2023 data.
+* The data are the Global Burden of Disease Study 2023 (GBD 2023) results,
+  Institute for Health Metrics and Evaluation (IHME)
+  (<https://vizhub.healthdata.org/gbd-results/>). The calendar-year-2023 data
+  is included; deaths and life tables span 1990-2023.
 * Source code, issues and releases: <https://github.com/mpascariu/lemur>.

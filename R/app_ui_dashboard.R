@@ -204,7 +204,9 @@ side_panel <- function() {
               Regions = data_app_input$regions, 
               Countries = data_app_input$countries
             ),
-            selected = "EUROPE",
+            # region2 must differ from region1 ("GLOBAL") at startup; EUROPE no
+            # longer exists now that the macro regions are dropped.
+            selected = "OECD COUNTRIES",
             width    = "90%"
           )
         )
@@ -222,7 +224,7 @@ side_panel <- function() {
             title = "Select the year for which the data to correspond to"
           ),
           choices = data_app_input$period,
-          selected = 2021,
+          selected = 2023,
           grid = TRUE,
           width = "90%"  # Ensure slider fills container
         )
@@ -261,7 +263,7 @@ side_panel <- function() {
                   title = "On which age interval to change the risks? The ages outside the selected interval will not be affected."
                 ),
                 choices = data_app_input$x,
-                selected = c(0, 110),
+                selected = c(0, 95),
                 grid = TRUE,
                 width = "90%"  # Ensure slider fills container
               )
@@ -443,7 +445,7 @@ chart_2 <- function() {
         inputId = "fig2_x",
         label = "Ages to be displayed",
         choices = data_app_input$x,
-        selected = seq(0, 110, 10),
+        selected = seq(0, 95, 10),
         multiple = TRUE
       )
     ),

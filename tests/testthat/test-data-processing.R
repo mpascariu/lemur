@@ -9,17 +9,18 @@
 # ------------------------------------------------- #
 
 test_that("accessor functions return the expected data", {
-  L <- data_gbd2021_lt()
-  D <- data_gbd2021_cod()
-  S <- data_gbd2021_sdg()
+  L <- data_gbd_lt()
+  D <- data_gbd_cod()
+  S <- data_gbd_sdg()
 
   expect_s3_class(L, "data.table")
   expect_s3_class(D, "data.table")
   expect_s3_class(S, "data.table")
 
-  expect_equal(nrow(L), 148500)
-  expect_equal(nrow(D), 2673000)
-  expect_equal(nrow(S), 3118500)
+  expect_equal(nrow(L), 142560)      # 216 regions x 10 periods x 3 sexes x 22 ages
+  expect_equal(nrow(D), 2566080)     # 216 x 10 x 3 x 22 ages x 18 causes
+  expect_equal(nrow(S), 2946240)     # 216 x 10 x 3 x 22 ages x 21 causes
+
 
   expect_true(all(c("x", "region", "sex", "period", "ex") %in% names(L)))
   expect_true(all(c("x", "region", "sex", "period", "cause_name", "deaths") %in% names(D)))
@@ -40,7 +41,7 @@ test_that("build_cod_matrix returns a proportions matrix", {
   M <- build_cod_matrix(D_romania)
 
   expect_true(is.matrix(M))
-  expect_equal(dim(M), c(25, 18))
+  expect_equal(dim(M), c(22, 18))
   expect_equal(rownames(M), as.character(sort(unique(D_romania$x))))
   expect_equal(colnames(M), as.character(unique(D_romania$cause_name)))
   # each age group's shares sum to 1
@@ -65,12 +66,12 @@ test_that("modify_cod applies scalar, vector and matrix changes", {
   expect_equal(v[, 18], cod[, 18] * 1.18)
 
   # matrix: element-wise
-  m <- matrix(10, nrow = 25, ncol = 18)
+  m <- matrix(10, nrow = 22, ncol = 18)
   expect_equal(modify_cod(cod, m), cod * 1.1)
 
   # a 100% reduction is rejected
   expect_error(modify_cod(cod, -100), "100%")
-  expect_error(modify_cod(cod, matrix(-100, 25, 18)), "100%")
+  expect_error(modify_cod(cod, matrix(-100, 22, 18)), "100%")
 })
 
 test_that("build_reduction_matrix fills the selected ages and causes only", {
@@ -81,7 +82,7 @@ test_that("build_reduction_matrix fills the selected ages and causes only", {
     cod_change  = -30
   )
 
-  expect_equal(dim(R), c(25, 18))
+  expect_equal(dim(R), c(22, 18))
   expect_equal(rownames(R), as.character(sort(unique(D_romania$x))))
   expect_equal(colnames(R), as.character(unique(D_romania$cause_name)))
 
@@ -91,7 +92,7 @@ test_that("build_reduction_matrix fills the selected ages and causes only", {
   expect_equal(unique(R[sel, "Ischemic Heart Disease"]), -30)
   # unselected ages are zero
   expect_equal(R[as.character(0), "Stroke"], 0)
-  expect_equal(R[as.character(110), "Stroke"], 0)
+  expect_equal(R[as.character(80), "Stroke"], 0)
   # unselected causes are zero
   expect_equal(R[as.character(50), "COVID-19"], 0)
 })
@@ -140,7 +141,7 @@ test_that("exFUN returns the life expectancy from a cause-specific mortality mat
   expect_equal(ex, L_romania$ex[1], tolerance = 1e-2)
 
   # lower mortality -> higher life expectancy (zero matrix gives Inf)
-  ex_zero <- exFUN(L_romania$x, matrix(0, nrow = 25, ncol = 18))
+  ex_zero <- exFUN(L_romania$x, matrix(0, nrow = 22, ncol = 18))
   expect_true(is.infinite(ex_zero))
 })
 
@@ -149,7 +150,7 @@ test_that("decompose_by_age reproduces the life expectancy gap", {
 
   expect_s3_class(dec, "decompose")
   expect_true(all(c("region", "period", "sex", "x.int", "x", "decomposition") %in% names(dec)))
-  expect_equal(nrow(dec), 25)
+  expect_equal(nrow(dec), 22)
   # identification columns carry labels, not factor integer codes
   expect_equal(unique(dec$sex), "both")
   expect_equal(unique(dec$region), "Romania - Mexico")
@@ -164,7 +165,7 @@ test_that("decompose_by_cod reproduces the gap and is symmetric", {
 
   expect_s3_class(dec, "decompose")
   expect_true("cause_name" %in% names(dec))
-  expect_equal(nrow(dec), 25 * length(unique(D_romania$cause_name)))
+  expect_equal(nrow(dec), 22 * length(unique(D_romania$cause_name)))
   # identification columns carry labels, not factor integer codes
   expect_equal(unique(dec$sex), "both")
   expect_equal(unique(dec$region), "Romania - Mexico")
@@ -227,20 +228,20 @@ test_that("prepare_data handles all three comparison modes", {
 test_that("dt_filter_local filters by region, sex and year", {
   # single region
   r <- dt_filter_local(D_full, "mode_cod", "Romania", "Romania", "both", 2021, NULL)
-  expect_equal(nrow(r), 450)
+  expect_equal(nrow(r), 396)  # 22 ages x 18 causes
   expect_s3_class(r, "data.frame")
 
   # two regions
   r2 <- dt_filter_local(D_full, "mode_cntr", "Romania", "Mexico", "both", 2021, NULL)
-  expect_equal(nrow(r2), 900)
+  expect_equal(nrow(r2), 792)
 
   # sex mode bypasses the gender filter (returns all sexes)
   r3 <- dt_filter_local(D_full, "mode_sex", "Romania", "Romania", "female", 2021, NULL)
-  expect_equal(nrow(r3), 1350)  # 3 sexes x 450
+  expect_equal(nrow(r3), 1188)  # 3 sexes x 396
   expect_setequal(unique(r3$sex), c("both", "female", "male"))
 
   # a plain data.frame input is converted internally
   r4 <- dt_filter_local(as.data.frame(D_full), "mode_cod", "Romania", "Romania", "both", 2021, NULL)
-  expect_equal(nrow(r4), 450)
+  expect_equal(nrow(r4), 396)
   expect_s3_class(r4, "data.frame")
 })

@@ -1,6 +1,5 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri Jun  6 06:41:01 2025
 # ------------------------------------------------- #
 
 
@@ -10,10 +9,10 @@
 #' @param serverMode If TRUE, the app uses data stored on the server;
 #' otherwise, the datasets saved in the package. Default: FALSE.
 #' @param ... A series of options to be used inside the app.
-#' @examples 
-#' \dontrun{
-#' run_app()
-#' }
+#' @example inst/examples/run_app.R
+
+
+
 #' @export
 run_app <- function(..., lb = TRUE, serverMode = FALSE) {
   shinyOptions(serverMode = serverMode)

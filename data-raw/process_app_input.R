@@ -1,74 +1,55 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Mon Apr 14 22:33:07 2025
+# Last update: 2026-08-31
 # ------------------------------------------------- #
 
+# Builds the app's input metadata (data_app_input): the region / country
+# dropdown lists, the cause levels for the COD and SDG grouping, the period
+# axis and the age grid. Must stay in sync with process_gbd_*.R (same region
+# mapping and cause ranks, age grid capped at 95+, periods through 2023).
 
-remove(list = ls())
-library(tidyverse)
-library(janitor)
-library(readxl)
+source("data-raw/gbd_utils.R")
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(janitor)
+  library(readxl)
+})
 
-path_map <- paste0(getwd(),"/data-raw/GBD_2021_Data_Tools_Guide/")
-file_map <- "IHME_GBD_2021_A1_HIERARCHIES_Y2024M05D15.XLSX"
-path_file_map <- paste0(path_map, file_map)
+hier     <- read_hierarchy()
+loc_map  <- build_location_map(hier$loc)
+region_map <- hier$loc   # carries the `type` column
 
-region_map <- read_excel(
-  path = path_file_map,
-  sheet = "GBD 2021 Locations Hierarchy") %>% 
-  clean_names()
+# Macro regions present in 2021 but not 2023 (Africa/Americas/Asia/Europe) are
+# dropped to keep the two rounds consistent; Korea labels fixed symmetrically.
+super_regions <- region_map %>%
+  filter(type == "region") %>%
+  left_join(loc_map, by = "location_id") %>%
+  filter(!location_id %in% MACRO_DROP_IDS) %>%
+  pull(region) %>%
+  unique()
 
-super_regions <- region_map %>% 
-  filter(type == "region") %>% 
-  select(location_name) %>% 
-  unlist() %>% 
-  toupper() %>% 
-  unname() 
-
-countries <- region_map %>% 
-  filter(type == "country") %>% 
-  select(location_name) %>% 
-  unlist() %>% 
-  unname() %>% 
+countries <- region_map %>%
+  filter(type == "country") %>%
+  left_join(loc_map, by = "location_id") %>%
+  pull(region) %>%
   sort()
 
-cod_map <- read_excel(
-  path = path_file_map,
-  sheet = "Cause Hierarchy") %>% 
-  clean_names()
+cod_selection <- hier$cod %>%
+  filter(cod_selection != "no", cod_selection != "COVID-19 (2)") %>%
+  arrange(cod_order) %>% pull(cod_selection) %>% unique()
 
-cause_name <- cod_map %>% 
-  filter(
-    cod_selection != "no",
-    cod_selection != "COVID-19 (2)"
-    ) %>%
-  arrange(cod_order) %>% 
-  select(cod_selection) %>% 
-  unlist() %>% 
-  unname() %>% 
-  unique() 
-
-cause_name_sdg <- cod_map %>% 
-  filter(
-    sdg_selection != "no",
-    ) %>%
-  arrange(sdg_order) %>% 
-  select(sdg_selection) %>% 
-  unlist() %>% 
-  unname() %>% 
-  unique() 
-
+sdg_selection <- hier$cod %>%
+  filter(sdg_selection != "no") %>%
+  arrange(sdg_order) %>% pull(sdg_selection) %>% unique()
 
 data_app_input <- list(
   regions    = super_regions,
   countries  = countries,
-  cause_name = factor(cause_name, levels = cause_name),
-  cause_name_sdg = factor(cause_name_sdg, levels = cause_name_sdg),
-  period = c(seq(1990, 2015, 5), 2019, 2020, 2021),
+  cause_name     = factor(cod_selection, levels = cod_selection),
+  cause_name_sdg = factor(sdg_selection, levels = sdg_selection),
+  period = c(seq(1990, 2015, 5), 2019, 2020, 2021, 2023),
   sex    = c("male", "female", "both"),
-  x      = c(0, 1, 2, seq(5, 110, 5))
+  x      = c(0, 1, 2, seq(5, 95, 5))
 )
-
-
 
 usethis::use_data(data_app_input, overwrite = TRUE)

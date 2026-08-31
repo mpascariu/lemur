@@ -1,6 +1,5 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri May  1 14:20:32 2026
 # ------------------------------------------------- #
 
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE

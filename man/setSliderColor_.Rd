@@ -2,62 +2,13 @@
 % Please edit documentation in R/fun-utils.R
 \name{setSliderColor_}
 \alias{setSliderColor_}
-\title{Color editor for sliderInput}
+\title{shinyWidgets::setSliderColor (vendored)}
 \usage{
 setSliderColor_(color, sliderId)
 }
-\arguments{
-\item{color}{The color to apply. Can be a vector of colors to customize more
-than one slider. Pass the name of a color such as 'Chartreuse' or 'Chocolate',
-or its HEX notation such as \code{'#7FFF00'} or \code{'#D2691E'}.}
-
-\item{sliderId}{The \code{id} of the customized slider(s). Can be a vector
-like \code{c(1, 2)} to modify the first two sliders, or a single value
-(e.g. 2) to modify one slider.}
-}
 \description{
-Edit the color of Shiny's slider inputs.
+Edit the color of Shiny's slider inputs, returning the CSS that recolors the
+slider skin. Used internally to colour the app's sliders; not part of the
+public API.
 }
-\note{
-See \url{https://www.w3schools.com/colors/colors_names.asp} for an overview of all colors.
-}
-\examples{
-if (interactive()) {
-
-library(shiny)
-library(shinyWidgets)
-
-ui <- fluidPage(
-
-  # only customize the 2 first sliders and the last one
-  # the color of the third one is empty
-  setSliderColor_(c("DeepPink", "#FF4500", "", "Teal"), c(1, 2, 4)),
-  sliderInput("obs", "My pink slider:",
-              min = 0, max = 100, value = 50
-  ),
-  sliderInput("obs2", "My orange slider:",
-              min = 0, max = 100, value = 50
-  ),
-  sliderInput("obs3", "My basic slider:",
-              min = 0, max = 100, value = 50
-  ),
-  sliderInput("obs4", "My teal slider:",
-              min = 0, max = 100, value = 50
-  ),
-  plotOutput("distPlot")
-)
-
-server <- function(input, output) {
-
-  output$distPlot <- renderPlot({
-    hist(rnorm(input$obs))
-  })
-}
-
-shinyApp(ui, server)
-
-}
-}
-\seealso{
-\code{\link[shinyWidgets]{chooseSliderSkin}} to update the global skin of your sliders.
-}
+\keyword{internal}

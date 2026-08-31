@@ -52,7 +52,7 @@ non_bar_traces <- function(built) {
 age_labels <- c("0", "1", "2-4", "5-9", "10-14", "15-19", "20-24", "25-29",
                 "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
                 "60-64", "65-69", "70-74", "75-79", "80-84", "85-89",
-                "90-94", "95-99", "100-104", "105-109", "+110")
+                "90-94", "+95")
 
 # Causes present in the positive / negative buckets, in the trace order used by
 # plotly_decompose(): PALETTE order -- the same colour order as figure 3 (NOT
@@ -74,7 +74,7 @@ pos_causes <- rev(pal_order(dec4$cause_name[dec4$decomposition > 0]))
 neg_causes <- pal_order(dec4$cause_name[dec4$decomposition < 0])
 
 test_that("decomposition result sums to the life-expectancy gap", {
-  expect_equal(nrow(dec), 450)                      # 18 causes x 25 age groups
+  expect_equal(nrow(dec), 396)                      # 18 causes x 22 age groups
   expect_equal(nlevels(dec$cause_name), 18)
   expect_equal(sum(dec$decomposition),
                L_mexico$ex[1] - L_romania$ex[1],

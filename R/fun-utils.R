@@ -1,13 +1,11 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Fri May  1 11:43:48 2026
 # ------------------------------------------------- #
 
 # HERE we import the source code of several functions in order to reduce the 
 # dependency of our package on other packages and avoid future trouble caused 
 # by updates in the related libraries. We do this only when we are using
 # 1 or 2 simple functions from a third party library.
-
 
 #' scales::label_number_si (vendored)
 #' @keywords internal 
@@ -50,22 +48,12 @@ number <- function (x, accuracy = NULL, scale = 1, prefix = "", suffix = "",
 }
 
 
-#' @title Color editor for sliderInput
+#' shinyWidgets::setSliderColor (vendored)
 #'
-#' @description Edit the color of Shiny's slider inputs.
-#'
-#' @param color The color to apply. Can be a vector of colors to customize more
-#' than one slider. Pass the name of a color such as 'Chartreuse' or 'Chocolate',
-#' or its HEX notation such as \code{'#7FFF00'} or \code{'#D2691E'}.
-#' @param sliderId The \code{id} of the customized slider(s). Can be a vector
-#' like \code{c(1, 2)} to modify the first two sliders, or a single value
-#' (e.g. 2) to modify one slider.
-#'
-#' @note See \url{https://www.w3schools.com/colors/colors_names.asp} for an overview of all colors.
-#'
-#' @seealso \code{\link[shinyWidgets]{chooseSliderSkin}} to update the global skin of your sliders.
-#'
-#' @export
+#' Edit the color of Shiny's slider inputs, returning the CSS that recolors the
+#' slider skin. Used internally to colour the app's sliders; not part of the
+#' public API.
+#' @keywords internal
 setSliderColor_ <- function(color, sliderId) {
   stopifnot(!is.null(color))
   stopifnot(is.character(color))
@@ -160,9 +148,9 @@ reset_inputs <- function(session) {
   reset_values <- list(
     sex = list(inputId = "sex", value = "both", type = "radio"),
     perc = list(inputId = "perc", value = FALSE, type = "switch"),
-    fig2_x = list(inputId = "fig2_x", value = seq(0, 110, 10), type = "select"),
-    time_slider = list(inputId = "time_slider", value = 2021, type = "sliderText"),
-    age_change = list(inputId = "age_change", value = c(0, 110), type = "sliderText"),
+    fig2_x = list(inputId = "fig2_x", value = seq(0, 95, 10), type = "select"),
+    time_slider = list(inputId = "time_slider", value = 2023, type = "sliderText"),
+    age_change = list(inputId = "age_change", value = c(0, 95), type = "sliderText"),
     cod_change = list(inputId = "cod_change", value = 0, type = "slider"),
     cod_target = list(inputId = "cod_target", value = lemur::data_app_input$cause_name, type = "checkbox")
   )

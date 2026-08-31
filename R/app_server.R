@@ -76,21 +76,19 @@ app_server <- function(input, output, session) {
   # not the expensive computation downstream.
   time_slider <- reactive(input$time_slider)
 
-  # Pre-load the static datasets as data.tables once at startup, so that
-  # dt_filter_local() filters without re-converting the full tables on every
-  # input change. (Not needed in server mode where the data lives in Postgres.)
-  #
-  # The data lives in inst/extdata/*_dt.rds -- lean copies of the public .rda
-  # datasets (see data-raw/build_fast_data.R): pre-factorized data.tables with
-  # gzip compression. They deserialize ~18x faster than the bzip2 .rda files
-  # (0.5s vs 8.6s for COD) and skip the as.data.table() conversion entirely.
-  if (!isTRUE(getShinyOption("serverMode"))) {
-    read_fast <- function(f) readRDS(system.file("extdata", f, package = "lemur"))
-    session$userData$dt <- list(
-      cod = read_fast("cod_dt.rds"),
-      lt  = read_fast("lt_dt.rds")
-      # sdg is loaded lazily -- only when the user enters an SDG mode
-    )
+  # The static datasets are loaded LAZILY and cached on first use -- cod/lt on
+  # the first figure render, sdg only inside the two SDG modes -- so a session
+  # starts with zero data I/O and each table is read from disk at most once.
+  # (Not used in server mode, where the data lives in Postgres.) The tables are
+  # pre-factorized data.tables (inst/extdata/*_dt.rds) so dt_filter_local()
+  # filters without re-converting them on every input change.
+  session$userData$dt <- list()
+  get_dt <- function(name) {
+    if (is.null(session$userData$dt[[name]])) {
+      session$userData$dt[[name]] <- readRDS(
+        system.file("extdata", paste0(name, "_dt.rds"), package = "lemur"))
+    }
+    session$userData$dt[[name]]
   }
 
 # ------------------------------------------------------------------
@@ -110,7 +108,7 @@ fetch_data <- function(data_sql_name) {
 
   } else {
     dt_filter_local(
-      data    = session$userData$dt[[data_sql_name]],
+      data    = get_dt(data_sql_name),
       mode    = input$mode,
       region1 = input$region1,
       region2 = input$region2,
@@ -145,14 +143,9 @@ data_sdg <- reactive({
   req(ui_state$ready)
 
   if (input$mode %in% c("mode_sdg", "mode_sdg2")) {
-    # SDG data is loaded lazily on first access: the sdg table (3.1M rows) is
-    # only needed in the two SDG modes, so we skip its ~0.6s load for every
-    # session that never uses it.
-    if (is.null(session$userData$dt[["sdg"]])) {
-      session$userData$dt[["sdg"]] <- readRDS(
-        system.file("extdata", "sdg_dt.rds", package = "lemur")
-      )
-    }
+    # sdg is loaded lazily by get_dt() on first SDG-mode render -- the table is
+    # only needed in the two SDG modes, so sessions that never use them never
+    # pay its ~0.6 s load.
     fetch_data("sdg") %>%
       mutate(cause_name = factor(cause_name, levels = data_app_input$cause_name_sdg)) %>%
       arrange(region, sex, x, cause_name) %>%
@@ -192,7 +185,7 @@ data_lt <- reactive({
       M <- build_reduction_matrix(
         data       = d_sdg,
         select_cod = as.character(unique(d_sdg$cause_name)),
-        select_x   = 0:110,
+        select_x   = 0:95,
         cod_change = 0
       )
       
@@ -242,7 +235,7 @@ data_lt <- reactive({
       M <- build_reduction_matrix(
         data       = d_sdg,
         select_cod = as.character(unique(d_sdg$cause_name)),
-        select_x   = 0:110,
+        select_x   = 0:95,
         cod_change = 0
       )
       

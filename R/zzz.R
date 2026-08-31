@@ -1,6 +1,5 @@
 # ------------------------------------------------- #
 # Author: Marius D. Pascariu
-# Last update: Mon Aug 10 2026
 # ------------------------------------------------- #
 
 .onLoad <- function(libname, pkgname) {

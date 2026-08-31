@@ -58,5 +58,12 @@ data-raw/IHME_GBD2021_Data/Population/*.zip
 data-raw/IHME_GBD2021_Data/*.Rdata
 data-raw/IHME_GBD2023_Data/*
 data-raw/*.Rdata
+# Backups of the pre-GBD2023 in-use datasets (not tracked)
+data-raw/_archive/
 # docs/ is the GitHub Pages site (deployed from the main branch, /docs
 # folder) -- docs/index.html must stay committed
+
+.claude/
+CLAUDE.md
+AGENTS.md
+# Coder-facing instruction files (kept locally, not versioned)

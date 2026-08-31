@@ -33,7 +33,7 @@ test_that("table captions are produced for every comparison mode", {
 
 test_that("fig2 captions build an xlab/ylab pair", {
   f2 <- generate_fig2_captions("mode_cod", "Romania", "Romania",
-                               c(0, 50, 110), FALSE, -50, c("Stroke"),
+                               c(0, 50, 95), FALSE, -50, c("Stroke"),
                                L_romania, L_mexico)
   expect_equal(names(f2), c("xlab", "ylab"))
   expect_true(nzchar(f2$xlab))
@@ -41,7 +41,7 @@ test_that("fig2 captions build an xlab/ylab pair", {
 
   # percentage mode changes the wording of the xlab
   f2_perc <- generate_fig2_captions("mode_cod", "Romania", "Romania",
-                                    c(0, 50, 110), TRUE, -50, c("Stroke"),
+                                    c(0, 50, 95), TRUE, -50, c("Stroke"),
                                     L_romania, L_mexico)
   expect_true(grepl("Relative difference", f2_perc$xlab, fixed = TRUE))
 })
@@ -61,7 +61,7 @@ test_that("fig4 captions report the right tooltip for each dimension", {
 
 test_that("generate_figure_captions orchestrates fig2/3/4", {
   ff <- generate_figure_captions("mode_cod", "Romania", "Romania",
-                                 c(0, 50, 110), FALSE, -50, c("Stroke"),
+                                 c(0, 50, 95), FALSE, -50, c("Stroke"),
                                  L_romania, L_mexico, "age")
   expect_equal(names(ff), c("fig2", "fig3", "fig4"))
   expect_equal(names(ff$fig2), c("xlab", "ylab"))

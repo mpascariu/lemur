@@ -7,7 +7,7 @@
 plot_change(
   L1,
   L2,
-  age = seq(0, 110, by = 10),
+  age = seq(0, 95, by = 10),
   perc = FALSE,
   title = NULL,
   subtitle = ""
