@@ -38,11 +38,13 @@ services:
       - net
 
   # The shiny service runs the app in server mode against the postgres
-  # container. run_app(serverMode=TRUE) reads LEMUR_DB_* (filled from .env).
+  # container. By default it pulls the published image from GHCR; maintainers
+  # rebuild locally with: docker compose --profile build build shiny
   shiny:
     container_name: shiny
-    image: lemur_shiny
+    image: ghcr.io/mpascariu/lemur-shiny:latest
     build: ./
+    profiles: ["build"]
     env_file: .env
     command:
       - Rscript
@@ -57,11 +59,12 @@ services:
     restart: on-failure
 
   # One-shot loader: fills cod/sdg/lt directly from the .rds bundled in the
-  # app image (DBI::dbWriteTable, no CSV files, no host R). Run manually:
+  # app image (DBI::dbWriteTable, no CSV files, no host R). Runs with:
   #   docker compose run --rm db-loader
   db-loader:
-    image: lemur_shiny
+    image: ghcr.io/mpascariu/lemur-shiny:latest
     build: ./
+    profiles: ["init", "build"]
     env_file: .env
     entrypoint: ["bash", "/scripts/load_data.sh"]
     volumes:
@@ -71,7 +74,6 @@ services:
     depends_on:
       - postgres
     restart: "no"
-    profiles: ["init"]
 
   postgres:
     image: postgres:17

@@ -1,3 +1,10 @@
+version 2.0.3 - "fresh air"
+- The Docker app image is rebuilt on the current R release (4.6.1) with
+  updated system libraries; three package pins were refreshed to versions
+  compatible with it. The published app image can now be pulled directly
+  instead of built for an hour. Nothing changes for users of the app or
+  the data.
+
 version 2.0.2 - "engine room"
 - Under-the-hood refresh of the deployment setup and developer docs;
   nothing changes for users of the app or the data.

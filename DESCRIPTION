@@ -1,6 +1,6 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 2.0.2
+Version: 2.0.3
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -17,18 +17,18 @@ Description: The life expectancy monitoring tool allows the user to select
   time, countries and sexes.
 License: GPL (>= 3) + file LICENSE
 Imports: 
-  data.table (>= 1.16.0),
+  data.table (>= 1.18.0),
   DT (>= 0.33),
   leaflet (>= 2.2.2),
   leaflet.extras (>= 2.0.1),
   sf (>= 1.0-17),
-  dplyr (>= 1.1.4),
+  dplyr (>= 1.2.1),
   shiny (>= 1.9.1),
   shinyWidgets (>= 0.8.7),
   shinyjs (>= 2.1.0),
   plotly (>= 4.10.4),
   DBI (>= 1.2.3),
-  RPostgres (>= 1.4.7),
+  RPostgres (>= 1.4.10),
   markdown (>= 1.13),
   bslib (>= 0.9.0),
   pool (>= 1.0.4)

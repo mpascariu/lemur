@@ -19,12 +19,23 @@ covered in the [build guide](docker_building_guide.md).
   docker compose version
   ```
 
-- **The `lemur_shiny` image must exist** — build it once per machine as
-  described in the [build guide](docker_building_guide.md):
+- **The app image must exist.** Either pull it from GHCR (the default compose
+  path):
+
+  ``` bash
+  docker pull ghcr.io/mpascariu/lemur-shiny:latest
+  ```
+
+  or build it locally once per machine as described in the
+  [build guide](docker_building_guide.md) (tags the same image locally as
+  `lemur_shiny`):
 
   ``` bash
   docker build -t lemur_shiny .
   ```
+
+  Both work identically for every command below -- the commands are shown
+  with the GHCR ref; if you built locally, substitute `lemur_shiny`.
 
 - For **server mode** you also need the database credentials file:
 
@@ -44,6 +55,10 @@ The image ships the complete GBD 2021+2023 datasets
 the app filters these in memory — PostgreSQL is never touched.
 
 ``` bash
+docker run -d --name lemur -p 3838:3838 ghcr.io/mpascariu/lemur-shiny:latest \
+  R -e "options(shiny.port = 3838, shiny.host = '0.0.0.0'); lemur::run_app(lb = FALSE)"
+
+# locally-built equivalent:
 docker run -d --name lemur -p 3838:3838 lemur_shiny \
   R -e "options(shiny.port = 3838, shiny.host = '0.0.0.0'); lemur::run_app(lb = FALSE)"
 ```
@@ -55,7 +70,8 @@ Then open <http://localhost:3838/>.
 - Stop and remove: `docker rm -f lemur`.
 
 **Windows note:** the quoting of the `R -e` expression is fragile through
-PowerShell. If it misbehaves, write the two lines to a file and mount it:
+PowerShell. If it misbehaves, write the two lines to a file and mount it
+(the same `lemur_shiny` / GHCR-ref substitution applies):
 
 ``` bash
 # run_local.R:  options(shiny.port = 3838, shiny.host = '0.0.0.0')
@@ -74,9 +90,8 @@ Server mode reads the same tables from PostgreSQL instead of the bundled
 
 | Service | Image | Port | Purpose |
 |---|---|---|---|
-| `postgres` | `postgres:17` | 5432 | database (`gbd_lemur_db`), tables `cod`, `sdg`, `lt`, `api_requests` |
-| `db-loader` | `lemur_shiny` (profile `init`) | — | one-shot: fills the tables from the `.rds` in the app image |
-| `shiny` | `lemur_shiny` | 3838 | the app, `run_app(serverMode = TRUE)` |
+| `db-loader` | `ghcr.io/mpascariu/lemur-shiny:latest` (profile `init`) | — | one-shot: fills the tables from the `.rds` in the app image |
+| `shiny` | `ghcr.io/mpascariu/lemur-shiny:latest` | 3838 | the app, `run_app(serverMode = TRUE)` |
 | `api` | built from `deploy/api/` | 5000 | Flask REST API |
 | `nginx` | `nginx` | 80 | reverse proxy (expects the shinyproxy layout) |
 | `shinyproxy` | `openanalytics/shinyproxy:2.6.0` | 8080 | app launcher (production path) |
@@ -117,7 +132,7 @@ running without shinyproxy, point it at the shiny container instead.
 
 ``` bash
 git pull
-docker compose build shiny      # rebuild the app image (also rebuilds the loader)
+docker compose --profile build build shiny   # rebuild the app image (also the loader)
 docker compose run --rm db-loader
 docker compose up -d shiny api
 ```
@@ -219,8 +234,8 @@ docker compose
 ├── postgres      <- data at rest: cod/sdg/lt/api_requests  (postgres:17)
 │     ↑ COPY                  ↑ SQL (pool)
 ├── db-loader     one-shot: .rds --DBI::dbWriteTable--> postgres  [profile: init]
-├── shiny         lemur_shiny image, run_app(serverMode = TRUE)  :3838
-├── api           Flask + psycopg2, reads the same tables        :5000
+├── shiny         ghcr.io/mpascariu/lemur-shiny, run_app(serverMode=T) :3838
+├── api           Flask + psycopg3, reads the same tables        :5000
 ├── nginx         :80 -> shinyproxy :8080, /api/v1 -> api :5000
 └── shinyproxy    :8080, spawns per-session app containers (container-env map)
 ```

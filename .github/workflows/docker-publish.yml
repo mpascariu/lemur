@@ -1,0 +1,76 @@
+# Builds and pushes the lemur Shiny app image to GHCR.
+#
+# Publishing is deliberate: runs on version tags (v*) and manual dispatch
+# only -- never on ordinary pushes, because the image build compiles R and
+# takes ~35-40 minutes. The image version tag is derived from the Version:
+# field in DESCRIPTION, so bumping the package version is what publishes.
+#
+# Image: ghcr.io/<owner>/lemur-shiny  (tags: v{X.Y.Z} + latest)
+# First run needs the package visibility flipped (GitHub -> Packages ->
+# package settings) if public distribution is wanted; private by default.
+
+name: docker publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      retag_latest:
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-shiny
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read package version from DESCRIPTION
+        id: version
+        run: |
+          VERSION=$(grep -E '^Version:' DESCRIPTION | awk '{print $2}')
+          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Package version: v${VERSION}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta (tags)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' || inputs.retag_latest == true }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name == 'push' || github.event.inputs.retag_latest == true }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NCPUS=4
