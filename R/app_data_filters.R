@@ -34,7 +34,7 @@ create_db_pool <- function(run_db = TRUE) {
   pool <- pool::dbPool(
     drv      = RPostgres::Postgres(),
     host     = db_setting("LEMUR_DB_HOST", "postgres"),
-    dbname   = db_setting("LEMUR_DB_NAME", "gbd2021"),
+    dbname   = db_setting("LEMUR_DB_NAME", "gbd_lemur_db"),
     user     = db_setting("LEMUR_DB_USER", "lemur"),
     password = password,
     port     = as.integer(db_setting("LEMUR_DB_PORT", "5432")),

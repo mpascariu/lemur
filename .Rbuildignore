@@ -19,3 +19,7 @@ $run_dev.*
 docker-compose.yml
 pkg_build.R
 .vscode
+^\.env$
+^\.gitignore$
+^\.Rbuildignore$
+^AGENTS\.md$

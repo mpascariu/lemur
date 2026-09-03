@@ -26,8 +26,8 @@ The other endpoints will all accept the arguments described below.
 Argument | Description
 |:-- |:-----------
 region | Region or country names as a list enclosed in square brackets (e.g. ['US'] or ['US', 'AFRICA']). Use the 'regions' endpoint for a complete list of acceptable values.
-year | Accepts only one of the following values: 1990, 1995, 2000, 2010, 2015, 2019
-age | Accepts only one of the following values: 0, 1, 5, 10, 15, ... , 100, 105, 110
+year | Accepts only one of the following values: 1990, 1995, 2000, 2005, 2010, 2015, 2019, 2020, 2021, 2023
+age | Accepts only one of the following values: 0, 1, 2, 5, 10, 15, ... , 95
 sex | Accepts only of the following values: 'female', 'male', 'both'
 
 ## API Response

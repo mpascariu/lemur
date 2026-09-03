@@ -1,6 +1,6 @@
 import os
 
-import psycopg2
+import psycopg
 import datetime
 import pandas as pd
 from ast import literal_eval
@@ -11,7 +11,7 @@ from ast import literal_eval
 # the defaults match the local docker-compose stack. See .env.example at the
 # repo root.
 DB_HOST = os.environ.get("LEMUR_DB_HOST", "postgres")
-DB_NAME = os.environ.get("LEMUR_DB_NAME", "gbd2021")
+DB_NAME = os.environ.get("LEMUR_DB_NAME", "gbd_lemur_db")
 DB_USER = os.environ.get("LEMUR_DB_USER", "lemur")
 DB_PASSWORD = os.environ.get("LEMUR_DB_PASSWORD", "")
 
@@ -24,8 +24,8 @@ if not DB_PASSWORD:
 
 def db_connect():
     """Open a connection to the lemur database."""
-    return psycopg2.connect(
-        database=DB_NAME,
+    return psycopg.connect(
+        dbname=DB_NAME,
         host=DB_HOST,
         user=DB_USER,
         password=DB_PASSWORD,
@@ -33,30 +33,46 @@ def db_connect():
 
 def timestr():
     return (
-        datetime.datetime.utcnow()
-        .replace(tzinfo=datetime.timezone.utc, microsecond=0)
+        datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
         .isoformat(sep=" ")[:-3]
     )
 
 
 def query(sql_query):
+    """Run a SELECT and wrap the result in the API's standard envelope.
 
+    Executed directly through psycopg (no pandas.read_sql: that path needs
+    SQLAlchemy on modern pandas). Column order and dtypes are preserved, and
+    df.to_json() keeps the response format the API consumers expect.
+    """
     status = 200
+    message = ""
+    data = "{}"
 
-    # query database
     try:
         conn = db_connect()
-        df = pd.read_sql(sql_query, conn)
+        cur = conn.cursor()
+        cur.execute(sql_query)
+        cols = [d.name for d in cur.description]
+        rows = cur.fetchall()
+        cur.close()
         conn.close()
-    except:
+        df = pd.DataFrame(rows, columns=cols)
+    except Exception:
         status = 500
         message = "Internal Server Error: Error returned from PostgreSQL server on SELECT."
+        return {
+            "status": status,
+            "message": message,
+            "timestamp": timestr(),
+            "data": data
+        }
 
-    if status == 200:
-        if df.shape[0] == 0:
-            message = "OK: No data match this query."
-        else:
-            message = "OK: Data successfully selected from database."
+    if df.shape[0] == 0:
+        message = "OK: No data match this query."
+    else:
+        message = "OK: Data successfully selected from database."
 
     return {
         "status": status,
@@ -89,8 +105,8 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     quote_args = ['sex'] + json_args + date_args
 
     sex_allowed = ['both', 'male', 'female']
-    age_allowed = [0, 1, *range(5, 100, 5)]
-    year_allowed = [*range(1990, 2016, 5), 2019]
+    age_allowed = [0, 1, 2, *range(5, 100, 5)]
+    year_allowed = [*range(1990, 2016, 5), 2019, 2020, 2021, 2023]
 
     # initialize response
     status = 200
@@ -192,7 +208,7 @@ def validate(ip):
     sql_query = "select count(*) from api_requests where ip='{}' and date=current_date;".format(ip)
     cur.execute(sql_query)
     conn.commit()
-    response = cur.fetchall()[0][0]
+    response = cur.fetchone()[0]
 
     authenticated = False
     if response == 0:

@@ -1,5 +1,4 @@
 # docker compose containers for nginx reverse proxy, shinyproxy, shiny app, flask api, and postgresql database.
-version: '3.3'
 
 services:
   
@@ -9,7 +8,7 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./deploy/nginx/conf.d/apps.conf
+        source: ./deploy/nginx/apps.conf
         target: /etc/nginx/conf.d/apps.conf
       - type: bind
         source: ./deploy/nginx/html/
@@ -38,34 +37,55 @@ services:
     networks:
       - net
 
+  # The shiny service runs the app in server mode against the postgres
+  # container. run_app(serverMode=TRUE) reads LEMUR_DB_* (filled from .env).
   shiny:
     container_name: shiny
+    image: lemur_shiny
     build: ./
-    # Supply the LEMUR_DB_* database credentials from .env (same file the
-    # postgres service uses).
     env_file: .env
-    # command: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
+    command:
+      - Rscript
+      - -e
+      - options(shiny.port=3838, shiny.host='0.0.0.0'); lemur::run_app(lb=FALSE, serverMode=TRUE)
     ports:
       - 3838:3838
     networks:
       - net
+    depends_on:
+      - postgres
+    restart: on-failure
+
+  # One-shot loader: fills cod/sdg/lt directly from the .rds bundled in the
+  # app image (DBI::dbWriteTable, no CSV files, no host R). Run manually:
+  #   docker compose run --rm db-loader
+  db-loader:
+    image: lemur_shiny
+    build: ./
+    env_file: .env
+    entrypoint: ["bash", "/scripts/load_data.sh"]
+    volumes:
+      - ./deploy/postgresql/load_data.sh:/scripts/load_data.sh:ro
+    networks:
+      - net
+    depends_on:
+      - postgres
+    restart: "no"
+    profiles: ["init"]
 
   postgres:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres
     restart: always
     env_file: .env
     volumes:
-      - /db-data/:/var/lib/postgresql/data/
-      - ./deploy/postgresql/:/data/
+      - db-data:/var/lib/postgresql/data/
       - type: bind
         source: ./deploy/postgresql/init-db.sh
         target: /docker-entrypoint-initdb.d/init-db.sh
       - type: bind
         source: ./deploy/postgresql/postgresql.conf
         target: /etc/postgresql/postgresql.conf
-    ports: 
-      - 5432:5432
     networks:
       - net
     
@@ -75,10 +95,7 @@ services:
     env_file: .env
     command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
     build: ./deploy/api/
-    volumes:
-      - type: bind
-        source: ./deploy/api/docs.html
-        target: /app/static/docs.html
+    volumes: []
     ports:
       - 5000:5000
     networks:
@@ -86,3 +103,6 @@ services:
 
 networks:
   net:
+
+volumes:
+  db-data:

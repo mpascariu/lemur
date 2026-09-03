@@ -1,0 +1,20 @@
+# Normalize all text files to LF in the repository and the working tree.
+# Prevents core.autocrlf=CRLF churn on Windows checkouts and keeps shell
+# scripts bind-mounted into Linux containers executable.
+* text=auto eol=lf
+
+# Explicitly binary — never convert, never diff as text.
+*.rds  binary
+*.rda  binary
+*.RData binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.tar  binary
+*.woff binary
+*.woff2 binary

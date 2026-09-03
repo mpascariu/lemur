@@ -1,19 +1,15 @@
 #!/usr/bin/python3
 
-from flask import Flask, request, jsonify, current_app
+from flask import Flask, request, jsonify, current_app, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from api.endpoints import api_fun, regions_fun, requests_fun
 
 
-def create_app():
-    app = Flask(__name__)
-    app.config["DEBUG"] = True
-    return app
+app = Flask(__name__)
+app.config["DEBUG"] = True
 
-
-app = create_app()
-limiter = Limiter(app, key_func=get_remote_address)
+limiter = Limiter(get_remote_address, app=app)
 rate_limit = "30/minute"
 
 
@@ -25,7 +21,7 @@ def page_not_found(e):
 @app.route("/", methods=["GET"])
 @limiter.limit(rate_limit)
 def home():
-    return current_app.send_static_file('docs.html')
+    return send_from_directory(app.root_path, "docs.md", mimetype="text/markdown")
 
 
 # ---- ENDPOINTS ----#
@@ -33,7 +29,7 @@ def home():
 @app.route("/cause_of_death", methods=["GET"])
 @limiter.limit(rate_limit)
 def cod():
-    """API endpoint to select data from the 'cod' table of the `gbd2019` database."""
+    """API endpoint to select data from the 'cod' table of the `gbd_lemur_db` database."""
     args = dict(request.args)
     if len(args) > 0:
         result = api_fun(args, table='cod', ip=str(request.remote_addr))
@@ -48,7 +44,7 @@ def cod():
 @app.route("/life_table", methods=["GET"])
 @limiter.limit(rate_limit)
 def lt():
-    """API endpoint to select data from the 'lt' table of the `gbd2019` database."""
+    """API endpoint to select data from the 'lt' table of the `gbd_lemur_db` database."""
     args = dict(request.args)
     if len(args) > 0:
         result = api_fun(args, table='lt', ip=str(request.remote_addr))
@@ -63,7 +59,7 @@ def lt():
 @app.route("/sdg", methods=["GET"])
 @limiter.limit(rate_limit)
 def sdg():
-    """API endpoint to select data from the 'sdg' table of the `gbd2019` database."""
+    """API endpoint to select data from the 'sdg' table of the `gbd_lemur_db` database."""
     args = dict(request.args)
     if len(args) > 0:
         result = api_fun(args, table='sdg', ip=str(request.remote_addr))
@@ -78,7 +74,7 @@ def sdg():
 @app.route("/regions", methods=["GET"])
 @limiter.limit(rate_limit)
 def regions():
-    """API endpoint to return full list of regions from the `gbd2019` database."""
+    """API endpoint to return full list of regions from the `gbd_lemur_db` database."""
     result = regions_fun(ip=str(request.remote_addr))
 
     return jsonify(result), result.get("status")
@@ -87,7 +83,7 @@ def regions():
 @app.route("/requests", methods=["GET"])
 @limiter.limit(rate_limit)
 def requests():
-    """API endpoint to return counts of API requests to `gbd2019` database."""
+    """API endpoint to return counts of API requests to `gbd_lemur_db` database."""
     args = dict(request.args)
     result = requests_fun(date=args.get('date'))
     return result.get('html'), result.get("status")

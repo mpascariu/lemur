@@ -15,21 +15,18 @@ proxy:
     container-network: lemur_net
     container-log-path: ./container-logs
     # Forward the database credentials into the app containers ShinyProxy
-    # spawns. Values come from ShinyProxy's own environment, which
-    # docker-compose fills from .env (see the shinyproxy service). If
+    # spawns. ShinyProxy 2.6.0 binds container-env as a map of NAME -> VALUE
+    # (verified in ShinyProxySpecProvider: getContainerEnv() returns
+    # Map<String, String>). Values come from ShinyProxy's own environment,
+    # which docker-compose fills from .env (see the shinyproxy service). If
     # LEMUR_DB_PASSWORD is missing, the app refuses to start with a clear
     # error naming the variable.
     container-env:
-      - name: LEMUR_DB_HOST
-        value: ${LEMUR_DB_HOST}
-      - name: LEMUR_DB_NAME
-        value: ${LEMUR_DB_NAME}
-      - name: LEMUR_DB_USER
-        value: ${LEMUR_DB_USER}
-      - name: LEMUR_DB_PASSWORD
-        value: ${LEMUR_DB_PASSWORD}
-      - name: LEMUR_DB_PORT
-        value: ${LEMUR_DB_PORT}
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
 logging:
   file:
     shinyproxy.log

@@ -1,31 +1,8 @@
-attrs==21.4.0
-certifi==2021.10.8
-charset-normalizer==2.0.12
-click==8.0.3
-Flask==2.0.3
-git-python==1.0.3
-gitdb==4.0.9
-GitPython==3.1.27
-idna==3.3
-iniconfig==1.1.1
-itsdangerous==2.0.1
-Jinja2==3.0.3
-MarkupSafe==2.0.1
-numpy==1.21.5
-packaging==21.3
-pandas==1.3.5
-# pkg-resources==0.0.0
-pluggy==1.0.0
-psycopg2-binary==2.9.2
-py==1.11.0
-pyparsing==3.0.6
-pytest==6.2.5
-python-dateutil==2.8.2
-python-dotenv==0.19.2
-pytz==2021.3
-requests==2.27.1
-six==1.16.0
-smmap==5.0.0
-toml==0.10.2
-urllib3==1.26.8
-Werkzeug==2.0.2
+# lemur API dependencies, pinned (2026-09).
+# The container runs python:3.13-slim; update pins together with the base
+# image when either changes.
+Flask==3.1.3
+Flask-Limiter==4.1.1
+pandas==2.3.3
+psycopg[binary]==3.2.13
+gunicorn==23.0.0

@@ -1,7 +1,24 @@
-.RData
-.Rhistory
+# Keep the docker build context small: the image only needs package sources
+# and the bundled data. Everything else is heavy and unused inside the image.
 .git
-.gitignore
-manifest.json
-rsconnect/
-Rproj.user
+data-raw
+docs
+sources
+man
+vignettes
+tests
+revdep
+.Rproj.user
+*.Rproj
+.github
+deploy
+*.tar
+*.tar.gz
+*.Rcheck
+.env
+.env.*
+!.env.example
+README.md
+NEWS
+CRAN-SUBMISSION
+.DS_Store

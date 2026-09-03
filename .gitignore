@@ -2,8 +2,6 @@
 /dev/*
 
 *.env
-/deploy/*.tar
-/deploy/*.csv
 
 # History files
 .Rhistory
