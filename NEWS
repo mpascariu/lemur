@@ -1,3 +1,9 @@
+version 2.0.4 - "signpost"
+- Clearer documentation for people who prefer to run the app themselves:
+  the deployment guide now explains up front what gets downloaded, what is
+  built on the spot, and how to set up access; the project page gained a
+  short Docker quick-start.
+
 version 2.0.3 - "fresh air"
 - The Docker app image is rebuilt on the current R release (4.6.1) with
   updated system libraries; three package pins were refreshed to versions

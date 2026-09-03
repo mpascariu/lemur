@@ -86,15 +86,33 @@ docker run -d --name lemur -p 3838:3838 \
 ## 2. Server mode (compose stack with PostgreSQL)
 
 Server mode reads the same tables from PostgreSQL instead of the bundled
-`.rds`. The compose file defines the whole stack:
+`.rds`. The compose file defines the whole stack.
 
-| Service | Image | Port | Purpose |
-|---|---|---|---|
-| `db-loader` | `ghcr.io/mpascariu/lemur-shiny:latest` (profile `init`) | — | one-shot: fills the tables from the `.rds` in the app image |
-| `shiny` | `ghcr.io/mpascariu/lemur-shiny:latest` | 3838 | the app, `run_app(serverMode = TRUE)` |
-| `api` | built from `deploy/api/` | 5000 | Flask REST API |
-| `nginx` | `nginx` | 80 | reverse proxy (expects the shinyproxy layout) |
-| `shinyproxy` | `openanalytics/shinyproxy:2.6.0` | 8080 | app launcher (production path) |
+### 2.0 What is pulled, what is built, and what you configure
+
+| Component | Source | What it contains |
+|---|---|---|
+| `ghcr.io/mpascariu/lemur-shiny:latest` | **pulled** from GHCR (built automatically on every release tag by `.github/workflows/docker-publish.yml`) | R + Shiny app + the GBD datasets + the data loader |
+| `postgres:17` | pulled from Docker Hub | empty database initialized on first boot from `deploy/postgresql/init-db.sh` |
+| API (Flask) | **built locally** from `deploy/api/` (~40 s, no host prerequisites) | REST endpoints over the same tables |
+| `nginx:latest`, `openanalytics/shinyproxy:2.6.0` | pulled | reverse proxy / app launcher (production topology) |
+
+Credentials: nothing is hard-coded anywhere. Copy `.env.example` to `.env`
+and fill it once -- every service reads the same file:
+
+| Variable | Read by | Purpose |
+|---|---|---|
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres container | creates the role and database on first boot (name and password are baked in at that moment; changing them later requires wiping the `db-data` volume) |
+| `LEMUR_DB_HOST` | app + API + loader | postgres hostname (`postgres` inside compose; a managed-DB endpoint in the cloud) |
+| `LEMUR_DB_NAME` / `LEMUR_DB_USER` / `LEMUR_DB_PASSWORD` / `LEMUR_DB_PORT` | app + API + loader | the connection the app's pool and the API use at runtime |
+
+Both `POSTGRES_PASSWORD` and `LEMUR_DB_PASSWORD` must hold the same value --
+if they disagree, the role is created with one password while the app
+authenticates with the other, and the app refuses to start. For anything
+beyond a local test deployment: replace the `change-me` placeholders, and
+consider removing the `ports: 5432:5432` exposure on the postgres service
+(compose default publishes it to the host; only the app, API and loader need
+network access, which they already have over the internal `net` network).
 
 ### 2.1 Start the database and load the data
 
@@ -200,7 +218,9 @@ docker run --rm --network lemur_net -e LEMUR_DB_HOST=postgres \
 
 ## 4. The API service
 
-`deploy/api/` builds a small Flask container exposing the same data over REST
+`deploy/api/` (see the [build guide](docker_building_guide.md) for its
+Dockerfile, pinned dependencies and build cost) builds a small Flask
+container exposing the same data over REST
 (nginx path `/api/v1`, direct port 5000). Endpoints: `/cause_of_death`,
 `/life_table`, `/sdg`, `/regions`, `/requests`. Accepted years:
 1990, 1995, 2000, 2005, 2010, 2015, 2019, 2020, 2021, 2023; ages

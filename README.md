@@ -6,7 +6,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
+[![version](https://img.shields.io/badge/version-2.0.3-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
 [![issues](https://img.shields.io/github/issues-raw/mpascariu/lemur.svg)](https://github.com/mpascariu/lemur/issues)
 [![license](https://img.shields.io/badge/License-GNU%20GPLv3-blue.svg)](https://github.com/mpascariu/lemur/blob/master/LICENSE)
 
@@ -51,6 +51,24 @@ The package bundles the GBD 2023 datasets (exposed as `data_gbd_lt()`,
 `data_gbd_cod()` and `data_gbd_sdg()`), covering deaths and life tables from
 1990 to 2023, so you can run the examples on the help pages and the analysis
 functions without a database connection.
+
+## Run with Docker (no R required)
+
+The app ships as a prebuilt image on the GitHub Container Registry:
+
+``` bash
+docker pull ghcr.io/mpascariu/lemur-shiny:latest
+
+# quick start -- bundled data, local mode:
+docker run -d --name lemur -p 3838:3838 ghcr.io/mpascariu/lemur-shiny:latest \
+  R -e "options(shiny.port = 3838, shiny.host = '0.0.0.0'); lemur::run_app(lb = FALSE)"
+# then open http://localhost:3838
+```
+
+For the full server deployment (PostgreSQL-backed, REST API included) see
+[docs/docker_running_guide.md](docs/docker_running_guide.md); building the
+images yourself is covered in
+[docs/docker_building_guide.md](docs/docker_building_guide.md).
 
 ## Documentation
 
