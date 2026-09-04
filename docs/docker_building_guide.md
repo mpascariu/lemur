@@ -43,7 +43,7 @@ exists. Maintainers keep the local build path (below) via the compose
 
 ## 3. App image — `lemur_shiny`
 
-The main image: R 4.3.2 + all package dependencies + the lemur package with
+The main image: R 4.6.1 + all package dependencies + the lemur package with
 the bundled GBD 2021+2023 datasets. Built from the repository root:
 
 ``` bash
@@ -51,7 +51,7 @@ docker build -t lemur_shiny .
 ```
 
 - **Duration:** ~35-40 min cold; R packages and gdal/sf are compiled from
-  source. The base image `rocker/rstudio:4.3.2` is pulled once.
+  source. The base image `rocker/rstudio:4.6.1` is pulled once.
 - **Rebuilds are incremental.** Docker caches each layer, so after a data or
   code change only the steps from that layer onward rerun (~2 min for a
   code-only change). The cache is invalidated automatically when
@@ -64,7 +64,7 @@ Verify the result:
 
 ``` bash
 docker run --rm lemur_shiny Rscript -e 'cat(as.character(packageVersion("lemur")), nrow(lemur::data_gbd_lt()), "\n")'
-# -> 2.0.2 142560
+# -> 2.0.4 142560
 ```
 
 ### System dependencies baked into the image

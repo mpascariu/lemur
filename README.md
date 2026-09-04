@@ -6,7 +6,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![version](https://img.shields.io/badge/version-2.0.3-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
+[![version](https://img.shields.io/badge/version-2.0.4-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
 [![issues](https://img.shields.io/github/issues-raw/mpascariu/lemur.svg)](https://github.com/mpascariu/lemur/issues)
 [![license](https://img.shields.io/badge/License-GNU%20GPLv3-blue.svg)](https://github.com/mpascariu/lemur/blob/master/LICENSE)
 
