@@ -28,6 +28,22 @@ cn <- DBI::dbConnect(
   password = Sys.getenv("LEMUR_DB_PASSWORD")
 )
 on.exit(DBI::dbDisconnect(cn), add = TRUE)
+# The API rate limiter (deploy/api/api/utils.py) reads and writes the
+# api_requests table. init-db.sh creates it, but that script only runs on the
+# FIRST boot of an empty postgres data volume -- on a re-used volume it never
+# executes and every API call fails until the table exists. Create it here so
+# the documented loader step covers that case too. Never drop this table: it
+# accumulates daily request counts.
+DBI::dbExecute(cn, "
+  CREATE TABLE IF NOT EXISTS api_requests (
+    id SERIAL PRIMARY KEY,
+    ip INET NOT NULL,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    requests INT NOT NULL DEFAULT 1,
+    UNIQUE(date, ip)
+  )
+")
+cat("api_requests table ensured\n")
 
 # The DDL in init-db.sh names the life-table columns x_int/llx/ttx (valid
 # unquoted identifiers) while the .rds uses x.int/Lx/Tx (dotted/case names).

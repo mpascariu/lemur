@@ -6,6 +6,9 @@
 # (empty data directory). For an existing volume run it manually:
 #   docker compose exec postgres bash /docker-entrypoint-initdb.d/init-db.sh
 # (tables are created IF NOT EXISTS-free: drop them first if reloading)
+# The db-loader (deploy/postgresql/load_data.sh) also creates api_requests
+# with CREATE TABLE IF NOT EXISTS, so re-used volumes missing it are covered
+# when the loader runs -- keep the two definitions identical.
 
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 "CREATE TABLE api_requests (

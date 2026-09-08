@@ -118,12 +118,15 @@ network access, which they already have over the internal `net` network).
 
 ``` bash
 docker compose up -d postgres        # creates role/db + empty tables on first boot
-docker compose run --rm db-loader    # fills cod/sdg/lt from the bundled .rds
+docker compose run --rm db-loader    # fills cod/sdg/lt, ensures api_requests
 ```
 
-The loader is idempotent — it drops and rewrites the three tables, so rerun it
-whenever a new package release ships new data. Progress prints per table
-(cod ≈ 2.57 M rows, sdg ≈ 2.95 M, lt ≈ 142 K; takes ~1 min).
+The loader is idempotent -- it drops and rewrites the three data tables, so
+rerun it whenever a new package release ships new data. It also creates the
+`api_requests` table the API depends on if it is missing (volumes initialized
+before that table existed) and never drops it, so usage counts survive reruns.
+Progress prints per table (cod ≈ 2.57 M rows, sdg ≈ 2.95 M, lt ≈ 142 K;
+takes ~1 min).
 
 ### 2.2 Start the app
 
@@ -239,6 +242,7 @@ from `.env`); it refuses to start without `LEMUR_DB_PASSWORD`.
 | App starts then exits with `no database password is configured` | `.env` missing or `LEMUR_DB_PASSWORD` empty (server mode only). Recreate from `.env.example`. |
 | `shiny` container restarts in a loop | Postgres not up or loader not run yet — check `docker compose ps`, run `docker compose run --rm db-loader`. |
 | App boots but tables/plots error with `column "x_int" does not exist` | The database was loaded with old tooling that named columns `x.int/Lx/Tx`. Re-run `docker compose run --rm db-loader` (it rewrites the tables with the DDL names). |
+| API answers 500 with `relation "api_requests" does not exist` | The postgres data volume predates the table (`init-db.sh` runs only on the first boot of an empty volume). Run `docker compose run --rm db-loader` -- it creates the table and leaves existing data alone. |
 | `postgres` container exits immediately complaining about `18+` data layout | The data volume was created by `postgres:latest` (18+). Pin the image to `postgres:17` (compose does) and remove the old volume. |
 | Port conflicts | 3838 (app), 5000 (API), 5432 (postgres), 8080 (shinyproxy), 80 (nginx) are bound on the host; change the left side of the `-p`/compose `ports` mapping if occupied. |
 

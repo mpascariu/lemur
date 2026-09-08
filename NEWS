@@ -1,3 +1,7 @@
+version 2.0.5 - "missing keystone"
+- Self-hosted deployments are more robust: the database now prepares everything
+  the app and its data service need on its own, and the About page is current.
+
 version 2.0.4 - "signpost"
 - Clearer documentation for people who prefer to run the app themselves:
   the deployment guide now explains up front what gets downloaded, what is
