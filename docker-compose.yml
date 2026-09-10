@@ -1,7 +1,7 @@
 # docker compose containers for nginx reverse proxy, shinyproxy, shiny app, flask api, and postgresql database.
 
 services:
-  
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -15,25 +15,36 @@ services:
         target: /var/www/html/
 
     ports:
-      - 80:80
+      - 127.0.0.1:80:80
     network_mode: 'host'
 
   shinyproxy:
-    image: openanalytics/shinyproxy:2.6.0
+    image: openanalytics/shinyproxy:3.2.4
     container_name: shinyproxy
     restart: always
     # Make the LEMUR_DB_* variables available to ShinyProxy's own process so it
     # can forward them to the app containers it spawns (via container-env in
     # deploy/shinyproxy/application.yml).
     env_file: .env
+    # ShinyProxy spawns app containers via /var/run/docker.sock (root:docker,
+    # mode 660), so it needs the host's docker gid -- checked numerically, and
+    # not inherited from the bind mount. The gid varies per host, so set
+    # DOCKER_GID in .env: getent group docker | cut -d: -f3
+    # This is root-equivalent access on the host; don't copy to other services.
+    group_add:
+      - "${DOCKER_GID:?set DOCKER_GID in .env - get it with: getent group docker | cut -d: -f3}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
         source: ./deploy/shinyproxy/application.yml
         target: /opt/shinyproxy/application.yml
-
+        read_only: true
     ports:
-      - 8080:8080
+      - 127.0.0.1:8080:8080
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - net
 
@@ -42,8 +53,11 @@ services:
   # rebuild locally with: docker compose --profile build build shiny
   shiny:
     container_name: shiny
-    image: ghcr.io/mpascariu/lemur-shiny:latest
-    build: ./
+    #image: ghcr.io/mpascariu/lemur-shiny:latest
+    #build: ./
+    image: lemur_shiny:latest
+    pull_policy: never
+    build: !reset null
     profiles: ["build"]
     env_file: .env
     command:
@@ -51,7 +65,11 @@ services:
       - -e
       - options(shiny.port=3838, shiny.host='0.0.0.0'); lemur::run_app(lb=FALSE, serverMode=TRUE)
     ports:
-      - 3838:3838
+      - 127.0.0.1:3838:3838
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - net
     depends_on:
@@ -62,8 +80,11 @@ services:
   # app image (DBI::dbWriteTable, no CSV files, no host R). Runs with:
   #   docker compose run --rm db-loader
   db-loader:
-    image: ghcr.io/mpascariu/lemur-shiny:latest
-    build: ./
+    #image: ghcr.io/mpascariu/lemur-shiny:latest
+    #build: ./
+    image: lemur_shiny:latest
+    pull_policy: never
+    build: !reset null
     profiles: ["init", "build"]
     env_file: .env
     entrypoint: ["bash", "/scripts/load_data.sh"]
@@ -85,21 +106,30 @@ services:
       - type: bind
         source: ./deploy/postgresql/init-db.sh
         target: /docker-entrypoint-initdb.d/init-db.sh
+        read_only: true
       - type: bind
         source: ./deploy/postgresql/postgresql.conf
         target: /etc/postgresql/postgresql.conf
+        read_only: true
     networks:
       - net
-    
+
   api:
     container_name: api
+    image: lemur-api:latest
+    pull_policy: never
+    build: !reset null
     restart: always
     env_file: .env
     command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
-    build: ./deploy/api/
+    #build: ./deploy/api/
     volumes: []
     ports:
-      - 5000:5000
+      - 127.0.0.1:5000:5000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - net
 

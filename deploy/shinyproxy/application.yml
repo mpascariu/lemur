@@ -13,6 +13,8 @@ proxy:
     container-cmd: ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app(serverMode=T)"]
     container-image: lemur_shiny
     container-network: lemur_net
+    container-memory-limit: 4g #change according to environment
+    container-cpu-limit: 2  #change according to environment
     container-log-path: ./container-logs
     # Forward the database credentials into the app containers ShinyProxy
     # spawns. ShinyProxy 2.6.0 binds container-env as a map of NAME -> VALUE
@@ -30,6 +32,3 @@ proxy:
 logging:
   file:
     shinyproxy.log
-
-
-
