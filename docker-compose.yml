@@ -14,8 +14,8 @@ services:
         source: ./deploy/nginx/html/
         target: /var/www/html/
 
-    ports:
-      - 127.0.0.1:80:80
+    # No ports: mapping -- this service uses host networking, under which
+    # Compose ignores ports:. The listen address is set in deploy/nginx/apps.conf.
     network_mode: 'host'
 
   shinyproxy:
@@ -26,13 +26,6 @@ services:
     # can forward them to the app containers it spawns (via container-env in
     # deploy/shinyproxy/application.yml).
     env_file: .env
-    # ShinyProxy spawns app containers via /var/run/docker.sock (root:docker,
-    # mode 660), so it needs the host's docker gid -- checked numerically, and
-    # not inherited from the bind mount. The gid varies per host, so set
-    # DOCKER_GID in .env: getent group docker | cut -d: -f3
-    # This is root-equivalent access on the host; don't copy to other services.
-    group_add:
-      - "${DOCKER_GID:?set DOCKER_GID in .env - get it with: getent group docker | cut -d: -f3}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
@@ -43,8 +36,6 @@ services:
       - 127.0.0.1:8080:8080
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
     networks:
       - net
 
