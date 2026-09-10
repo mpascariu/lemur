@@ -54,10 +54,9 @@ services:
   shiny:
     container_name: shiny
     #image: ghcr.io/mpascariu/lemur-shiny:latest
-    #build: ./
+    build: ./
     image: lemur_shiny:latest
     pull_policy: never
-    build: !reset null
     profiles: ["build"]
     env_file: .env
     command:
@@ -81,10 +80,9 @@ services:
   #   docker compose run --rm db-loader
   db-loader:
     #image: ghcr.io/mpascariu/lemur-shiny:latest
-    #build: ./
+    build: ./
     image: lemur_shiny:latest
     pull_policy: never
-    build: !reset null
     profiles: ["init", "build"]
     env_file: .env
     entrypoint: ["bash", "/scripts/load_data.sh"]
@@ -118,11 +116,10 @@ services:
     container_name: api
     image: lemur-api:latest
     pull_policy: never
-    build: !reset null
     restart: always
     env_file: .env
     command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
-    #build: ./deploy/api/
+    build: ./deploy/api/
     volumes: []
     ports:
       - 127.0.0.1:5000:5000
