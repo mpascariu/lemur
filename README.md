@@ -54,7 +54,8 @@ functions without a database connection.
 
 ## Run with Docker (no R required)
 
-The app ships as a prebuilt image on the GitHub Container Registry:
+The app ships as a prebuilt image on the GitHub Container Registry
+(single-container use; the full compose stack builds its own image):
 
 ``` bash
 docker pull ghcr.io/mpascariu/lemur-shiny:latest

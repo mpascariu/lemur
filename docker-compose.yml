@@ -40,8 +40,8 @@ services:
       - net
 
   # The shiny service runs the app in server mode against the postgres
-  # container. By default it pulls the published image from GHCR; maintainers
-  # rebuild locally with: docker compose --profile build build shiny
+  # container. The image is built locally (never pulled); rebuild with:
+  #   docker compose --profile build build shiny
   shiny:
     container_name: shiny
     #image: ghcr.io/mpascariu/lemur-shiny:latest

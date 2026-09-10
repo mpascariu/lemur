@@ -1,3 +1,7 @@
+version 2.0.6 - "locked doors"
+- Self-hosted deployments are now safer to run: the app no longer works as
+  administrator and only the public front door is reachable from outside.
+
 version 2.0.5 - "missing keystone"
 - Self-hosted deployments are more robust: the database now prepares everything
   the app and its data service need on its own, and the About page is current.

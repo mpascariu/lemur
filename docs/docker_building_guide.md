@@ -36,10 +36,10 @@ bumping `Version:` and tagging the release (`v2.0.3`) is what publishes.
 Images are private by default; flip to public under GitHub -> Packages ->
 package settings if you want them pullable without authentication.
 
-`docker compose up -d shiny` resolves this automatically: compose pulls
-`ghcr.io/mpascariu/lemur-shiny:latest` when no local `lemur_shiny` image
-exists. Maintainers keep the local build path (below) via the compose
-`build` profile.
+`docker compose up -d shiny` requires the locally built image: compose
+builds it via the `build` profile when it does not exist locally and never
+pulls the GHCR ref for the compose stack. The published GHCR image serves
+the single-container local mode in the run guide.
 
 ## 3. App image — `lemur_shiny`
 
@@ -56,7 +56,7 @@ docker build -t lemur_shiny .
   code change only the steps from that layer onward rerun (~2 min for a
   code-only change). The cache is invalidated automatically when
   `inst/extdata/*.rds` or `R/` sources change (they enter the image via
-  `ADD . /build_zone`).
+  `COPY . /build_zone`).
 - **After a full cache wipe** (`docker builder prune`), expect the long build
   again.
 
@@ -106,7 +106,7 @@ These are pulled, not built:
 |---|---|---|
 | `postgres:17` | data store | pinned on purpose -- `postgres:18+` changed the data-directory layout and refuses the compose volume |
 | `nginx:latest` | reverse proxy | pulls on `docker compose up` |
-| `openanalytics/shinyproxy:2.6.0` | app launcher | config comes from `deploy/shinyproxy/application.yml`, bind-mounted at runtime -- no custom build |
+| `openanalytics/shinyproxy:3.2.4` | app launcher | config comes from `deploy/shinyproxy/application.yml`, bind-mounted at runtime -- no custom build |
 
 ## 6. Build context
 

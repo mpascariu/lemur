@@ -19,23 +19,20 @@ covered in the [build guide](docker_building_guide.md).
   docker compose version
   ```
 
-- **The app image must exist.** Either pull it from GHCR (the default compose
-  path):
-
-  ``` bash
-  docker pull ghcr.io/mpascariu/lemur-shiny:latest
-  ```
-
-  or build it locally once per machine as described in the
-  [build guide](docker_building_guide.md) (tags the same image locally as
-  `lemur_shiny`):
+- **The app image must exist.** The compose stack always uses the locally
+  built image, tagged `lemur_shiny` (see the
+  [build guide](docker_building_guide.md)); build it once per machine:
 
   ``` bash
   docker build -t lemur_shiny .
   ```
 
-  Both work identically for every command below -- the commands are shown
-  with the GHCR ref; if you built locally, substitute `lemur_shiny`.
+  A prebuilt image is also published on GHCR for the single-container
+  local mode below (§1); the compose stack never pulls it:
+
+  ``` bash
+  docker pull ghcr.io/mpascariu/lemur-shiny:latest
+  ```
 
 - For **server mode** you also need the database credentials file:
 
@@ -92,10 +89,10 @@ Server mode reads the same tables from PostgreSQL instead of the bundled
 
 | Component | Source | What it contains |
 |---|---|---|
-| `ghcr.io/mpascariu/lemur-shiny:latest` | **pulled** from GHCR (built automatically on every release tag by `.github/workflows/docker-publish.yml`) | R + Shiny app + the GBD datasets + the data loader |
+| `lemur_shiny:latest` | **built locally** from the repo root (~35-40 min cold, incremental after) | R + Shiny app + the GBD datasets + the data loader |
 | `postgres:17` | pulled from Docker Hub | empty database initialized on first boot from `deploy/postgresql/init-db.sh` |
 | API (Flask) | **built locally** from `deploy/api/` (~40 s, no host prerequisites) | REST endpoints over the same tables |
-| `nginx:latest`, `openanalytics/shinyproxy:2.6.0` | pulled | reverse proxy / app launcher (production topology) |
+| `nginx:latest`, `openanalytics/shinyproxy:3.2.4` | pulled | reverse proxy / app launcher (production topology) |
 
 Credentials: nothing is hard-coded anywhere. Copy `.env.example` to `.env`
 and fill it once -- every service reads the same file:
@@ -146,8 +143,11 @@ docker compose up -d           # postgres + shiny + api (nginx/shinyproxy includ
 ```
 
 `nginx` binds port 80 and proxies `/` to ShinyProxy (8080) and `/api/v1` to
-the Flask API — that is the production layout of life-expectancy.org. When
-running without shinyproxy, point it at the shiny container instead.
+the Flask API — that is the production layout of life-expectancy.org. The
+other published ports (8080, 3838, 5000) are loopback-only: reachable from
+the host itself, unreachable from other machines; off-host traffic goes
+through nginx. When running without shinyproxy, point it at the shiny
+container instead.
 
 ### 2.4 Updating data or code
 
@@ -224,7 +224,8 @@ docker run --rm --network lemur_net -e LEMUR_DB_HOST=postgres \
 `deploy/api/` (see the [build guide](docker_building_guide.md) for its
 Dockerfile, pinned dependencies and build cost) builds a small Flask
 container exposing the same data over REST
-(nginx path `/api/v1`, direct port 5000). Endpoints: `/cause_of_death`,
+(`/api/v1` via nginx; port 5000 is loopback-only, reachable from the host
+itself). Endpoints: `/cause_of_death`,
 `/life_table`, `/sdg`, `/regions`, `/requests`. Accepted years:
 1990, 1995, 2000, 2005, 2010, 2015, 2019, 2020, 2021, 2023; ages
 0, 1, 2, 5, 10 … 95; sexes `male`, `female`, `both`. Interactive docs:
@@ -258,10 +259,10 @@ docker compose
 ├── postgres      <- data at rest: cod/sdg/lt/api_requests  (postgres:17)
 │     ↑ COPY                  ↑ SQL (pool)
 ├── db-loader     one-shot: .rds --DBI::dbWriteTable--> postgres  [profile: init]
-├── shiny         ghcr.io/mpascariu/lemur-shiny, run_app(serverMode=T) :3838
+├── shiny         lemur_shiny (built locally), run_app(serverMode=T) :3838
 ├── api           Flask + psycopg3, reads the same tables        :5000
 ├── nginx         :80 -> shinyproxy :8080, /api/v1 -> api :5000
-└── shinyproxy    :8080, spawns per-session app containers (container-env map)
+└── shinyproxy    3.2.4 :8080, spawns per-session app containers (container-env map)
 ```
 
 Local mode uses only the `lemur_shiny` image (data is inside it); server mode

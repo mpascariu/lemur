@@ -17,10 +17,9 @@ proxy:
     container-cpu-limit: 2  #change according to environment
     container-log-path: ./container-logs
     # Forward the database credentials into the app containers ShinyProxy
-    # spawns. ShinyProxy 2.6.0 binds container-env as a map of NAME -> VALUE
-    # (verified in ShinyProxySpecProvider: getContainerEnv() returns
-    # Map<String, String>). Values come from ShinyProxy's own environment,
-    # which docker-compose fills from .env (see the shinyproxy service). If
+    # spawns. Both 2.6.0 and 3.2.4 bind container-env as a map of NAME ->
+    # VALUE. Values come from ShinyProxy's own environment, which
+    # docker-compose fills from .env (see the shinyproxy service). If
     # LEMUR_DB_PASSWORD is missing, the app refuses to start with a clear
     # error naming the variable.
     container-env:
