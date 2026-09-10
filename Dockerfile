@@ -23,9 +23,13 @@ RUN Rscript -e 'remotes::install_version("sf",upgrade="never", version = "1.0-17
 RUN Rscript -e 'remotes::install_version("leaflet.extras",upgrade="never", version = "2.0.1")'
 RUN Rscript -e 'remotes::install_version("DT",upgrade="never", version = "0.33")'
 RUN mkdir /build_zone
-ADD . /build_zone
+COPY . /build_zone
 WORKDIR /build_zone
 RUN R -e 'remotes::install_local(upgrade="never")'
 RUN rm -rf /build_zone
+#change user from root for security reasons.
+RUN useradd -m -u 1002 -s /bin/bash lemur 
+WORKDIR /home/lemur 
+USER lemur 
 #EXPOSE 3838
 #CMD  ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');library(lemur);lemur::run_app()"]
