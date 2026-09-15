@@ -110,7 +110,7 @@ and fill it once -- every service reads the same file:
 one cannot be migrated in place. Back up, wipe the volume and reload:
 
 ```bash
-docker compose exec postgres pg_dump -U lemur -d gbd_lemur_db > backup.sql
+docker compose exec postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > backup.sql
 docker compose down -v
 # update .env from .env.example, filling in three different passwords
 docker compose up -d postgres
@@ -155,8 +155,14 @@ while the loader runs.
 ### 2.3 Full stack
 
 ``` bash
-docker compose up -d           # postgres + shiny + api (nginx/shinyproxy included)
+docker compose up -d           # nginx + shinyproxy + postgres + api
 ```
+
+This does **not** start the `shiny` service: it sits behind the `build`
+profile, so plain `up` skips it. In this topology the app is not a
+long-lived container at all -- ShinyProxy launches one per session on demand
+(they appear in `docker ps` as `sp-container-...`). Use §2.2 only when you
+want the single app container on its own, without ShinyProxy.
 
 `nginx` binds port 80 and proxies `/` to ShinyProxy (8080) and `/api/v1` to
 the Flask API — that is the production layout of life-expectancy.org. The
@@ -202,13 +208,38 @@ rebuild and no reload.
 ## 3. Verifying the deployment
 
 ``` bash
-# app (both modes)
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3838/    # -> 200
+# app -- pick the line matching how you started it
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost/          # full stack, via nginx
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/app_direct/lemur/   # shinyproxy direct
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3838/     # only if you ran §2.2
+```
 
-# database contents (server mode)
-docker exec postgres psql -U lemur -d gbd_lemur_db \
-  -c "SELECT DISTINCT period FROM cod ORDER BY period"
+Port 3838 answers `000` under the full stack: the `shiny` service is behind
+the `build` profile and is not running. Check for `sp-container-...` entries
+in `docker ps` instead -- ShinyProxy starts one per session.
+
+The database examples below wrap psql in `sh -c` so that `$POSTGRES_USER`
+is expanded inside the container. Those variables come from `.env`, which
+compose reads -- they are not set in your own shell, and `-U ""` makes psql
+fall back to the OS user and fail with `role "root" does not exist`.
+
+Do not add `-h` either: the local socket trusts, while forcing TCP matches
+the scram rule and psql then waits for a password with no visible prompt.
+
+``` bash
+# database contents
+docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -c "SELECT DISTINCT period FROM cod ORDER BY period"'
 #   must list 1990 1995 2000 2005 2010 2015 2019 2020 2021 2023
+
+# roles: lemur_owner and lemur_app must both show no attributes
+docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\du"'
+
+# the superuser must be refused over TCP but work on the local socket
+docker compose exec postgres grep -n "^host all .* reject" /var/lib/postgresql/data/pg_hba.conf
+
+# the app and API containers must not hold the superuser password
+docker compose exec api env | grep -c POSTGRES        # -> 0
 
 # API (server mode; new GBD periods are valid)
 curl "http://localhost:5000/cause_of_death?region=['Angola']&year=2023&sex=male&age=0"
@@ -223,9 +254,8 @@ All three API calls return `200` with a JSON body (`status`, `message`,
 PostgreSQL must match the bundled `.rds` bit for bit:
 
 ``` bash
-docker run --rm --network lemur_net -e LEMUR_DB_HOST=postgres \
-  -e LEMUR_DB_NAME=gbd_lemur_db -e LEMUR_DB_USER=lemur \
-  -e LEMUR_DB_PASSWORD=change-me lemur_shiny \
+docker run --rm --network lemur_net --env-file .env -e LEMUR_DB_HOST=postgres \
+  lemur_shiny \
   Rscript -e 'cn <- DBI::dbConnect(RPostgres::Postgres(), host = Sys.getenv("LEMUR_DB_HOST"),
     dbname = Sys.getenv("LEMUR_DB_NAME"), user = Sys.getenv("LEMUR_DB_USER"),
     password = Sys.getenv("LEMUR_DB_PASSWORD"));
@@ -239,7 +269,7 @@ docker run --rm --network lemur_net -e LEMUR_DB_HOST=postgres \
 
 `deploy/api/` (see the [build guide](docker_building_guide.md) for its
 Dockerfile, pinned dependencies and build cost) builds a small Flask
-container exposing the same data over REST
+container, served by gunicorn, exposing the same data over REST
 (`/api/v1` via nginx; port 5000 is loopback-only, reachable from the host
 itself). Endpoints: `/cause_of_death`,
 `/life_table`, `/sdg`, `/regions`, `/requests`. Accepted years:
@@ -247,8 +277,14 @@ itself). Endpoints: `/cause_of_death`,
 0, 1, 2, 5, 10 … 95; sexes `male`, `female`, `both`. Interactive docs:
 <http://localhost:5000/> (human-readable reference page).
 
+`/requests` reports request counts per day. It does not return the calling
+addresses recorded in `api_requests`: the endpoint is public, so publishing
+them would expose every visitor's IP.
+
 The API reads `LEMUR_DB_*` from the environment (docker-compose fills them
-from `.env`); it refuses to start without `LEMUR_DB_PASSWORD`.
+from `.env`); it refuses to start without `LEMUR_DB_PASSWORD`. It connects
+as `LEMUR_DB_USER`, which can read the data tables and update
+`api_requests`, and nothing else.
 
 ---
 
@@ -261,7 +297,7 @@ from `.env`); it refuses to start without `LEMUR_DB_PASSWORD`.
 | App boots but tables/plots error with `column "x_int" does not exist` | The database was loaded with old tooling that named columns `x.int/Lx/Tx`. Re-run `docker compose run --rm db-loader` (it rewrites the tables with the DDL names). |
 | API answers 500 with `relation "api_requests" does not exist` | The postgres data volume predates the table (`init-db.sh` runs only on the first boot of an empty volume). Run `docker compose run --rm db-loader` -- it creates the table and leaves existing data alone. |
 | `postgres` container exits immediately complaining about `18+` data layout | The data volume was created by `postgres:latest` (18+). Pin the image to `postgres:17` (compose does) and remove the old volume. |
-| Port conflicts | 3838 (app), 5000 (API), 5432 (postgres), 8080 (shinyproxy), 80 (nginx) are bound on the host; change the left side of the `-p`/compose `ports` mapping if occupied. |
+| Port conflicts | 80 (nginx) plus 8080, 3838 and 5000 bound on loopback; change the left side of the `-p`/compose `ports` mapping if occupied. Postgres publishes nothing to the host -- it is reachable only on the internal `net` network. |
 
 Build-time failures (`cmake not found`, missing `libuv1-dev`, ...) are
 covered in the [build guide](docker_building_guide.md).

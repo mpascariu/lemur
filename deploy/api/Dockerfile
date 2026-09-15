@@ -10,4 +10,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# CMD is provided by docker-compose (flask run --host=0.0.0.0)
+# CMD is provided by docker-compose (gunicorn --bind 0.0.0.0:5000 app:app)

@@ -1,6 +1,6 @@
 # Building the lemur Docker images
 
-**Date:** 2026-09-03 · **Repo:** `Dockerfile` (app), `deploy/api/Dockerfile` (API)
+**Date:** 2026-09-15 · **Repo:** `Dockerfile` (app), `deploy/api/Dockerfile` (API)
 
 How to build the images that the [run guide](docker_running_guide.md) uses.
 Do this once per machine (or whenever code/data/dependencies change); running
@@ -28,11 +28,11 @@ docker pull ghcr.io/mpascariu/lemur-shiny:latest
 
 | Tag | Meaning |
 |---|---|
-| `v2.0.3` | built from the v2.0.3 release; immutable -- fixes ship as new versions |
+| `v2.0.6` | built from the v2.0.6 release; immutable -- fixes ship as new versions |
 | `latest` | points at the most recently published version |
 
 The image version always matches the package version in DESCRIPTION --
-bumping `Version:` and tagging the release (`v2.0.3`) is what publishes.
+bumping `Version:` and tagging the release (`v2.0.6`) is what publishes.
 Images are private by default; flip to public under GitHub -> Packages ->
 package settings if you want them pullable without authentication.
 
@@ -59,12 +59,16 @@ docker build -t lemur_shiny .
   `COPY . /build_zone`).
 - **After a full cache wipe** (`docker builder prune`), expect the long build
   again.
+- **The image runs as a non-root user.** The final layers add `lemur`
+  (uid 1002) and switch to it, so anything the container writes at runtime
+  must be writable by that uid -- relevant if you add a bind mount for
+  output. Build steps still run as root; only the runtime user changes.
 
 Verify the result:
 
 ``` bash
 docker run --rm lemur_shiny Rscript -e 'cat(as.character(packageVersion("lemur")), nrow(lemur::data_gbd_lt()), "\n")'
-# -> 2.0.4 142560
+# -> 2.0.6 142560
 ```
 
 ### System dependencies baked into the image
@@ -83,8 +87,10 @@ The R package pins in the Dockerfile mirror the minimum versions declared in
 
 ## 4. API image — `lemur-api`
 
-Small Flask container (Python 3.13, Flask 3.1) serving the REST API. Built
-automatically on first `docker compose up -d api`, or manually:
+Small Python container (Python 3.13, Flask 3.1) serving the REST API under
+gunicorn -- the command comes from docker-compose, not from the Dockerfile,
+so the image carries no CMD of its own. Built automatically on first
+`docker compose up -d api`, or manually:
 
 ``` bash
 docker compose build api          # uses deploy/api/Dockerfile + requirements.txt
@@ -110,10 +116,19 @@ These are pulled, not built:
 
 ## 6. Build context
 
-`.dockerignore` keeps the build context small (the repo's `data-raw/`,
-`.git`, `docs/`, `deploy/` etc. are excluded -- the image needs only package
-sources and `inst/`). If the build seems to upload gigabytes, check that
-`.dockerignore` is still intact in the repository root.
+There are two build contexts, each with its own ignore file.
+
+The repository root builds `lemur_shiny`; `.dockerignore` there excludes
+`data-raw/`, `.git`, `docs/`, `deploy/` and the `.env` files, so the image
+gets only package sources and `inst/`. Keeping `.env` out matters: the
+Dockerfile does `COPY . /build_zone`, and the later `rm -rf` removes the
+directory from the filesystem but not from the layer beneath it, so anything
+copied in stays readable in the image history. If the build seems to upload
+gigabytes, check that this file is still intact.
+
+`deploy/api/` builds `lemur-api` from its own context, which the root
+`.dockerignore` does not cover -- `deploy/api/.dockerignore` keeps `.idea/`
+and `__pycache__/` out of that image.
 
 ## 7. Rebuilding after changes
 
