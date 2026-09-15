@@ -148,7 +148,10 @@ services:
       LEMUR_DB_USER: ${LEMUR_DB_USER}
       LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
       LEMUR_DB_PORT: ${LEMUR_DB_PORT}
-    command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+    # gunicorn, not `flask run`: Flask's built-in server is a development
+    # server -- single-threaded and not written to face hostile input.
+    # gunicorn is already pinned in deploy/api/requirements.txt.
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]
     build: ./deploy/api/
     volumes: []
     ports:

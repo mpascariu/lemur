@@ -1,0 +1,10 @@
+# The API Dockerfile does `COPY . .`, so anything left here lands in the
+# image. Keep it to the application itself.
+.idea
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+test
+.env
+.env.*
