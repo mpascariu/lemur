@@ -99,17 +99,33 @@ and fill it once -- every service reads the same file:
 
 | Variable | Read by | Purpose |
 |---|---|---|
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres container | creates the role and database on first boot (name and password are baked in at that moment; changing them later requires wiping the `db-data` volume) |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres container **only** | the superuser: creates the database and the two lesser roles on first boot (baked in at that moment; changing them later requires wiping the `db-data` volume). No other container receives this password |
+| `LEMUR_DB_OWNER` / `LEMUR_DB_OWNER_PASSWORD` | postgres container + db-loader | owns the schema and tables; the loader connects as this to write `cod`/`sdg`/`lt` |
 | `LEMUR_DB_HOST` | app + API + loader | postgres hostname (`postgres` inside compose; a managed-DB endpoint in the cloud) |
-| `LEMUR_DB_NAME` / `LEMUR_DB_USER` / `LEMUR_DB_PASSWORD` / `LEMUR_DB_PORT` | app + API + loader | the connection the app's pool and the API use at runtime |
+| `LEMUR_DB_NAME` / `LEMUR_DB_USER` / `LEMUR_DB_PASSWORD` / `LEMUR_DB_PORT` | app + API | the least-privilege connection the app's pool and the API use at runtime |
 
-Both `POSTGRES_PASSWORD` and `LEMUR_DB_PASSWORD` must hold the same value --
-if they disagree, the role is created with one password while the app
-authenticates with the other, and the app refuses to start. For anything
-beyond a local test deployment: replace the `change-me` placeholders, and
-consider removing the `ports: 5432:5432` exposure on the postgres service
-(compose default publishes it to the host; only the app, API and loader need
-network access, which they already have over the internal `net` network).
+### Upgrading an existing deployment
+
+`POSTGRES_USER` changes in this version, so a database created by an earlier
+one cannot be migrated in place. Back up, wipe the volume and reload:
+
+```bash
+docker compose exec postgres pg_dump -U lemur -d gbd_lemur_db > backup.sql
+docker compose down -v
+# update .env from .env.example, filling in three different passwords
+docker compose up -d postgres
+docker compose run --rm db-loader
+docker compose up -d
+```
+
+Do not instead try `ALTER ROLE lemur NOSUPERUSER` on the old database: that
+role is the cluster's bootstrap superuser and usually the only one, so
+demoting it leaves no way to grant the privilege back short of single-user
+mode.
+
+For anything beyond a local test deployment, replace the `change-me`
+placeholders in `.env` with real values -- three different passwords, one
+per role.
 
 ### 2.1 Start the database and load the data
 

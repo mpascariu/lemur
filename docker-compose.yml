@@ -25,7 +25,15 @@ services:
     # Make the LEMUR_DB_* variables available to ShinyProxy's own process so it
     # can forward them to the app containers it spawns (via container-env in
     # deploy/shinyproxy/application.yml).
-    env_file: .env
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
@@ -49,7 +57,15 @@ services:
     image: lemur_shiny:latest
     pull_policy: never
     profiles: ["build"]
-    env_file: .env
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
     command:
       - Rscript
       - -e
@@ -75,7 +91,16 @@ services:
     image: lemur_shiny:latest
     pull_policy: never
     profiles: ["init", "build"]
-    env_file: .env
+    # The loader needs DDL, so it gets LEMUR_DB_OWNER -- but still not
+    # POSTGRES_PASSWORD. LEMUR_DB_USER (no password) is only used to name the
+    # grantee when re-granting SELECT on the reloaded tables.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
+      LEMUR_DB_OWNER: ${LEMUR_DB_OWNER}
+      LEMUR_DB_OWNER_PASSWORD: ${LEMUR_DB_OWNER_PASSWORD}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
     entrypoint: ["bash", "/scripts/load_data.sh"]
     volumes:
       - ./deploy/postgresql/load_data.sh:/scripts/load_data.sh:ro
@@ -89,6 +114,10 @@ services:
     image: postgres:17
     container_name: postgres
     restart: always
+    # The only service that holds the superuser password: it needs it to
+    # initialise, and init-db.sh needs the other two roles' credentials to
+    # create them. init-db.sh then adds a pg_hba.conf rule rejecting TCP
+    # logins for POSTGRES_USER, so the password is unusable off-container.
     env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/data/
@@ -110,7 +139,15 @@ services:
     image: lemur-api:latest
     pull_policy: never
     restart: always
-    env_file: .env
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
     command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
     build: ./deploy/api/
     volumes: []
