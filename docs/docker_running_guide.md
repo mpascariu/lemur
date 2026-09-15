@@ -241,10 +241,12 @@ docker compose exec postgres grep -n "^host all .* reject" /var/lib/postgresql/d
 # the app and API containers must not hold the superuser password
 docker compose exec api env | grep -c POSTGRES        # -> 0
 
-# API (server mode; new GBD periods are valid)
-curl "http://localhost:5000/cause_of_death?region=['Angola']&year=2023&sex=male&age=0"
-curl "http://localhost:5000/life_table?region=['Angola']&year=2020&sex=both&age=0"
-curl "http://localhost:5000/regions"
+# API (server mode; new GBD periods are valid).
+# -g is required: curl treats [ and ] as glob metacharacters and refuses the
+# URL without it -- with -s that failure is silent, printing nothing at all.
+curl -sg "http://localhost:5000/cause_of_death?region=['Angola']&year=2023&sex=male&age=0"
+curl -sg "http://localhost:5000/life_table?region=['Angola']&year=2020&sex=both&age=0"
+curl -s  "http://localhost:5000/regions"
 ```
 
 All three API calls return `200` with a JSON body (`status`, `message`,
