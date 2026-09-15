@@ -39,8 +39,14 @@ def timestr():
     )
 
 
-def query(sql_query):
+def query(sql, params=None):
     """Run a SELECT and wrap the result in the API's standard envelope.
+
+    `sql` must be a literal defined in this codebase; every value derived
+    from a request goes in `params` as a bind parameter. Besides preventing
+    injection, passing parameters makes psycopg use the extended query
+    protocol, which rejects multiple statements in one execute() -- so a
+    stray ';' cannot append a second statement.
 
     Executed directly through psycopg (no pandas.read_sql: that path needs
     SQLAlchemy on modern pandas). Column order and dtypes are preserved, and
@@ -51,13 +57,13 @@ def query(sql_query):
     data = "{}"
 
     try:
-        conn = db_connect()
-        cur = conn.cursor()
-        cur.execute(sql_query)
-        cols = [d.name for d in cur.description]
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
+        # Context managers so the connection is released on the error path
+        # too; the previous version leaked one per failed query.
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                cols = [d.name for d in cur.description]
+                rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
     except Exception:
         status = 500
@@ -142,7 +148,10 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     ):
         for i in set(args).intersection(integer_args):
             try:
-                int(float(args.get(i)))
+                # Store the coerced value: it is passed to the database as a
+                # bind parameter, so it must be an int rather than the
+                # original string.
+                args[i] = int(float(args.get(i)))
             except:
                 status = 400
                 message = "Bad Request: '{}' cannot be coerced to an integer.".format(i)
@@ -153,6 +162,11 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     ):
         for i in set(args).intersection(list_args):
             try:
+                # literal_eval evaluates literals only (no code execution),
+                # but cap the input first so a deeply nested value cannot be
+                # used to burn CPU.
+                if len(str(args.get(i))) > 500:
+                    raise ValueError("argument too long")
                 args[i] = literal_eval(args.get(i))
                 if not isinstance(args[i], list):
                     args[i] = [args[i]]
@@ -191,9 +205,9 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
                     "1",
                 ]
 
-        # quote strings
-        for i in set(args).intersection(quote_args):
-            args[i] = "'" + str(args[i].replace("'", '"')) + "'"
+        # String values are NOT quoted here. They are passed to the
+        # database as bind parameters (see endpoints.api_fun), so wrapping
+        # them in quotes would make the quotes part of the value.
 
     return {"status": status, "message": message, "args": args}
 
@@ -203,24 +217,34 @@ def validate(ip):
     rpm = 30
     daily_limit = rpm * 60 * 24
 
-    conn = db_connect()
-    cur = conn.cursor()
-    sql_query = "select count(*) from api_requests where ip='{}' and date=current_date;".format(ip)
-    cur.execute(sql_query)
-    conn.commit()
-    response = cur.fetchone()[0]
-
     authenticated = False
-    if response == 0:
-        authenticated = True
-        sql_query = "insert into api_requests(date, ip) values(current_date, '{}');".format(ip)
-        cur.execute(sql_query)
-        conn.commit()
-    elif response < daily_limit:
-        authenticated = True
-        sql_query = "update api_requests set requests=requests+1 where ip='{}' and date=current_date;".format(ip)
-        cur.execute(sql_query)
-        conn.commit()
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            # Read the stored counter, not the row count. api_requests has
+            # UNIQUE(date, ip), so count(*) was only ever 0 or 1 -- which made
+            # the "response < daily_limit" branch below always true and the
+            # daily limit unenforceable.
+            cur.execute(
+                "select requests from api_requests "
+                "where ip = %s and date = current_date;",
+                (ip,),
+            )
+            row = cur.fetchone()
+
+            if row is None:
+                authenticated = True
+                cur.execute(
+                    "insert into api_requests (date, ip) values (current_date, %s);",
+                    (ip,),
+                )
+            elif row[0] < daily_limit:
+                authenticated = True
+                cur.execute(
+                    "update api_requests set requests = requests + 1 "
+                    "where ip = %s and date = current_date;",
+                    (ip,),
+                )
 
     if authenticated:
         status = 200
@@ -229,7 +253,6 @@ def validate(ip):
         status = 401
         message = "Unauthorized: Daily limit exceeded ({} API requests).".format(daily_limit)
 
-    conn.close()
     return {"status": status, "message": message}
 
 
