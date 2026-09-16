@@ -10,6 +10,48 @@
 # with CREATE TABLE IF NOT EXISTS, so re-used volumes missing it are covered
 # when the loader runs -- keep the two definitions identical.
 
+# Fail before the first statement, not after.
+#
+# This script is run once, on the first boot of an empty data directory. If it
+# aborts partway, the image still treats PGDATA as initialised and will not run
+# it again -- so a configuration error caught after the CREATE TABLEs would
+# leave a half-built database that fixing .env does not repair. Every check
+# therefore happens up front, and set -e stops the script at the first failing
+# command (the entrypoint sources this file under its own set -e when the file
+# is not executable; this makes that independent of the file mode).
+set -e
+
+: "${LEMUR_DB_OWNER:?LEMUR_DB_OWNER must be set (see .env.example)}"
+: "${LEMUR_DB_OWNER_PASSWORD:?LEMUR_DB_OWNER_PASSWORD must be set (see .env.example)}"
+: "${LEMUR_DB_USER:?LEMUR_DB_USER must be set (see .env.example)}"
+: "${LEMUR_DB_PASSWORD:?LEMUR_DB_PASSWORD must be set (see .env.example)}"
+
+for pair in "POSTGRES_USER:LEMUR_DB_OWNER" "POSTGRES_USER:LEMUR_DB_USER" "LEMUR_DB_OWNER:LEMUR_DB_USER"; do
+  a="${pair%%:*}"; b="${pair##*:}"
+  if [ "${!a}" = "${!b}" ]; then
+    echo "init-db.sh: $a and $b must name different roles (both are '${!a}')." >&2
+    echo "  The superuser, the schema owner and the runtime role are three" >&2
+    echo "  distinct roles by design. See .env.example." >&2
+    exit 1
+  fi
+done
+
+# Distinct names are not enough. If the runtime role shares a password with
+# the owner or the superuser, a compromised app container can authenticate as
+# that role over the internal network -- role names are readable from
+# pg_roles -- and regain the DDL rights this split exists to remove.
+for pair in "POSTGRES_PASSWORD:LEMUR_DB_OWNER_PASSWORD" \
+            "POSTGRES_PASSWORD:LEMUR_DB_PASSWORD" \
+            "LEMUR_DB_OWNER_PASSWORD:LEMUR_DB_PASSWORD"; do
+  a="${pair%%:*}"; b="${pair##*:}"
+  if [ "${!a}" = "${!b}" ]; then
+    echo "init-db.sh: $a and $b must differ." >&2
+    echo "  Sharing a password lets a container holding the weaker role" >&2
+    echo "  authenticate as the stronger one. See .env.example." >&2
+    exit 1
+  fi
+done
+
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 "CREATE TABLE api_requests (
 	id SERIAL PRIMARY KEY,
@@ -78,22 +120,9 @@ psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
 #                     * SELECT/INSERT/UPDATE on api_requests + its sequence
 #                       (deploy/api/api/utils.py rate limiter)
 #                   No DDL, no DELETE, no TRUNCATE.
+#
+# The variables these use are validated at the top of this script.
 # ---------------------------------------------------------------------------
-: "${LEMUR_DB_OWNER:?LEMUR_DB_OWNER must be set (see .env.example)}"
-: "${LEMUR_DB_OWNER_PASSWORD:?LEMUR_DB_OWNER_PASSWORD must be set (see .env.example)}"
-: "${LEMUR_DB_USER:?LEMUR_DB_USER must be set (see .env.example)}"
-: "${LEMUR_DB_PASSWORD:?LEMUR_DB_PASSWORD must be set (see .env.example)}"
-
-for pair in "POSTGRES_USER:LEMUR_DB_OWNER" "POSTGRES_USER:LEMUR_DB_USER" "LEMUR_DB_OWNER:LEMUR_DB_USER"; do
-  a="${pair%%:*}"; b="${pair##*:}"
-  if [ "${!a}" = "${!b}" ]; then
-    echo "init-db.sh: $a and $b must name different roles (both are '${!a}')." >&2
-    echo "  The superuser, the schema owner and the runtime role are three" >&2
-    echo "  distinct roles by design. See .env.example." >&2
-    exit 1
-  fi
-done
-
 # psql's :"x" interpolates as a quoted identifier and :'x' as a quoted
 # literal, so passwords and role names never enter a shell-built SQL string.
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" \

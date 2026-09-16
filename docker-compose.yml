@@ -7,9 +7,14 @@ services:
     container_name: nginx
     restart: always
     volumes:
+      # Mounted over the image's own default.conf rather than beside it.
+      # That file declares server_name localhost, which would otherwise win
+      # Host: localhost on an exact-name match and serve the nginx welcome
+      # page instead of the app.
       - type: bind
         source: ./deploy/nginx/apps.conf
-        target: /etc/nginx/conf.d/apps.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
       - type: bind
         source: ./deploy/nginx/html/
         target: /var/www/html/
@@ -151,6 +156,12 @@ services:
     # gunicorn, not `flask run`: Flask's built-in server is a development
     # server -- single-threaded and not written to face hostile input.
     # gunicorn is already pinned in deploy/api/requirements.txt.
+    # Flask-Limiter's 30/minute uses in-process storage, so with more than
+    # one worker each holds its own counter and the effective rate is
+    # workers x 30. It is a coarse burst guard only; the authoritative limit
+    # is the per-day counter in api_requests, which lives in the database and
+    # is therefore shared. Give Flask-Limiter a shared backend if that
+    # per-minute figure ever needs to be exact.
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]
     build: ./deploy/api/
     volumes: []

@@ -14,6 +14,7 @@ DB_HOST = os.environ.get("LEMUR_DB_HOST", "postgres")
 DB_NAME = os.environ.get("LEMUR_DB_NAME", "gbd_lemur_db")
 DB_USER = os.environ.get("LEMUR_DB_USER", "lemur")
 DB_PASSWORD = os.environ.get("LEMUR_DB_PASSWORD", "")
+DB_PORT = os.environ.get("LEMUR_DB_PORT", "5432")
 
 if not DB_PASSWORD:
     raise RuntimeError(
@@ -27,6 +28,7 @@ def db_connect():
     return psycopg.connect(
         dbname=DB_NAME,
         host=DB_HOST,
+        port=DB_PORT,
         user=DB_USER,
         password=DB_PASSWORD,
     )
@@ -217,34 +219,34 @@ def validate(ip):
     rpm = 30
     daily_limit = rpm * 60 * 24
 
-    authenticated = False
-
     with db_connect() as conn:
         with conn.cursor() as cur:
-            # Read the stored counter, not the row count. api_requests has
-            # UNIQUE(date, ip), so count(*) was only ever 0 or 1 -- which made
-            # the "response < daily_limit" branch below always true and the
-            # daily limit unenforceable.
+            # Test and increment in one statement. gunicorn serves this app
+            # with several workers, so a read followed by a separate write
+            # races: two workers can both see no row for an IP and one then
+            # loses the UNIQUE(date, ip) insert with an error, and two
+            # increments near the cap can both pass a check made before
+            # either wrote. ON CONFLICT does the comparison and the increment
+            # under a single row lock.
+            #
+            # A row comes back exactly when the request is allowed -- it was
+            # the first today, or the counter was still below the limit and
+            # has now been raised. At or above the limit the WHERE fails, no
+            # row returns and nothing is written.
+            #
+            # Note this counts requests, not rows: api_requests has
+            # UNIQUE(date, ip), so the earlier count(*) was only ever 0 or 1
+            # and the limit could never be reached.
             cur.execute(
-                "select requests from api_requests "
-                "where ip = %s and date = current_date;",
-                (ip,),
+                "insert into api_requests (date, ip, requests) "
+                "values (current_date, %s, 1) "
+                "on conflict (date, ip) do update "
+                "   set requests = api_requests.requests + 1 "
+                "   where api_requests.requests < %s "
+                "returning requests;",
+                (ip, daily_limit),
             )
-            row = cur.fetchone()
-
-            if row is None:
-                authenticated = True
-                cur.execute(
-                    "insert into api_requests (date, ip) values (current_date, %s);",
-                    (ip,),
-                )
-            elif row[0] < daily_limit:
-                authenticated = True
-                cur.execute(
-                    "update api_requests set requests = requests + 1 "
-                    "where ip = %s and date = current_date;",
-                    (ip,),
-                )
+            authenticated = cur.fetchone() is not None
 
     if authenticated:
         status = 200

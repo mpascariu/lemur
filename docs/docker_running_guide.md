@@ -38,9 +38,10 @@ covered in the [build guide](docker_building_guide.md).
 
   ``` bash
   cp .env.example .env
-  # then edit .env: the POSTGRES_* block creates the role/database, the
-  # LEMUR_DB_* block is what the app and API read. The two blocks must agree
-  # or authentication fails.
+  # then edit .env. POSTGRES_* is the superuser that creates the database,
+  # LEMUR_DB_OWNER is the schema owner the loader uses, and LEMUR_DB_USER is
+  # what the app and API read at runtime. Three separate roles with three
+  # separate passwords -- init-db.sh refuses to initialise if any two match.
   ```
 
 ---
@@ -256,7 +257,12 @@ All three API calls return `200` with a JSON body (`status`, `message`,
 PostgreSQL must match the bundled `.rds` bit for bit:
 
 ``` bash
-docker run --rm --network lemur_net --env-file .env -e LEMUR_DB_HOST=postgres \
+# Only the runtime credentials: --env-file .env would also hand this
+# container POSTGRES_PASSWORD, undoing the separation the stack sets up.
+docker run --rm --network lemur_net -e LEMUR_DB_HOST=postgres \
+  -e LEMUR_DB_NAME="$(grep -E '^LEMUR_DB_NAME=' .env | cut -d= -f2-)" \
+  -e LEMUR_DB_USER="$(grep -E '^LEMUR_DB_USER=' .env | cut -d= -f2-)" \
+  -e LEMUR_DB_PASSWORD="$(grep -E '^LEMUR_DB_PASSWORD=' .env | cut -d= -f2-)" \
   lemur_shiny \
   Rscript -e 'cn <- DBI::dbConnect(RPostgres::Postgres(), host = Sys.getenv("LEMUR_DB_HOST"),
     dbname = Sys.getenv("LEMUR_DB_NAME"), user = Sys.getenv("LEMUR_DB_USER"),
