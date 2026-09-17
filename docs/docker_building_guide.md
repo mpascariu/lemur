@@ -28,11 +28,11 @@ docker pull ghcr.io/mpascariu/lemur-shiny:latest
 
 | Tag | Meaning |
 |---|---|
-| `v2.1.0` | built from the v2.1.0 release; immutable -- fixes ship as new versions |
+| `v2.1.1` | built from the v2.1.1 release; immutable -- fixes ship as new versions |
 | `latest` | points at the most recently published version |
 
 The image version always matches the package version in DESCRIPTION --
-bumping `Version:` and tagging the release (`v2.1.0`) is what publishes.
+bumping `Version:` and tagging the release (`v2.1.1`) is what publishes.
 Images are private by default; flip to public under GitHub -> Packages ->
 package settings if you want them pullable without authentication.
 
@@ -68,7 +68,7 @@ Verify the result:
 
 ``` bash
 docker run --rm lemur_shiny Rscript -e 'cat(as.character(packageVersion("lemur")), nrow(lemur::data_gbd_lt()), "\n")'
-# -> 2.1.0 142560
+# -> 2.1.1 142560
 ```
 
 ### System dependencies baked into the image

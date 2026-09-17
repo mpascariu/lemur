@@ -107,17 +107,51 @@ and fill it once -- every service reads the same file:
 
 ### Upgrading an existing deployment
 
-`POSTGRES_USER` changes in this version, so a database created by an earlier
-one cannot be migrated in place. Back up, wipe the volume and reload:
+This release changes `POSTGRES_USER`, adds two database roles, and changes the
+API, so an existing deployment cannot be upgraded in place. Two things bite if
+the order below is not followed:
+
+- The **images must be rebuilt after `git pull`**. Every image in this stack is
+  built locally (`pull_policy: never`), and `docker compose up` only builds an
+  image that is missing -- an existing `lemur_shiny:latest` or
+  `lemur-api:latest` is reused as-is. That matters for the API in particular,
+  whose code is baked into its image: without the rebuild it keeps serving the
+  previous, vulnerable version. The `db-loader` mounts its shell script from
+  the working tree but still runs the R package baked into `lemur_shiny`, so
+  it needs the rebuild too.
+- The **backup must run while the old stack is still up and `.env` still holds
+  the old values**, because it connects with `$POSTGRES_USER`.
 
 ```bash
+# 1. back up the old database, while it is still running
 docker compose exec postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > backup.sql
+
+# 2. fetch the new code, then rebuild BOTH locally-built images
+git pull
+docker compose --profile build build shiny    # app image + the db-loader (same image)
+docker compose build api                      # the API has its own build context
+
+# 3. update .env from .env.example: three roles, three DIFFERENT passwords
+#    (init-db.sh refuses to start if any two role names or passwords match)
+
+# 4. wipe the data volume -- the roles are baked in at first boot, so a re-used
+#    volume keeps the old ones and the app cannot authenticate
 docker compose down -v
-# update .env from .env.example, filling in three different passwords
+
+# 5. rebuild the database and reload the data
 docker compose up -d postgres
 docker compose run --rm db-loader
+
+# 6. bring the rest up -- plain `up` skips the `shiny` service, which sits
+#    behind the build profile: it starts nginx + shinyproxy + postgres + api
 docker compose up -d
+#    ...and only if you ran the app as a single container (§2.2, no
+#    ShinyProxy), start that one too:
+# docker compose up -d shiny
 ```
+
+Then confirm the deployment is healthy with the checks in §3 -- in particular
+`\du` must list `lemur_owner` and `lemur_app`, and the API must answer.
 
 Do not instead try `ALTER ROLE lemur NOSUPERUSER` on the old database: that
 role is the cluster's bootstrap superuser and usually the only one, so
@@ -126,7 +160,8 @@ mode.
 
 Wiping the volume loses no scientific data: `cod`, `sdg` and `lt` are rebuilt
 from the `.rds` files bundled in the app image. Only the request counters in
-`api_requests` are discarded.
+`api_requests` are discarded -- which is why the backup above is really only
+worth taking if you want those counters.
 
 For anything beyond a local test deployment, replace the `change-me`
 placeholders in `.env` with real values -- three different passwords, one
@@ -178,12 +213,21 @@ container instead.
 
 ### 2.4 Updating data or code
 
+Rebuild after every `git pull`: the images are local (`pull_policy: never`) and
+`docker compose up` reuses whatever is already tagged, so an un-rebuilt image
+keeps running the previous code.
+
 ``` bash
 git pull
 docker compose --profile build build shiny   # rebuild the app image (also the loader)
+docker compose build api                     # only if deploy/api changed
 docker compose run --rm db-loader
 docker compose up -d shiny api
 ```
+
+Upgrading across a release that changes the database roles or `POSTGRES_USER`
+needs the full sequence in "Upgrading an existing deployment" above, not this
+one -- the volume must be wiped for the new roles to exist.
 
 ### 2.5 Stopping the app when no longer needed
 
@@ -202,8 +246,9 @@ rebuild and no reload.
 | Goal | Command |
 |---|---|
 | Stop app only, keep the stack | `docker compose stop shiny` |
-| Stop everything (app, API, postgres) | `docker compose down` — removes containers, keeps the `db-data` volume, database survives |
-| Also wipe the database | `docker compose down` then `docker volume rm db-data` (next `up` recreates empty tables; re-run the loader) |
+| Stop everything (app, API, postgres) | `docker compose down` — removes containers, keeps the database volume, database survives |
+| Also wipe the database | `docker compose down -v` — removes the containers and the database volume. Next `up` recreates empty tables, so re-run the loader |
+| See the database volume's full name | `docker volume ls` — Compose prefixes it with the project name, which defaults to the clone directory (`lemur_db-data` for a `lemur/` checkout) |
 | Plain `docker run` local-mode container (§1) | `docker rm -f lemur` |
 
 `docker compose ps` shows which services are still up at any time.

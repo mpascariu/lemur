@@ -1,3 +1,7 @@
+version 2.1.1 - "map and compass"
+- The upgrade instructions for a self-hosted deployment now work as written:
+  they rebuild the app and its data service before wiping the database.
+
 version 2.1.0 - "three keys"
 - Self-hosted deployments are safer: the app and its data service now each use
   their own database account, so neither of them can take over the database,
