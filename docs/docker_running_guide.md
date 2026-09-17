@@ -124,6 +124,10 @@ role is the cluster's bootstrap superuser and usually the only one, so
 demoting it leaves no way to grant the privilege back short of single-user
 mode.
 
+Wiping the volume loses no scientific data: `cod`, `sdg` and `lt` are rebuilt
+from the `.rds` files bundled in the app image. Only the request counters in
+`api_requests` are discarded.
+
 For anything beyond a local test deployment, replace the `change-me`
 placeholders in `.env` with real values -- three different passwords, one
 per role.
@@ -304,6 +308,7 @@ as `LEMUR_DB_USER`, which can read the data tables and update
 | `shiny` container restarts in a loop | Postgres not up or loader not run yet — check `docker compose ps`, run `docker compose run --rm db-loader`. |
 | App boots but tables/plots error with `column "x_int" does not exist` | The database was loaded with old tooling that named columns `x.int/Lx/Tx`. Re-run `docker compose run --rm db-loader` (it rewrites the tables with the DDL names). |
 | API answers 500 with `relation "api_requests" does not exist` | The postgres data volume predates the table (`init-db.sh` runs only on the first boot of an empty volume). Run `docker compose run --rm db-loader` -- it creates the table and leaves existing data alone. |
+| `postgres` container exits and the log ends with `init-db.sh: ... must differ` (or another `init-db.sh:` message) | The role configuration in `.env` was rejected before any table was created. Fix `.env`, then **wipe the volume**: `docker compose down -v && docker compose up -d postgres && docker compose run --rm db-loader`. Correcting `.env` and restarting is not enough -- the entrypoint reports `Skipping initialization` and leaves the database with no roles at all, so the app still cannot connect. |
 | `postgres` container exits immediately complaining about `18+` data layout | The data volume was created by `postgres:latest` (18+). Pin the image to `postgres:17` (compose does) and remove the old volume. |
 | Port conflicts | 80 (nginx) plus 8080, 3838 and 5000 bound on loopback; change the left side of the `-p`/compose `ports` mapping if occupied. Postgres publishes nothing to the host -- it is reachable only on the internal `net` network. |
 

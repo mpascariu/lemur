@@ -28,11 +28,11 @@ docker pull ghcr.io/mpascariu/lemur-shiny:latest
 
 | Tag | Meaning |
 |---|---|
-| `v2.0.6` | built from the v2.0.6 release; immutable -- fixes ship as new versions |
+| `v2.1.0` | built from the v2.1.0 release; immutable -- fixes ship as new versions |
 | `latest` | points at the most recently published version |
 
 The image version always matches the package version in DESCRIPTION --
-bumping `Version:` and tagging the release (`v2.0.6`) is what publishes.
+bumping `Version:` and tagging the release (`v2.1.0`) is what publishes.
 Images are private by default; flip to public under GitHub -> Packages ->
 package settings if you want them pullable without authentication.
 
@@ -68,7 +68,7 @@ Verify the result:
 
 ``` bash
 docker run --rm lemur_shiny Rscript -e 'cat(as.character(packageVersion("lemur")), nrow(lemur::data_gbd_lt()), "\n")'
-# -> 2.0.6 142560
+# -> 2.1.0 142560
 ```
 
 ### System dependencies baked into the image
@@ -127,8 +127,8 @@ copied in stays readable in the image history. If the build seems to upload
 gigabytes, check that this file is still intact.
 
 `deploy/api/` builds `lemur-api` from its own context, which the root
-`.dockerignore` does not cover -- `deploy/api/.dockerignore` keeps `.idea/`
-and `__pycache__/` out of that image.
+`.dockerignore` does not cover -- `deploy/api/.dockerignore` keeps `.idea/`,
+`__pycache__/` and `tests/` out of that image.
 
 ## 7. Rebuilding after changes
 

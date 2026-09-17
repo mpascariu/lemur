@@ -25,7 +25,7 @@ The other endpoints will all accept the arguments described below.
 
 Argument | Description
 |:-- |:-----------
-region | Region or country names as a list enclosed in square brackets (e.g. ['US'] or ['US', 'AFRICA']). Use the 'regions' endpoint for a complete list of acceptable values.
+region | Region or country names as a list enclosed in square brackets (e.g. ['Angola'] or ['Angola', 'Albania']). Use the 'regions' endpoint for a complete list of acceptable values.
 year | Accepts only one of the following values: 1990, 1995, 2000, 2005, 2010, 2015, 2019, 2020, 2021, 2023
 age | Accepts only one of the following values: 0, 1, 2, 5, 10, 15, ... , 95
 sex | Accepts only of the following values: 'female', 'male', 'both'
@@ -55,7 +55,7 @@ For example:
 
 **Query data using a url:**  
 ```{python}
-http://life-expectancy.org/api/v1/cause_of_death?region=['US','AFRICA']&sex=both
+http://life-expectancy.org/api/v1/cause_of_death?region=['Angola','Albania']&sex=both
 ```
 
 **Query data from Python:**
@@ -66,7 +66,7 @@ import pandas as pd
 
 # query arguments
 args = {
-  "region": "['US','AFRICA']",
+  "region": "['Angola','Albania']",
   "year": 2019,
   "age": 10,
   "sex": "both"
@@ -96,7 +96,7 @@ library('jsonlite')
 options(scipen = 999)
 
 # query arguments
-args <- list(region = "['US','AFRICA']",
+args <- list(region = "['Angola','Albania']",
              year = 2019,
              age = 10,
              sex = 'both')

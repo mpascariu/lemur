@@ -106,15 +106,9 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     required_globally = []  # 'valid'
 
     integer_args = ['age', 'year']
-    json_args = []
     boolean_args = []
     date_args = []
     list_args = ['region']
-    quote_args = ['sex'] + json_args + date_args
-
-    sex_allowed = ['both', 'male', 'female']
-    age_allowed = [0, 1, 2, *range(5, 100, 5)]
-    year_allowed = [*range(1990, 2016, 5), 2019, 2020, 2021, 2023]
 
     # initialize response
     status = 200
@@ -145,7 +139,7 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
             )
         )
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), int) for i in set(args).intersection(integer_args)
     ):
         for i in set(args).intersection(integer_args):
@@ -159,7 +153,7 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
                 message = "Bad Request: '{}' cannot be coerced to an integer.".format(i)
                 break
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), list) for i in set(args).intersection(list_args)
     ):
         for i in set(args).intersection(list_args):
@@ -179,7 +173,7 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
                 message = "Bad Request: '{}' cannot be coerced to a list. Try {}=['{}'].".format(i, i, args[i])
                 break
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), datetime.date)
         for i in set(args).intersection(date_args)
     ):
