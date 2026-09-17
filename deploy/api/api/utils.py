@@ -14,6 +14,7 @@ DB_HOST = os.environ.get("LEMUR_DB_HOST", "postgres")
 DB_NAME = os.environ.get("LEMUR_DB_NAME", "gbd_lemur_db")
 DB_USER = os.environ.get("LEMUR_DB_USER", "lemur")
 DB_PASSWORD = os.environ.get("LEMUR_DB_PASSWORD", "")
+DB_PORT = os.environ.get("LEMUR_DB_PORT", "5432")
 
 if not DB_PASSWORD:
     raise RuntimeError(
@@ -27,6 +28,7 @@ def db_connect():
     return psycopg.connect(
         dbname=DB_NAME,
         host=DB_HOST,
+        port=DB_PORT,
         user=DB_USER,
         password=DB_PASSWORD,
     )
@@ -39,8 +41,14 @@ def timestr():
     )
 
 
-def query(sql_query):
+def query(sql, params=None):
     """Run a SELECT and wrap the result in the API's standard envelope.
+
+    `sql` must be a literal defined in this codebase; every value derived
+    from a request goes in `params` as a bind parameter. Besides preventing
+    injection, passing parameters makes psycopg use the extended query
+    protocol, which rejects multiple statements in one execute() -- so a
+    stray ';' cannot append a second statement.
 
     Executed directly through psycopg (no pandas.read_sql: that path needs
     SQLAlchemy on modern pandas). Column order and dtypes are preserved, and
@@ -51,13 +59,13 @@ def query(sql_query):
     data = "{}"
 
     try:
-        conn = db_connect()
-        cur = conn.cursor()
-        cur.execute(sql_query)
-        cols = [d.name for d in cur.description]
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
+        # Context managers so the connection is released on the error path
+        # too; the previous version leaked one per failed query.
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                cols = [d.name for d in cur.description]
+                rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
     except Exception:
         status = 500
@@ -98,15 +106,9 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
     required_globally = []  # 'valid'
 
     integer_args = ['age', 'year']
-    json_args = []
     boolean_args = []
     date_args = []
     list_args = ['region']
-    quote_args = ['sex'] + json_args + date_args
-
-    sex_allowed = ['both', 'male', 'female']
-    age_allowed = [0, 1, 2, *range(5, 100, 5)]
-    year_allowed = [*range(1990, 2016, 5), 2019, 2020, 2021, 2023]
 
     # initialize response
     status = 200
@@ -137,22 +139,30 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
             )
         )
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), int) for i in set(args).intersection(integer_args)
     ):
         for i in set(args).intersection(integer_args):
             try:
-                int(float(args.get(i)))
+                # Store the coerced value: it is passed to the database as a
+                # bind parameter, so it must be an int rather than the
+                # original string.
+                args[i] = int(float(args.get(i)))
             except:
                 status = 400
                 message = "Bad Request: '{}' cannot be coerced to an integer.".format(i)
                 break
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), list) for i in set(args).intersection(list_args)
     ):
         for i in set(args).intersection(list_args):
             try:
+                # literal_eval evaluates literals only (no code execution),
+                # but cap the input first so a deeply nested value cannot be
+                # used to burn CPU.
+                if len(str(args.get(i))) > 500:
+                    raise ValueError("argument too long")
                 args[i] = literal_eval(args.get(i))
                 if not isinstance(args[i], list):
                     args[i] = [args[i]]
@@ -163,7 +173,7 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
                 message = "Bad Request: '{}' cannot be coerced to a list. Try {}=['{}'].".format(i, i, args[i])
                 break
 
-    elif not all(
+    if status == 200 and not all(
         isinstance(args.get(i), datetime.date)
         for i in set(args).intersection(date_args)
     ):
@@ -191,9 +201,9 @@ def check_args(args, required=[], required_oneof=[], optional=[]):
                     "1",
                 ]
 
-        # quote strings
-        for i in set(args).intersection(quote_args):
-            args[i] = "'" + str(args[i].replace("'", '"')) + "'"
+        # String values are NOT quoted here. They are passed to the
+        # database as bind parameters (see endpoints.api_fun), so wrapping
+        # them in quotes would make the quotes part of the value.
 
     return {"status": status, "message": message, "args": args}
 
@@ -203,24 +213,34 @@ def validate(ip):
     rpm = 30
     daily_limit = rpm * 60 * 24
 
-    conn = db_connect()
-    cur = conn.cursor()
-    sql_query = "select count(*) from api_requests where ip='{}' and date=current_date;".format(ip)
-    cur.execute(sql_query)
-    conn.commit()
-    response = cur.fetchone()[0]
-
-    authenticated = False
-    if response == 0:
-        authenticated = True
-        sql_query = "insert into api_requests(date, ip) values(current_date, '{}');".format(ip)
-        cur.execute(sql_query)
-        conn.commit()
-    elif response < daily_limit:
-        authenticated = True
-        sql_query = "update api_requests set requests=requests+1 where ip='{}' and date=current_date;".format(ip)
-        cur.execute(sql_query)
-        conn.commit()
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            # Test and increment in one statement. gunicorn serves this app
+            # with several workers, so a read followed by a separate write
+            # races: two workers can both see no row for an IP and one then
+            # loses the UNIQUE(date, ip) insert with an error, and two
+            # increments near the cap can both pass a check made before
+            # either wrote. ON CONFLICT does the comparison and the increment
+            # under a single row lock.
+            #
+            # A row comes back exactly when the request is allowed -- it was
+            # the first today, or the counter was still below the limit and
+            # has now been raised. At or above the limit the WHERE fails, no
+            # row returns and nothing is written.
+            #
+            # Note this counts requests, not rows: api_requests has
+            # UNIQUE(date, ip), so the earlier count(*) was only ever 0 or 1
+            # and the limit could never be reached.
+            cur.execute(
+                "insert into api_requests (date, ip, requests) "
+                "values (current_date, %s, 1) "
+                "on conflict (date, ip) do update "
+                "   set requests = api_requests.requests + 1 "
+                "   where api_requests.requests < %s "
+                "returning requests;",
+                (ip, daily_limit),
+            )
+            authenticated = cur.fetchone() is not None
 
     if authenticated:
         status = 200
@@ -229,7 +249,6 @@ def validate(ip):
         status = 401
         message = "Unauthorized: Daily limit exceeded ({} API requests).".format(daily_limit)
 
-    conn.close()
     return {"status": status, "message": message}
 
 

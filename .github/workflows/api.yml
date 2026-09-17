@@ -1,0 +1,50 @@
+# Tests for the Flask API in deploy/api -- argument validation and the
+# bind-parameter handling that keeps request values out of the SQL text.
+#
+# Deliberately separate from r.yml, which runs R CMD check: these tests need
+# Python and touch nothing in the R package. They also need no database --
+# check_args() is pure, and the tests set a dummy password just to satisfy the
+# import-time guard in api/utils.py.
+
+name: API tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/api/**'
+      - '.github/workflows/api.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'deploy/api/**'
+      - '.github/workflows/api.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    name: pytest (deploy/api)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # Runtime deps only; pytest is a test-time tool and stays out of
+      # requirements.txt so the image does not carry it.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r deploy/api/requirements.txt pytest
+
+      - name: Run API tests
+        working-directory: deploy/api
+        env:
+          LEMUR_DB_PASSWORD: test
+        run: python -m pytest tests -q

@@ -7,9 +7,14 @@ services:
     container_name: nginx
     restart: always
     volumes:
+      # Mounted over the image's own default.conf rather than beside it.
+      # That file declares server_name localhost, which would otherwise win
+      # Host: localhost on an exact-name match and serve the nginx welcome
+      # page instead of the app.
       - type: bind
         source: ./deploy/nginx/apps.conf
-        target: /etc/nginx/conf.d/apps.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
       - type: bind
         source: ./deploy/nginx/html/
         target: /var/www/html/
@@ -25,7 +30,15 @@ services:
     # Make the LEMUR_DB_* variables available to ShinyProxy's own process so it
     # can forward them to the app containers it spawns (via container-env in
     # deploy/shinyproxy/application.yml).
-    env_file: .env
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
@@ -49,7 +62,15 @@ services:
     image: lemur_shiny:latest
     pull_policy: never
     profiles: ["build"]
-    env_file: .env
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
     command:
       - Rscript
       - -e
@@ -75,7 +96,16 @@ services:
     image: lemur_shiny:latest
     pull_policy: never
     profiles: ["init", "build"]
-    env_file: .env
+    # The loader needs DDL, so it gets LEMUR_DB_OWNER -- but still not
+    # POSTGRES_PASSWORD. LEMUR_DB_USER (no password) is only used to name the
+    # grantee when re-granting SELECT on the reloaded tables.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
+      LEMUR_DB_OWNER: ${LEMUR_DB_OWNER}
+      LEMUR_DB_OWNER_PASSWORD: ${LEMUR_DB_OWNER_PASSWORD}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
     entrypoint: ["bash", "/scripts/load_data.sh"]
     volumes:
       - ./deploy/postgresql/load_data.sh:/scripts/load_data.sh:ro
@@ -89,6 +119,10 @@ services:
     image: postgres:17
     container_name: postgres
     restart: always
+    # The only service that holds the superuser password: it needs it to
+    # initialise, and init-db.sh needs the other two roles' credentials to
+    # create them. init-db.sh then adds a pg_hba.conf rule rejecting TCP
+    # logins for POSTGRES_USER, so the password is unusable off-container.
     env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/data/
@@ -110,8 +144,25 @@ services:
     image: lemur-api:latest
     pull_policy: never
     restart: always
-    env_file: .env
-    command: [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+    # Only the runtime credentials -- deliberately not env_file: .env, which
+    # would also hand this container POSTGRES_PASSWORD and LEMUR_DB_OWNER_PASSWORD.
+    # Compose still reads .env for the ${...} substitutions below.
+    environment:
+      LEMUR_DB_HOST: ${LEMUR_DB_HOST}
+      LEMUR_DB_NAME: ${LEMUR_DB_NAME}
+      LEMUR_DB_USER: ${LEMUR_DB_USER}
+      LEMUR_DB_PASSWORD: ${LEMUR_DB_PASSWORD}
+      LEMUR_DB_PORT: ${LEMUR_DB_PORT}
+    # gunicorn, not `flask run`: Flask's built-in server is a development
+    # server -- single-threaded and not written to face hostile input.
+    # gunicorn is already pinned in deploy/api/requirements.txt.
+    # Flask-Limiter's 30/minute uses in-process storage, so with more than
+    # one worker each holds its own counter and the effective rate is
+    # workers x 30. It is a coarse burst guard only; the authoritative limit
+    # is the per-day counter in api_requests, which lives in the database and
+    # is therefore shared. Give Flask-Limiter a shared backend if that
+    # per-minute figure ever needs to be exact.
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]
     build: ./deploy/api/
     volumes: []
     ports:

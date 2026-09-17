@@ -7,7 +7,9 @@ from api.endpoints import api_fun, regions_fun, requests_fun
 
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+# Never True in a deployed service: Flask's debugger turns an unhandled
+# exception into an interactive console on the public endpoint.
+app.config["DEBUG"] = False
 
 limiter = Limiter(get_remote_address, app=app)
 rate_limit = "30/minute"

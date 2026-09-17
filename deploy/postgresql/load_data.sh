@@ -3,14 +3,24 @@
 # the .rds datasets bundled in the lemur package -- the app image already
 # ships DBI/RPostgres, so no host R and no CSV files are needed.
 # Run with: docker compose run --rm db-loader
+#
+# Connects as LEMUR_DB_OWNER, not LEMUR_DB_USER and not the superuser: this
+# script issues DDL (DROP / CREATE / write) and owns the resulting tables,
+# while LEMUR_DB_USER is the read-mostly role the app and API run as. The
+# owner is NOSUPERUSER, so a compromise of this container cannot reach
+# COPY ... FROM PROGRAM. See deploy/postgresql/init-db.sh.
 set -euo pipefail
 
 host="${LEMUR_DB_HOST:-postgres}"
 port="${LEMUR_DB_PORT:-5432}"
 
+: "${LEMUR_DB_OWNER:?LEMUR_DB_OWNER must be set (see .env.example)}"
+: "${LEMUR_DB_OWNER_PASSWORD:?LEMUR_DB_OWNER_PASSWORD must be set (see .env.example)}"
+: "${LEMUR_DB_USER:?LEMUR_DB_USER must be set (see .env.example)}"
+
 echo "Waiting for postgres at ${host}:${port} ..."
 for i in $(seq 1 60); do
-  if Rscript -e "cn <- DBI::dbConnect(RPostgres::Postgres(), host='${host}', port=${port}, dbname=Sys.getenv('LEMUR_DB_NAME'), user=Sys.getenv('LEMUR_DB_USER'), password=Sys.getenv('LEMUR_DB_PASSWORD')); DBI::dbDisconnect(cn)" 2>/dev/null; then
+  if Rscript -e "cn <- DBI::dbConnect(RPostgres::Postgres(), host='${host}', port=${port}, dbname=Sys.getenv('LEMUR_DB_NAME'), user=Sys.getenv('LEMUR_DB_OWNER'), password=Sys.getenv('LEMUR_DB_OWNER_PASSWORD')); DBI::dbDisconnect(cn)" 2>/dev/null; then
     break
   fi
   if [ "$i" -eq 60 ]; then echo "postgres unreachable after 5 minutes" >&2; exit 1; fi
@@ -24,10 +34,14 @@ cn <- DBI::dbConnect(
   RPostgres::Postgres(),
   host = host, port = as.integer(port),
   dbname = Sys.getenv("LEMUR_DB_NAME"),
-  user   = Sys.getenv("LEMUR_DB_USER"),
-  password = Sys.getenv("LEMUR_DB_PASSWORD")
+  user   = Sys.getenv("LEMUR_DB_OWNER"),
+  password = Sys.getenv("LEMUR_DB_OWNER_PASSWORD")
 )
 on.exit(DBI::dbDisconnect(cn), add = TRUE)
+
+# The runtime role the app and API connect as. Tables recreated below are
+# owned by LEMUR_DB_OWNER, so each has to be granted to it explicitly.
+app_user <- DBI::dbQuoteIdentifier(cn, Sys.getenv("LEMUR_DB_USER"))
 # The API rate limiter (deploy/api/api/utils.py) reads and writes the
 # api_requests table. init-db.sh creates it, but that script only runs on the
 # FIRST boot of an empty postgres data volume -- on a re-used volume it never
@@ -43,6 +57,10 @@ DBI::dbExecute(cn, "
     UNIQUE(date, ip)
   )
 ")
+DBI::dbExecute(cn, paste(
+  "GRANT SELECT, INSERT, UPDATE ON api_requests TO", app_user))
+DBI::dbExecute(cn, paste(
+  "GRANT USAGE, SELECT ON SEQUENCE api_requests_id_seq TO", app_user))
 cat("api_requests table ensured\n")
 
 # The DDL in init-db.sh names the life-table columns x_int/llx/ttx (valid
@@ -57,6 +75,8 @@ load_table <- function(name, df, rename_map = character(0)) {
   if (length(rename_map)) names(df)[match(names(rename_map), names(df))] <- unname(rename_map)
   DBI::dbExecute(cn, sprintf("DROP TABLE IF EXISTS %s", name))
   DBI::dbWriteTable(cn, name, df, row.names = FALSE)
+  # DROP discards the old table's grants along with the table.
+  DBI::dbExecute(cn, paste("GRANT SELECT ON", name, "TO", app_user))
   n <- as.numeric(DBI::dbGetQuery(cn, sprintf("SELECT count(*) AS n FROM %s", name))$n)
   cat(sprintf("%-4s loaded: %d rows\n", name, n))
 }
