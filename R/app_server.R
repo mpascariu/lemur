@@ -1,11 +1,7 @@
-# --------------------------------------------
-# Author: Marius D PASCARIU
-# Date: 2026-05-08 18:18:33
-# --------------------------------------------
-
 #' The application server-side
 #'
 #' @param input,output,session Internal parameters for shiny.
+#' @importFrom shiny renderUI
 #' @keywords internal
 #' @export
 app_server <- function(input, output, session) {
@@ -574,6 +570,22 @@ data_lt <- reactive({
       ylab = cap$fig2$ylab
     )
   })
+
+  # Fluid caption under figure 2. The long dynamic text (applied change +
+  # before/after life expectancy) is plain HTML, so the browser wraps it to
+  # any card width - plotly axis titles cannot reflow and would clip.
+  output$fig2_caption <- renderUI({
+    req(ui_state$ready)
+    df <- data_fig()
+    req(df$data)
+
+    cap <- figure_captions()
+    tags$div(
+      class = "lemur-fig-caption",
+      tags$span(class = "lemur-fig-caption-main", cap$fig2$note_main),
+      tags$span(class = "lemur-fig-caption-detail", cap$fig2$note_detail)
+    )
+  })
   
   # Figure 3 - The COD Distribution
   output$figure3 <- renderPlotly({
@@ -581,8 +593,6 @@ data_lt <- reactive({
     req(ui_state$ready)
     df <- data_fig()
     req(df$data)
-
-    cap <- figure_captions()
 
     # The comparison modes (cntr/sex) plot initial vs final COD side by side,
     # everything else plots the final COD distribution only.
@@ -592,12 +602,23 @@ data_lt <- reactive({
       df$data$cod_final
     }
 
+    # The axis title is rendered as a fluid HTML caption below the chart
+    # (see output$fig3_caption): plotly titles cannot reflow and would clip
+    # on narrow plots.
     plotly_cod(
       cod  = cod,
       perc = df$perc,
-      xlab = cap$fig3,
+      xlab = "",
       mode = df$mode
     )
+  })
+
+  output$fig3_caption <- renderUI({
+    req(ui_state$ready)
+    df <- data_fig()
+    req(df$data)
+
+    tags$div(class = "lemur-fig-caption", figure_captions()$fig3)
   })
   
   # Figure 4 - The Decomposition
@@ -633,14 +654,27 @@ data_lt <- reactive({
 
     cap <- figure_captions()
 
+    # X-axis label renders as a fluid HTML caption below the chart (shared
+    # .lemur-fig-caption style with fig2/fig3); the y title stays on the
+    # plot with the same font/size as fig2's y title.
     plotly_decompose(
       object = dec,
       perc   = df$perc,
       by     = df$fig4_dim,
-      xlab   = cap$fig4$xlab,
+      xlab   = if (df$fig4_dim == "cod") cap$fig4$xlab else "",
       ylab   = cap$fig4$ylab,
       ttip   = cap$fig4$ttip
     )
+  })
+
+  output$fig4_caption <- renderUI({
+    req(ui_state$ready)
+    df <- data_fig()
+    req(df$data)
+
+    cap <- figure_captions()
+    if (df$fig4_dim == "cod") return(NULL)
+    tags$div(class = "lemur-fig-caption", cap$fig4$xlab)
   })
   
   

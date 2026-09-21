@@ -31,19 +31,22 @@ test_that("table captions are produced for every comparison mode", {
   expect_true(grepl("Romania", caps[1], fixed = TRUE))
 })
 
-test_that("fig2 captions build an xlab/ylab pair", {
+test_that("fig2 captions build an xlab/ylab pair plus a fluid note", {
   f2 <- generate_fig2_captions("mode_cod", "Romania", "Romania",
                                c(0, 50, 95), FALSE, -50, c("Stroke"),
                                L_romania, L_mexico)
-  expect_equal(names(f2), c("xlab", "ylab"))
-  expect_true(nzchar(f2$xlab))
+  expect_equal(names(f2), c("xlab", "ylab", "note_main", "note_detail"))
+  # the plotly title is empty; the label lives in the fluid HTML caption
+  expect_equal(f2$xlab, "")
   expect_equal(f2$ylab, "Age (years)")
+  expect_equal(f2$note_main, "Life expectancy change following a 50% reduction in Stroke related deaths")
+  expect_true(grepl("^\\[Before: ", f2$note_detail))
 
-  # percentage mode changes the wording of the xlab
+  # percentage mode prefixes the wording of the note
   f2_perc <- generate_fig2_captions("mode_cod", "Romania", "Romania",
                                     c(0, 50, 95), TRUE, -50, c("Stroke"),
                                     L_romania, L_mexico)
-  expect_true(grepl("Relative difference", f2_perc$xlab, fixed = TRUE))
+  expect_true(grepl("Relative life expectancy change", f2_perc$note_main, fixed = TRUE))
 })
 
 test_that("fig3 captions switch between percentage and counts", {
@@ -64,7 +67,7 @@ test_that("generate_figure_captions orchestrates fig2/3/4", {
                                  c(0, 50, 95), FALSE, -50, c("Stroke"),
                                  L_romania, L_mexico, "age")
   expect_equal(names(ff), c("fig2", "fig3", "fig4"))
-  expect_equal(names(ff$fig2), c("xlab", "ylab"))
+  expect_equal(names(ff$fig2), c("xlab", "ylab", "note_main", "note_detail"))
   expect_true(is.character(ff$fig3))
   expect_true(all(c("xlab", "ylab", "ttip") %in% names(ff$fig4)))
 })

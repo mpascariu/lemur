@@ -1,9 +1,5 @@
-# --------------------------------------------
-# Author: Marius D PASCARIU
-# Date: 2026-05-08 18:17:53
-# --------------------------------------------
-
 #' UI - dashboard page
+#' @importFrom shiny uiOutput
 #' @keywords internal
 #' @export
 ui_dashbord <- function() {
@@ -57,11 +53,19 @@ ui_dashbord <- function() {
 top_panel <- function() {
   layout_columns(
     col_widths = breakpoints(
-      # Large screens: custom widths (out of 12)
-      lg = c(4, 5, 2, 1),
-      # Medium and small screens: stack all vertically
-      md = c(12, 12, 12, 12),
-      sm = c(12, 12, 12, 12)
+      # Very wide desktop screens: single row (out of 12)
+      xxl = c(3, 5, 3, 1),
+      # Desktop/large tablets (992-1399px): sex + mode share one row, data
+      # type + reset move to a second row instead of being squeezed until
+      # the button labels wrap or clip.
+      xl = c(6, 6, 6, 6),
+      lg = c(6, 6, 6, 6),
+      # Medium and small screens: stack vertically, but keep the two small
+      # controls (sex and data type) and the reset button on shared rows so
+      # the top panel does not push the charts below the fold on phones.
+      md = c(6, 12, 12, 6),
+      sm = c(6, 12, 6, 6),
+      xs = c(6, 12, 6, 6)
     ),
     # Keep the control row at its natural (content) height instead of
     # stretching it to fill the page alongside the charts.
@@ -359,7 +363,7 @@ main_panel <- function() {
     class = "html-fill-item html-fill-container",
     style = "display: flex; flex-direction: column; overflow-y: auto;",
     div(
-      class = "html-fill-item html-fill-container",
+      class = "html-fill-item html-fill-container lemur-chart-row",
       style = "flex: 1 1 0; min-height: 320px;",
       layout_columns(
         col_widths = breakpoints(
@@ -373,7 +377,7 @@ main_panel <- function() {
       )
     ),
     div(
-      class = "html-fill-item html-fill-container",
+      class = "html-fill-item html-fill-container lemur-chart-row",
       style = "flex: 1 1 0; min-height: 320px;",
       layout_columns(
         col_widths = breakpoints(
@@ -440,7 +444,7 @@ chart_2 <- function() {
     class = "border-0",
     fill = TRUE,
     boxTitleInput2(
-      title = "Difference in Life Expectancy at various ages",
+      title = "Life Expectancy Change at various ages",
       selectInput(
         inputId = "fig2_x",
         label = "Ages to be displayed",
@@ -451,7 +455,8 @@ chart_2 <- function() {
     ),
     card_body(
       fill = TRUE,
-      plotlyOutput(outputId = "figure2", height = "100%")
+      plotlyOutput(outputId = "figure2", height = "100%"),
+      uiOutput(outputId = "fig2_caption")
     )
   )
 }
@@ -477,7 +482,8 @@ chart_3 <- function() {
     ),
     card_body(
       fill = TRUE,
-      plotlyOutput(outputId = "figure3", height = "100%")
+      plotlyOutput(outputId = "figure3", height = "100%"),
+      uiOutput(outputId = "fig3_caption")
     )
   )
 }
@@ -508,7 +514,8 @@ chart_4 <- function() {
     ),
     card_body(
       fill = TRUE,
-      plotlyOutput(outputId = "figure4", height = "100%")
+      plotlyOutput(outputId = "figure4", height = "100%"),
+      uiOutput(outputId = "fig4_caption")
     )
   )
 }

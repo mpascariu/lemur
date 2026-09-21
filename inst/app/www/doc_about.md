@@ -12,21 +12,8 @@ The Sustainable Development Goals (SDGs) were set in 2015 with many specific tar
 ---
 #### Updates and news
 
-**Monitor Version:** 2.1.1
+**Monitor Version:** 2.1.2
+**Last Update:** 2026-09-21
 
-**Last Update:** 2026-09-17
-
-**News in previous versions:**
-- 2026-09-17 - v2.1.1 - Safer self-hosted deployments
-- 2026-09-08 - v2.0.5 - HMD validation, rebuilt Docker image, clearer self-run guide, database now self-prepares;
-- 2026-08-31 - v2.0.0 - Data refresh to the GBD 2023 round (calendar-year-2023 data included; ages run 0-95);
-- 2026-08-12 - v1.6.0 - Figures 3-4 now render natively with plotly and change data structure;
-- 2025-12-22 - v1.0.0 - First stable release;
-- 2025-06-11 - v0.25.0 - Rebuilt the interface on Bootstrap 5;
-- 2025-05-05 - v0.23.0 - Updated the application and library to the current GBD 2021 data;
-- 2021-12-09 - v0.8.0 - Renamed the library from {MortalityCauses} to {lemur};
-- 2021-04-08 - v0.2.0 - Added the life-expectancy decomposition method;
-- 2021-03-29 - v0.1.0 - Added the modified life-table method;
-- 2021-03-01 - v0.0.1 - Project start;
 
 The source code and the development repository can be found on GitHub [@mpascariu/lemur](https://github.com/mpascariu/lemur) under the [GNU GPLv3](https://github.com/mpascariu/lemur/blob/main/LICENSE) license.

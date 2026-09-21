@@ -1,7 +1,3 @@
-# ------------------------------------------------- #
-# Author: Marius D. Pascariu
-# ------------------------------------------------- #
-
 # ALL THE INFORMATIVE CAPTIONS FOR FIGURES AND TABLES ARE CODED HERE
 # WE TRY TO MAKE THEM AS DYNAMIC AS POSSIBLE IN ORDER TO BE INFORMATIVE 
 # GIVEN THE SHINY SELECTION
@@ -164,17 +160,21 @@ generate_fig2_captions <- function(mode,
 ) {
   
   # Build a dynamic x-axis title to help with interpretability
-  # Part 1 - absolute or relative values?
+  # Part 1 - absolute or relative values? (short, stays in the plotly title)
   x_min      <- min(as.numeric(fig2_x))
   x_min_text <- if (x_min == 0) " at birth" else paste(" at age", x_min)
   l0         <- lt_initial
   l1         <- lt_final
-  
-  
-  suffix <- if (cod_change == 0) " in life expectancy" else ""
-  xlab_part1 <- ifelse(perc, 
-                       paste0("\nRelative difference", suffix),
-                       paste0("\nDifference", suffix)
+
+
+  # The axis label ("Life expectancy change") is part of the fluid HTML
+  # caption, not the plotly title: plotly titles cannot reflow and the three
+  # x-axis labels (fig2/fig3/fig4) must share one font, which the
+  # .lemur-fig-caption CSS class guarantees.
+  xlab <- ""
+  prefix0 <- ifelse(perc,
+                    "Relative life expectancy change",
+                    "Life expectancy change"
   )
   
   # Part 2 - increase, decrease how much, where? 
@@ -210,18 +210,23 @@ generate_fig2_captions <- function(mode,
   }
   
   xlab_part3 <- paste0(
-    "\n[",
-    prefix1, 
-    round(l0$ex[l0$x == x_min], 2), 
-    " vs. ", 
-    prefix2, 
+    "[",
+    prefix1,
+    round(l0$ex[l0$x == x_min], 2),
+    " vs. ",
+    prefix2,
     round(l1$ex[l1$x == x_min], 2),
     " years", x_min_text, "]"
   )
-  
-  xlab <- paste0(xlab_part1, xlab_part2, xlab_part3)
+
+  # The caption renders under the chart as two logical lines (see
+  # output$fig2_caption): the label + applied change on the first, the
+  # before/after values on the second. Each part is plain HTML and wraps
+  # fluidly when the card is narrow.
+  note_main   <- trimws(paste0(prefix0, " ", trimws(xlab_part2)))
+  note_detail <- xlab_part3
   ylab <- "Age (years)"
-  out  <- list(xlab = xlab, ylab = ylab)
+  out  <- list(xlab = xlab, ylab = ylab, note_main = note_main, note_detail = note_detail)
   return(out)
 }
 
@@ -263,13 +268,22 @@ generate_fig4_captions <- function(perc, fig4_dim) {
     ttip = c("fill", "x")
     ylab <- "Causes of Death"
     xlab <- "Change in Life Expectancy at Birth [%]"
-    
+
   } else if (!perc & (fig4_dim == "cod")){
     ttip = c("fill", "x")
     ylab <- "Causes of Death"
     xlab <- "Change in Life Expectancy at Birth [years]"
   }
-  
+
+  # Full y label on two lines: the rotated title must stay shorter than the
+  # plot height on narrow layouts. Same wording as before the responsive
+  # rework; the "\n" separator becomes <br> at layout time (see
+  # axis_title_html()).
+  ylab <- if (perc) {
+    "Change in Life Expectancy\nat Birth [%]"
+  } else {
+    "Change in Life Expectancy\nat Birth (years)"
+  }
   out <- list(xlab = xlab,
               ylab = ylab,
               ttip = ttip)

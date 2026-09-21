@@ -1,3 +1,7 @@
+version 2.1.2 - "small screens"
+- The dashboard now fits phones and tablets: charts keep a readable size and
+  captions adapt to the screen, so nothing is cut off anymore.
+
 version 2.1.1 - "map and compass"
 - The upgrade instructions for a self-hosted deployment now work as written:
   they rebuild the app and its data service before wiping the database.

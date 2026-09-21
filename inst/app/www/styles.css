@@ -29,6 +29,20 @@ body  {
   z-index: 10000
 }
 
+/* Fluid caption under figure 2: plain HTML text, wraps to any card width.
+   Two logical lines: description first, [Before: ... After: ...] second;
+   each wraps further on narrow cards. */
+.lemur-fig-caption {
+  font-size: 15px;
+  color: #495057;
+  text-align: center;
+  padding: 0 8px 6px;
+}
+
+.lemur-fig-caption-detail {
+  display: block;
+}
+
 .small, small {
   font-size: 60%;
 }
@@ -101,4 +115,46 @@ body  {
   height: -webkit-calc(40vh - 100px) !important; /* google, safari */
   height: -moz-calc(40vh - 100px) !important; /* firefox */
   height: calc(40vh - 100px) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile / tablet dashboard layout                                    */
+/* Desktop (>= 992px) is untouched; everything below fixes the         */
+/* crushed charts seen on iPhone and iPad screens.                     */
+/* ------------------------------------------------------------------ */
+
+/* Tablets (768-1199px): the fixed 400px input sidebar eats most of the
+   viewport, leaving ~370px for the charts. Narrow it on these widths;
+   desktop keeps the full 400px. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .bslib-sidebar-layout {
+    --_sidebar-width: 300px !important;
+  }
+}
+
+/* Phones and tablets below the lg breakpoint: each chart row stacks its
+   two cards vertically inside a single 320px row, which crushes the
+   plots to slivers (and collapses the leaflet map to 0px). Let the rows
+   size to their content and give every chart card a usable height
+   instead. The same flex:none applies up to 1399.98px: in the two-row
+   top-panel band the viewport leaves less room than the cards need, and
+   flex-sized rows would clip the captions and overlap the next row. */
+@media (max-width: 1399.98px) {
+  .lemur-chart-row {
+    flex: none !important;
+    min-height: unset !important;
+  }
+
+  .lemur-chart-row .bslib-card {
+    min-height: 340px;
+  }
+}
+
+/* Two-row top panel band (992-1399px): the shared viewport leaves the
+   shortest charts here, and fig4's two-line rotated y title needs ~170px
+   of plot height. */
+@media (min-width: 992px) and (max-width: 1399.98px) {
+  .lemur-chart-row .bslib-card {
+    min-height: 400px;
+  }
 }

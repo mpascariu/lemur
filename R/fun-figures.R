@@ -1,6 +1,17 @@
 
 # Figure 1.
 
+# Plotly axis titles do not break lines on "\n" (only on "<br>"), so caption
+# strings built with newlines render as one long line and get clipped at the
+# card edges on narrow screens. Convert before handing them to layout().
+# Empty input returns "": plotly R auto-titles axes from the data column
+# names ("value", "Deaths", "Age Interval", ...) when the title is NULL, so
+# suppressing a label requires an explicit empty string, not NULL.
+axis_title_html <- function(x) {
+  if (is.null(x)) x <- ""
+  gsub("\n", "<br>", sub("\n+$", "", x), fixed = TRUE)
+}
+
 #' Plot an interactive map
 #' @param location Geographical location.
 #' @param zoom The zoom level.
@@ -330,7 +341,9 @@ plotly_change <- function(L1, L2,
     plotly::layout(
       shapes = shapes,
       xaxis = list(
-        title     = xlab,
+      margin      = list(l = 10, r = 10, t = 10, b = 4),
+        automargin = TRUE,
+        title     = axis_title_html(xlab),
         titlefont = list(size = 13),
         tickfont  = list(size = 11),
         range     = c(-dmax, dmax) * 1.05,
@@ -338,8 +351,9 @@ plotly_change <- function(L1, L2,
         ticktext  = xtic
       ),
       yaxis = list(
-        title     = ylab,
-        titlefont = list(size = 14),
+        automargin = TRUE,
+        title     = axis_title_html(ylab),
+        titlefont = list(size = 12),
         tickfont  = list(size = 11),
         range     = c(min(d$x) - 1, max(d$x) + 2)
       ),
@@ -463,7 +477,9 @@ plotly_cod <- function(cod,
         margin      = list(t = 50),
         barmode = "stack",
         xaxis = list(
-          title     = xlab,
+        margin      = list(l = 10, r = 10, t = 10, b = 4),
+          automargin = TRUE,
+          title     = axis_title_html(xlab),
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
           tickvals  = xbr,
@@ -475,6 +491,7 @@ plotly_cod <- function(cod,
           ticktext = xtic
         ),
         yaxis = list(
+          automargin = TRUE,
           title = "",
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
@@ -488,13 +505,16 @@ plotly_cod <- function(cod,
       plotly::layout(
         barmode = "stack",
         xaxis = list(
-          title     = xlab,
+        margin      = list(l = 10, r = 10, t = 10, b = 4),
+          automargin = TRUE,
+          title     = axis_title_html(xlab),
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
           tickvals  = xbr,
           ticktext  = xtic
         ),
         yaxis = list(
+          automargin = TRUE,
           title = "",
           titlefont = list(size = 14),
           tickfont  = list(size = 11),
@@ -673,7 +693,9 @@ plotly_decompose <- function(object,
       barmode = "relative",
       showlegend = FALSE,
       xaxis = list(
-        title          = xlab,
+      margin      = list(l = 10, r = 10, t = 10, b = 4),
+        automargin = TRUE,
+        title          = axis_title_html(xlab),
         titlefont      = list(size = 14),
         tickfont       = list(size = 11),
         tickvals       = vbr,
@@ -683,6 +705,7 @@ plotly_decompose <- function(object,
         zerolinecolor  = "black"
       ),
       yaxis = list(
+        automargin = TRUE,
         title           = "",
         titlefont       = list(size = 14),
         tickfont        = list(size = 11),
@@ -747,14 +770,19 @@ plotly_decompose <- function(object,
       showlegend = FALSE,
       bargap = 0.1,
       xaxis = list(
-        title     = xlab,
+      margin      = list(l = 10, r = 10, t = 10, b = 4),
+        automargin = TRUE,
+        title     = axis_title_html(xlab),
         titlefont = list(size = 14),
-        tickfont  = list(size = 11),
-        tickangle = 45
+        tickfont  = list(size = 11)
       ),
       yaxis = list(
-        title          = ylab,
-        titlefont      = list(size = 14),
+        automargin = TRUE,
+        title          = axis_title_html(ylab),
+        # 12px, same as the fig2 y title: the two y-axis labels must share
+        # font and size. With the auto x titles gone the plot area is tall
+        # enough for the two-line rotated label again.
+        titlefont      = list(size = 12),
         tickfont       = list(size = 11),
         range          = c(neg_lo, pos_hi),
         tickvals       = vbr,

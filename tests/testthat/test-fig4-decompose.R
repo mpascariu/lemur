@@ -150,7 +150,8 @@ test_that("figure 4 (by='both') stacks in palette order, figure 3 style", {
   expect_identical(g$x$layout$barmode, "relative")
   expect_equal(g$x$layout$bargap, 0.1)
   expect_identical(g$x$layout$xaxis$type, "category")
-  expect_equal(g$x$layout$xaxis$tickangle, 45)
+  # tick angle is left to plotly's auto-rotation so labels fit narrow cards
+  expect_null(g$x$layout$xaxis$tickangle)
   expect_true(isTRUE(g$x$layout$yaxis$zeroline))
   expect_identical(g$x$layout$yaxis$ticktext,
                    unname(label_number_si(accuracy = 0.01)(g$x$layout$yaxis$tickvals)))
@@ -243,7 +244,8 @@ test_that("figure 4 (by='age') shows one grey bar trace per age group", {
   # category x axis carrying the grouped age labels, not a linear 1:25 axis
   expect_identical(as.character(bars[[1]]$x), age_labels)
   expect_identical(g$x$layout$xaxis$type, "category")
-  expect_equal(g$x$layout$xaxis$tickangle, 45)
+  # tick angle is left to plotly's auto-rotation so labels fit narrow cards
+  expect_null(g$x$layout$xaxis$tickangle)
   expect_equal(g$x$layout$bargap, 0.1)
 
   # zero line via the yaxis zeroline (no scatter trace), SI tick labels
