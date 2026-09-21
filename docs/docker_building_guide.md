@@ -111,7 +111,7 @@ These are pulled, not built:
 | Image | Role | Note |
 |---|---|---|
 | `postgres:17` | data store | pinned on purpose -- `postgres:18+` changed the data-directory layout and refuses the compose volume |
-| `nginx:latest` | reverse proxy | pulls on `docker compose up` |
+| `nginx:1.28` | reverse proxy | pulls on `docker compose up` |
 | `openanalytics/shinyproxy:3.2.4` | app launcher | config comes from `deploy/shinyproxy/application.yml`, bind-mounted at runtime -- no custom build |
 
 ## 6. Build context

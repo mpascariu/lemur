@@ -3,6 +3,12 @@
 
 *.env
 
+# Cloudflare origin certificate material: never commit private keys.
+# The directory itself stays via .gitkeep; drop 443.conf, origin.pem and
+# origin.key in place on the server only.
+/deploy/nginx/certs/*
+!/deploy/nginx/certs/.gitkeep
+
 # History files
 .Rhistory
 .Rapp.history

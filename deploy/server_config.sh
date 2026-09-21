@@ -51,16 +51,17 @@ newgrp docker
 
 #---- shinyproxy ----#
 
-# modify docker config
-sudo systemctl edit docker
-# [Service]
-# ExecStart=
-# ExecStart=/usr/bin/dockerd -H unix:// -D -H tcp://127.0.0.1:2375
-
-sudo chmod a+rw /var/run/docker.sock
-
-sudo systemctl daemon-reload
-sudo systemctl restart docker
+# ShinyProxy needs access to /var/run/docker.sock to start app containers.
+# Access is granted by group, via group_add in docker-compose.yml using the
+# DOCKER_GID value from .env. Find the numeric group id with:
+#   stat -c %g /var/run/docker.sock
+#
+# Never make the socket world-writable (chmod a+rw): dockerd recreates it
+# with 0660 root:docker on every restart, the change evaporates, and every
+# new visitor session then fails with 500 "Container failed to start".
+# The old advice to run dockerd with -H tcp://127.0.0.1:2375 is also gone:
+# ShinyProxy talks to the unix socket only, there is no reason to expose
+# a TCP endpoint.
 
 
 #---- lemur app ----#
@@ -69,11 +70,11 @@ sudo systemctl restart docker
 
 mkdir ~/git
 cd ~/git
-git clone git@github.com:doug-leasure/lemur
+git clone git@github.com:mpascariu/lemur
 
 # deploy
 cd ~/git/lemur
-docker-compose up -d
+docker compose up -d
 
 
 

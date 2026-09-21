@@ -93,7 +93,7 @@ Server mode reads the same tables from PostgreSQL instead of the bundled
 | `lemur_shiny:latest` | **built locally** from the repo root (~35-40 min cold, incremental after) | R + Shiny app + the GBD datasets + the data loader |
 | `postgres:17` | pulled from Docker Hub | empty database initialized on first boot from `deploy/postgresql/init-db.sh` |
 | API (Flask) | **built locally** from `deploy/api/` (~40 s, no host prerequisites) | REST endpoints over the same tables |
-| `nginx:latest`, `openanalytics/shinyproxy:3.2.4` | pulled | reverse proxy / app launcher (production topology) |
+| `nginx:1.28`, `openanalytics/shinyproxy:3.2.4` | pulled | reverse proxy / app launcher (production topology) |
 
 Credentials: nothing is hard-coded anywhere. Copy `.env.example` to `.env`
 and fill it once -- every service reads the same file:
@@ -104,6 +104,11 @@ and fill it once -- every service reads the same file:
 | `LEMUR_DB_OWNER` / `LEMUR_DB_OWNER_PASSWORD` | postgres container + db-loader | owns the schema and tables; the loader connects as this to write `cod`/`sdg`/`lt` |
 | `LEMUR_DB_HOST` | app + API + loader | postgres hostname (`postgres` inside compose; a managed-DB endpoint in the cloud) |
 | `LEMUR_DB_NAME` / `LEMUR_DB_USER` / `LEMUR_DB_PASSWORD` / `LEMUR_DB_PORT` | app + API | the least-privilege connection the app's pool and the API use at runtime |
+| `DOCKER_GID` | shinyproxy | numeric gid of the host `docker` group (`stat -c %g /var/run/docker.sock`); grants the container access to the Docker socket without making it world-writable |
+
+> One non-credential variable, but it lives in the same file: `DOCKER_GID`
+> only matters for the ShinyProxy topology (`docker compose up -d` full
+> stack). Single-container runs (§1, §2.2) never touch the Docker socket.
 
 ### Upgrading an existing deployment
 
@@ -133,6 +138,7 @@ docker compose build api                      # the API has its own build contex
 
 # 3. update .env from .env.example: three roles, three DIFFERENT passwords
 #    (init-db.sh refuses to start if any two role names or passwords match)
+#    plus DOCKER_GID (numeric gid of the docker group on this server)
 
 # 4. wipe the data volume -- the roles are baked in at first boot, so a re-used
 #    volume keeps the old ones and the app cannot authenticate
@@ -211,7 +217,45 @@ the host itself, unreachable from other machines; off-host traffic goes
 through nginx. When running without shinyproxy, point it at the shiny
 container instead.
 
-### 2.4 Updating data or code
+### 2.4 Behind Cloudflare (life-expectancy.org)
+
+The production site sits behind Cloudflare. Three settings have to agree, or
+the site starts flapping between "loads", "stuck until refresh" and Cloudflare
+error pages (525 / 526 / 520).
+
+**Rocket Loader must be OFF.** Cloudflare Speed -> Optimization -> Rocket
+Loader. It rewrites every `<script>` tag and reorders Shiny's dependency
+loading (jquery -> shiny.js -> the widget bindings), so the dashboard paints
+but never connects to the server; a refresh sometimes recovers it. One
+checkbox, biggest win for the "stuck" reports.
+
+**TLS terminates at the origin, not nowhere.** The stack serves plain HTTP on
+port 80; Cloudflare SSL modes that attempt HTTPS to the origin (Full, Full
+strict) then fail with 525/526. To serve real TLS:
+
+1. Cloudflare SSL/TLS -> Origin Server: create an Origin Certificate.
+2. On the server, put three files in `deploy/nginx/certs/` (gitignored):
+   `origin.pem`, `origin.key`, and a `443.conf` snippet:
+   `listen 443 ssl;` plus `ssl_certificate` / `ssl_certificate_key` pointing
+   at the two files inside the container (`/etc/nginx/certs/...`).
+3. Open 443 in the cloud security group and `ufw allow https` must actually
+   be present (`ufw status`).
+4. `docker compose up -d nginx` (the cert mount is already in compose).
+5. Set the Cloudflare SSL mode to **Full (strict)**.
+
+Interim option: set the SSL mode to **Flexible** so Cloudflare never attempts
+TLS to the origin. It removes the 525/526s immediately, but Cloudflare-to-
+server traffic stays plaintext; prefer the origin certificate.
+
+**Check the DNS zone.** A stale A record pointing at a previous server makes
+Cloudflare pick between origins, which explains "sometimes fine, sometimes
+SSL error" with no pattern. One record, one origin.
+
+Also worth a look on the box: `ss -ltnp 'sport = :80 or sport = :443'` to
+make sure no legacy host-installed nginx is fighting the container for
+port 80.
+
+### 2.5 Updating data or code
 
 Rebuild after every `git pull`: the images are local (`pull_policy: never`) and
 `docker compose up` reuses whatever is already tagged, so an un-rebuilt image
@@ -229,7 +273,7 @@ Upgrading across a release that changes the database roles or `POSTGRES_USER`
 needs the full sequence in "Upgrading an existing deployment" above, not this
 one -- the volume must be wiped for the new roles to exist.
 
-### 2.5 Stopping the app when no longer needed
+### 2.6 Stopping the app when no longer needed
 
 The app answers on <http://localhost:3838/> until its container is stopped —
 it does not shut down on its own.
