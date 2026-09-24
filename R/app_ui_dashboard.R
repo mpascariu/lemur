@@ -8,12 +8,17 @@ ui_dashbord <- function() {
     sidebar = sidebar(
       side_panel(),
       width = "400px",
+      # Mobile gets bslib's stacked flow layout with the sidebar above the
+      # charts ("always-above"); styles.css extends that stack up through md
+      # and orders the blocks. Desktop stays exactly as before: open,
+      # collapsible, 400px on the left.
+      open = list(desktop = "open", mobile = "always-above")
     ),
     # Main content area: a vertical flex column that fills the page height,
     # so the chart rows in main_panel() stretch to fill the window (no unused
     # space at the bottom) and resize together with it.
     div(
-      class = "html-fill-item html-fill-container",
+      class = "lemur-dash-body html-fill-item html-fill-container",
       style = "display: flex; flex-direction: column;",
       # Loading overlay. position:fixed so it covers the viewport (and stays
       # out of the flex flow). The server hides it via the hideLoading custom
@@ -40,7 +45,8 @@ ui_dashbord <- function() {
           "Loading data\u2026"
         )
       ),
-      top_panel(),
+      # Wrapped so the small-screen stack can order it above the sidebar.
+      div(class = "lemur-top-bar", top_panel()),
       main_panel()
     )
   )
@@ -60,12 +66,11 @@ top_panel <- function() {
       # the button labels wrap or clip.
       xl = c(6, 6, 6, 6),
       lg = c(6, 6, 6, 6),
-      # Medium and small screens: stack vertically, but keep the two small
-      # controls (sex and data type) and the reset button on shared rows so
-      # the top panel does not push the charts below the fold on phones.
-      md = c(6, 12, 12, 6),
-      sm = c(6, 12, 6, 6),
-      xs = c(6, 12, 6, 6)
+      # Medium and small screens: one control per row. The charts do drop
+      # below the fold on phones; full-width plots beat 1px slivers.
+      md = c(12, 12, 12, 12),
+      sm = c(12, 12, 12, 12),
+      xs = c(12, 12, 12, 12)
     ),
     # Keep the control row at its natural (content) height instead of
     # stretching it to fill the page alongside the charts.
@@ -355,12 +360,13 @@ side_panel <- function() {
 
 #' @keywords internal
 main_panel <- function() {
-  # Two chart rows stacked in a fillable column. Each row takes half of the
-  # remaining height and its cards stretch to fill it, so the charts resize
-  # with the window. On short/small screens each row keeps a minimum height
-  # and the panel scrolls instead of crushing the charts.
+  # Two chart rows stacked in a fillable column. On lg+ each row takes half
+  # of the remaining height and its cards stretch to fill it, so the charts
+  # resize with the window. Below lg the rows size to their content and the
+  # chart outputs get fixed heights (see styles.css): stacked cards sharing
+  # one flex-sized row is what used to crush them into 1px slivers.
   div(
-    class = "html-fill-item html-fill-container",
+    class = "lemur-charts html-fill-item html-fill-container",
     style = "display: flex; flex-direction: column; overflow-y: auto;",
     div(
       class = "html-fill-item html-fill-container lemur-chart-row",

@@ -12,8 +12,8 @@ The Sustainable Development Goals (SDGs) were set in 2015 with many specific tar
 ---
 #### Updates and news
 
-**Monitor Version:** 2.1.2
-**Last Update:** 2026-09-21
+**Monitor Version:** 2.1.4
+**Last Update:** 2026-09-24
 
 
 The source code and the development repository can be found on GitHub [@mpascariu/lemur](https://github.com/mpascariu/lemur) under the [GNU GPLv3](https://github.com/mpascariu/lemur/blob/main/LICENSE) license.

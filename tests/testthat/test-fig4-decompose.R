@@ -291,3 +291,23 @@ test_that("figure 4 colours stay stable when a cause level is absent", {
   expect_identical(unique(cols2[names2 == levs[18]]),
                    unname(epidemiology_palette()[levs[18]]))
 })
+
+test_that("figure 4 x-axis always shows the full age grid", {
+  # A scenario where only the youngest ages move (SDG neonatal-style): the
+  # bar traces carry data for the first three age groups only, but the axis
+  # must still show every age label - the empty columns are the contrast.
+  dec_young <- dec
+  dec_young$decomposition[as.integer(dec_young$x.int) > 3] <- 0
+
+  for (variant in c("both", "age")) {
+    g <- plotly::plotly_build(
+      suppressWarnings(plotly_decompose(dec_young, by = variant))
+    )
+    expect_identical(g$x$layout$xaxis$type, "category")
+    expect_identical(g$x$layout$xaxis$categoryorder, "array")
+    expect_identical(as.character(g$x$layout$xaxis$categoryarray), age_labels)
+    # plotly.js spans a category axis only across the categories present in
+    # the data; the pinned range is what keeps the full grid on screen
+    expect_equal(g$x$layout$xaxis$range, c(-0.5, length(age_labels) - 0.5))
+  }
+})

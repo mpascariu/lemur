@@ -118,15 +118,17 @@ body  {
 }
 
 /* ------------------------------------------------------------------ */
-/* Mobile / tablet dashboard layout                                    */
-/* Desktop (>= 992px) is untouched; everything below fixes the         */
-/* crushed charts seen on iPhone and iPad screens.                     */
+/* Responsive dashboard layout                                         */
+/* lg and up: the 400px input sidebar on the left, chart pairs filling  */
+/* the page height (the historical desktop look). Below lg: one         */
+/* vertical stack - mode controls, inputs, then full-width charts       */
+/* below the fold on phones.                                            */
 /* ------------------------------------------------------------------ */
 
-/* Tablets (768-1199px): the fixed 400px input sidebar eats most of the
-   viewport, leaving ~370px for the charts. Narrow it on these widths;
+/* lg/xl (992-1199px): the fixed 400px input sidebar eats most of the
+   viewport, leaving ~370px for the chart pairs. Narrow it here; wider
    desktop keeps the full 400px. */
-@media (min-width: 768px) and (max-width: 1199.98px) {
+@media (min-width: 992px) and (max-width: 1199.98px) {
   .bslib-sidebar-layout {
     --_sidebar-width: 300px !important;
   }
@@ -156,5 +158,80 @@ body  {
 @media (min-width: 992px) and (max-width: 1399.98px) {
   .lemur-chart-row .bslib-card {
     min-height: 400px;
+  }
+}
+
+/* md and smaller (< 992px): one vertical stack. bslib wants a two-column
+   grid here (with a sidebar overlay on phones); we want a plain flow of
+   mode controls, then inputs, then charts. `display: contents` flattens
+   the two main-area wrappers so the sidebar can sit between them (see the
+   order rules). The [data-collapsible-mobile] and :not(.sidebar-right)
+   bits only serve to out-rank bslib's own !important rules below sm. */
+@media (max-width: 991.98px) {
+  .bslib-sidebar-layout[data-collapsible-mobile]:not(.sidebar-right) {
+    display: flex !important;
+    flex-direction: column;
+    overflow-y: auto;
+    /* No toggle button in this layout, so use the regular padding. */
+    --_padding-icon: var(--_padding);
+  }
+
+  .bslib-sidebar-layout[data-collapsible-mobile]:not(.sidebar-right) > .main,
+  .lemur-dash-body {
+    display: contents !important;
+  }
+
+  .lemur-top-bar {
+    order: 1;
+    /* No shrinking: the stack scrolls as a whole (see overflow above). */
+    flex: 0 0 auto;
+    padding: 0 var(--_padding) var(--_padding);
+  }
+
+  .bslib-sidebar-layout[data-collapsible-mobile]:not(.sidebar-right) > .sidebar {
+    order: 2;
+    /* Fill CSS hands this block min-height: 0, so when the stack is taller
+       than the viewport flex-shrink crushes it to a 1px ribbon. Let the
+       stack scroll instead (see overflow above). */
+    flex: 0 0 auto !important;
+    display: block !important;
+    border-right: none;
+    border-bottom: var(--_border);
+  }
+
+  .bslib-sidebar-layout[data-collapsible-mobile]:not(.sidebar-right)
+      > .sidebar[hidden] {
+    display: block !important;
+  }
+
+  .bslib-sidebar-layout[data-collapsible-mobile]:not(.sidebar-right)
+      > .collapse-toggle,
+  .bslib-sidebar-resize-handle {
+    display: none !important;
+  }
+
+  .lemur-charts {
+    order: 3;
+    flex: 0 0 auto !important;
+  }
+
+  /* Stacked rows size to their content, which leaves the height:100%
+     chart outputs with nothing to fill (hello, 1px plots). Pin them. */
+  #figure1,
+  #figure2,
+  #figure3,
+  #figure4 {
+    height: 360px !important;
+  }
+}
+
+/* Tablets in the stack (768-991px): full-width charts at phone height
+   look like wide ribbons; give them a taller box. */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  #figure1,
+  #figure2,
+  #figure3,
+  #figure4 {
+    height: 440px !important;
   }
 }

@@ -553,29 +553,33 @@ plotly_decompose <- function(object,
 
   object <- rename(object, `Age Interval` = x.int)
 
-  levels(object$`Age Interval`) <-
-    c("0",
-      "1",
-      "2-4",
-      "5-9",
-      "10-14",
-      "15-19",
-      "20-24",
-      "25-29",
-      "30-34",
-      "35-39",
-      "40-44",
-      "45-49",
-      "50-54",
-      "55-59",
-      "60-64",
-      "65-69",
-      "70-74",
-      "75-79",
-      "80-84",
-      "85-89",
-      "90-94",
-      "+95")
+  # Canonical age grid: all 22 groups, always in this order. The x axis shows
+  # this full grid no matter which ages a scenario actually moves - the empty
+  # columns are half the story ("nothing changed here").
+  age_levels <- c("0",
+                  "1",
+                  "2-4",
+                  "5-9",
+                  "10-14",
+                  "15-19",
+                  "20-24",
+                  "25-29",
+                  "30-34",
+                  "35-39",
+                  "40-44",
+                  "45-49",
+                  "50-54",
+                  "55-59",
+                  "60-64",
+                  "65-69",
+                  "70-74",
+                  "75-79",
+                  "80-84",
+                  "85-89",
+                  "90-94",
+                  "+95")
+
+  levels(object$`Age Interval`) <- age_levels
 
   # input data (mirror of plot_decompose)
   if (by == "age") {
@@ -774,7 +778,17 @@ plotly_decompose <- function(object,
         automargin = TRUE,
         title     = axis_title_html(xlab),
         titlefont = list(size = 14),
-        tickfont  = list(size = 11)
+        tickfont  = list(size = 11),
+        # Pin the category axis to the full age grid. The bar traces only
+        # carry the ages with non-zero contributions (nothing to stack at
+        # the others), and plotly.js spans a category axis only from the
+        # first to the last category present in the data: a neonatal-only
+        # scenario used to render 3 age groups. The fixed range keeps every
+        # age label on the axis, empty columns included.
+        type          = "category",
+        categoryorder = "array",
+        categoryarray = age_levels,
+        range         = c(-0.5, length(age_levels) - 0.5)
       ),
       yaxis = list(
         automargin = TRUE,

@@ -1,3 +1,7 @@
+version 2.1.4 - "small screens 2"
+- Small and medium screens stack the dashboard in one column with full-width
+  charts, and the decomposition figure always shows every age.
+
 version 2.1.2 - "small screens"
 - The dashboard now fits phones and tablets: charts keep a readable size and
   captions adapt to the screen, so nothing is cut off anymore.
