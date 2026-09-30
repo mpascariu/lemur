@@ -101,6 +101,29 @@ tab_md <- function(title, file) {
 
 
 
+#' Versioned URL for a file under \code{app/www}
+#'
+#' The files under \code{app/www} are fetched by the browser (unlike the
+#' \code{.md} documents, which are inlined at render time) and the server sends
+#' them with \code{Cache-Control: public, max-age=2592000}. The URL carries no
+#' version, so browsers and the Cloudflare edge keep handing out the
+#' pre-deploy copy for up to a month: after the v2.1.2 redeploy the live site
+#' was still serving the old stylesheet, which left the figure captions
+#' unstyled (left-aligned, the detail line running on instead of wrapping).
+#' Appending the installed file's size and mtime gives every rebuild a fresh
+#' URL, while leaving the file itself cacheable.
+#'
+#' @param file File name inside \code{app/www}.
+#' @return Character URL relative to the Shiny resource path.
+#' @keywords internal
+www_asset <- function(file) {
+  path  <- system.file("app", "www", file, package = "lemur")
+  info  <- file.info(path)
+  stamp <- if (is.na(info$size)) "" else
+    paste0("?v=", info$size, "-", as.integer(info$mtime))
+  paste0("www/", file, stamp)
+}
+
 #' Add external Resources to the Application
 #'
 #' This function is internally used to add external
@@ -122,9 +145,9 @@ golem_add_external_resources <- function() {
     tags$link(
       rel = "stylesheet",
       type = "text/css",
-      href = "www/styles.css"
+      href = www_asset("styles.css")
     ),
-    tags$script(src = "www/addNavLink.js"),
+    tags$script(src = www_asset("addNavLink.js")),
     # Hide the #lemur-loading overlay when the server signals that the data is
     # ready. Shiny doesn't emit this message; app_server.R does via
     # session$sendCustomMessage("hideLoading", ...).

@@ -21,6 +21,45 @@ axis_title_html <- function(x) {
 #' @example inst/examples/plot_map.R
 
 
+# Leaflet 1.3.1 (the version bundled with the `leaflet` R package) closes a
+# feature's tooltip only from that feature's own `mouseout` event. When the
+# browser drops it -- fast pointer movement across 200+ polygons, a heavily
+# loaded/older machine, or a map re-render landing mid-hover -- the tooltip is
+# never closed: it stays on the map as a stray box, and that feature cannot
+# reopen it because leaflet still considers it open. If the event does arrive,
+# leaflet 1.3.1 still fades the box out and removes the node 200 ms later
+# (`DivOverlay.onRemove`), so invisible nodes pile up on slow machines.
+#
+# Two counter-measures, both in plot_map():
+#   * `fadeAnimation = FALSE` makes close synchronous (no fade timer, no
+#     opacity churn).
+#   * this handler is the missing safety net: at most one tooltip may stay
+#     open, enforced on every pointer move, whenever a tooltip opens, and when
+#     the pointer leaves the map. It closes through the public
+#     Map.closeTooltip() API, so the tooltips remain bound to their features
+#     and reopen normally.
+MAP_TOOLTIP_GUARD <- "
+function(el, x) {
+  var map = this, open = [], newest = null;
+
+  function closeStale() {
+    for (var i = open.length - 1; i >= 0; i--) {
+      var t = open[i];
+      if (t !== newest && t.isOpen()) { map.closeTooltip(t); }
+    }
+  }
+  function closeAll() { newest = null; closeStale(); }
+
+  map.on('tooltipopen', function (e) {
+    newest = e.tooltip;
+    if (open.indexOf(newest) === -1) { open.push(newest); }
+    closeStale();
+  });
+  map.on('mousemove', closeStale);
+  el.addEventListener('mouseleave', closeAll);
+}
+"
+
 #' @export
 plot_map <- function(location,
                      zoom = 5,
@@ -62,16 +101,11 @@ plot_map <- function(location,
 
   dt <- data[data$name == location, ]
 
-  leaflet() %>%
+  leaflet(options = leafletOptions(fadeAnimation = FALSE)) %>%
     addTiles() %>%
     addMapPane(name = "choropleth", zIndex = 410) %>%
     addMapPane(name = "polygons", zIndex = 420) %>%
     addMapPane(name = "borders", zIndex = 430) %>%
-    addMapPane(name = "place_labels", zIndex = 450) %>%
-    addProviderTiles(
-      "CartoDB.PositronOnlyLabels",
-      group = "Place Labels",
-      options = leafletOptions(pane = "place_labels")) %>%
     addScaleBar(position = "bottomleft") %>%
     leaflet.extras::addFullscreenControl(position = "topleft") %>%
     leaflet.extras::addResetMapButton() %>%
@@ -95,7 +129,8 @@ plot_map <- function(location,
     setView(
       lng  = dt$lon,
       lat  = dt$lat,
-      zoom = zoom)
+      zoom = zoom) %>%
+    htmlwidgets::onRender(MAP_TOOLTIP_GUARD)
 
 }
 

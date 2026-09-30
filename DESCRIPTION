@@ -1,6 +1,6 @@
 Package: lemur
 Title: Life expectancy monitor upscaled in R
-Version: 2.1.4
+Version: 2.1.5
 Authors@R: c(
   person("Marius D.", "Pascariu", role = c("aut", "cre", "cph"), email = "rpascariu@outlook.com", comment = c(ORCID = "0000-0002-2568-6489")),
   person("Jose Manuel", "Aburto", role = "aut", comment = c(ORCID = "0000-0002-2926-6879")),
@@ -21,6 +21,7 @@ Imports:
   DT (>= 0.33),
   leaflet (>= 2.2.2),
   leaflet.extras (>= 2.0.1),
+  htmlwidgets (>= 1.6.4),
   sf (>= 1.0-17),
   dplyr (>= 1.2.1),
   shiny (>= 1.9.1),

@@ -141,4 +141,14 @@ test_that("plot_map returns a leaflet widget", {
   skip_on_cran()
   p <- suppressWarnings(plot_map(location = "Romania"))
   expect_s3_class(p, "leaflet")
+
+  # The map relies on two things to avoid stray hover tooltips (leaflet 1.3.1
+  # closes them only from the feature's own mouseout, so a dropped event leaves
+  # the box on the map and blocks that feature from reopening it):
+  #   * synchronous close, i.e. no fade timer holding the node in the DOM;
+  #   * the onRender guard that keeps at most one tooltip open.
+  expect_false(p$x$options$fadeAnimation)
+  hook <- paste(vapply(p$jsHooks$render, function(h) paste(h$code, collapse = "\n"), ""),
+                collapse = "\n")
+  expect_match(hook, "closeStale", fixed = TRUE)
 })

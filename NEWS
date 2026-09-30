@@ -1,3 +1,7 @@
+version 2.1.5 - "stray cat"
+- The map no longer leaves stray information boxes behind after quick mouse
+  movements, and figure labels display correctly on the published site again.
+
 version 2.1.4 - "small screens 2"
 - Small and medium screens stack the dashboard in one column with full-width
   charts, and the decomposition figure always shows every age.

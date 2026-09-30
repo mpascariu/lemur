@@ -10,6 +10,7 @@ RUN Rscript -e 'remotes::install_version("DBI",upgrade="never", version = "1.2.3
 RUN Rscript -e 'remotes::install_version("shiny",upgrade="never", version = "1.9.1")'
 RUN Rscript -e 'remotes::install_version("data.table",upgrade="never", version = "1.18.6.1")'
 RUN Rscript -e 'remotes::install_version("leaflet",upgrade="never", version = "2.2.2")'
+RUN Rscript -e 'remotes::install_version("htmlwidgets",upgrade="never", version = "1.6.4")'
 RUN Rscript -e 'remotes::install_version("testthat",upgrade="never", version = "3.3.2")'
 RUN Rscript -e 'remotes::install_version("plogr",upgrade="never", version = "0.2.0")'
 RUN Rscript -e 'remotes::install_version("RPostgres",upgrade="never", version = "1.4.10")'
