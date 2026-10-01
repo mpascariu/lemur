@@ -1,3 +1,7 @@
+version 2.1.6 - "double take"
+- The list of causes in the side panel returns to the order it had before
+  version 2.1.5, and figures 3 and 4 now follow that same order.
+
 version 2.1.5 - "stray cat"
 - The map no longer leaves stray information boxes behind after quick mouse
   movements, and figure labels display correctly on the published site again.

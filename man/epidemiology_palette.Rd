@@ -13,4 +13,13 @@ respiratory blues, infectious blacks/grays, etc.). The named palette is
 matched by name in \pkg{plotly} \code{color}, ensuring that the same COD
 always receives the same colour regardless of factor-level reordering.
 }
+\details{
+The order encodes the app's cause order, it is not decoration: figures 3
+and 4 render causes in palette order, so the vector runs down
+\code{data_app_input$cause_name} with the causes that only the SDG list
+carries slotted next to their family. Restricting the palette to either
+list therefore reproduces that list's order exactly -- asserted by the
+tests, so adding a cause to the data without giving it a slot here fails
+the suite instead of silently reordering the figures.
+}
 \keyword{internal}

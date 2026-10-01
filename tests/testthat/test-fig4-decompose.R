@@ -15,11 +15,12 @@
 #      segments up from zero and negative segments
 #      down from zero, with the FIRST trace added
 #      adjacent to zero. Cause order follows
-#      epidemiology_palette() -- the same colour order
-#      as figure 3 -- NOT the COD factor levels: the
+#      epidemiology_palette() -- the same order as
+#      figure 3, which is itself the app's cause
+#      order -- NOT the COD factor levels: the
 #      positive bucket adds traces in REVERSE palette
 #      order (the last palette cause sits adjacent to
-#      zero, the first -- Chronic Respiratory diseases -- at
+#      zero, the first -- COVID-19 -- at
 #      the top of the positive stack); the negative
 #      bucket adds traces in FORWARD palette order so
 #      the cause adjacent to zero is also the first
@@ -55,11 +56,11 @@ age_labels <- c("0", "1", "2-4", "5-9", "10-14", "15-19", "20-24", "25-29",
                 "90-94", "+95")
 
 # Causes present in the positive / negative buckets, in the trace order used by
-# plotly_decompose(): PALETTE order -- the same colour order as figure 3 (NOT
+# plotly_decompose(): PALETTE order -- the same cause order as figure 3 (NOT
 # the COD factor levels). The positive bucket adds traces in REVERSE palette
 # order (the last palette cause sits adjacent to zero, the first palette cause
-# -- Chronic Respiratory diseases -- at the top of the positive stack); the
-# negative bucket adds traces in FORWARD palette order so the cause adjacent to
+# -- COVID-19 -- at the top of the positive stack); the negative bucket adds
+# traces in FORWARD palette order so the cause adjacent to
 # zero is
 # also the first palette cause. Rounding to 4 decimals mirrors the round() the
 # figure applies before splitting by sign, so causes whose rounded contribution
@@ -92,16 +93,16 @@ test_that("figure 4 (by='both') stacks in palette order, figure 3 style", {
   expect_identical(nms, c(pos_causes, neg_causes))
 
   # figure-3 geometry: reading either stack top-down follows
-  # epidemiology_palette() -- Chronic Respiratory diseases (the first palette
-  # cause present) is the top-most segment of the positive stack AND sits
-  # adjacent to zero in the negative stack, and the bottom of the negative
-  # stack is Maternal and Neonatal (the last palette cause present with a
-  # negative contribution). (Relative stacking puts the first-added trace
-  # adjacent to zero, so the positive bucket is added in reverse palette order
-  # and the negative bucket in forward palette order.)
-  expect_identical(tail(pos_causes, 1), "Chronic Respiratory diseases")
-  expect_identical(neg_causes[1], "Chronic Respiratory diseases")
-  expect_identical(tail(nms, 1), "Maternal and Neonatal")
+  # epidemiology_palette() -- COVID-19 (the first palette cause present) is the
+  # top-most segment of the positive stack AND sits adjacent to zero in the
+  # negative stack, and the bottom of the negative stack is Self-Harm and
+  # Violence (the last palette cause present with a negative contribution).
+  # (Relative stacking puts the first-added trace adjacent to zero, so the
+  # positive bucket is added in reverse palette order and the negative bucket
+  # in forward palette order.)
+  expect_identical(tail(pos_causes, 1), "COVID-19")
+  expect_identical(neg_causes[1], "COVID-19")
+  expect_identical(tail(nms, 1), "Self-Harm and Violence")
 
   # every trace is a vertical bar with its raw signed value and base = NULL:
   # the stack geometry is assembled by plotly at render time

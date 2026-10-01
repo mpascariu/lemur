@@ -15,26 +15,6 @@ suppressPackageStartupMessages({
   library(readxl)
 })
 
-# The cause dropdown / checkbox order must follow epidemiology_palette() -- the
-# palette that already drives the figure 3/4 colours and the figure 4 stack
-# order -- so the UI lists causes in the same order the figures draw them.
-# The palette lives in R/fun-figures.R; source it rather than duplicating the
-# 36-name list here (only the function definitions run, nothing is drawn).
-source("R/fun-figures.R")
-pal_names <- names(epidemiology_palette())
-
-# Restrict the palette order to the causes actually kept; a cause the palette
-# does not know about keeps its GBD rank order at the end rather than being
-# dropped silently.
-order_by_palette <- function(x) {
-  missing <- setdiff(x, pal_names)
-  if (length(missing)) {
-    warning("cause(s) missing from epidemiology_palette(): ",
-            paste(missing, collapse = ", "))
-  }
-  c(intersect(pal_names, x), missing)
-}
-
 hier     <- read_hierarchy()
 loc_map  <- build_location_map(hier$loc)
 region_map <- hier$loc   # carries the `type` column
@@ -56,13 +36,11 @@ countries <- region_map %>%
 
 cod_selection <- hier$cod %>%
   filter(cod_selection != "no", cod_selection != "COVID-19 (2)") %>%
-  arrange(cod_order) %>% pull(cod_selection) %>% unique() %>%
-  order_by_palette()
+  arrange(cod_order) %>% pull(cod_selection) %>% unique()
 
 sdg_selection <- hier$cod %>%
   filter(sdg_selection != "no") %>%
-  arrange(sdg_order) %>% pull(sdg_selection) %>% unique() %>%
-  order_by_palette()
+  arrange(sdg_order) %>% pull(sdg_selection) %>% unique()
 
 data_app_input <- list(
   regions    = super_regions,

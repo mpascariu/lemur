@@ -12,15 +12,6 @@ axis_title_html <- function(x) {
   gsub("\n", "<br>", sub("\n+$", "", x), fixed = TRUE)
 }
 
-#' Plot an interactive map
-#' @param location Geographical location.
-#' @param zoom The zoom level.
-#' @param data An \code{sf} object with the map polygons.
-#' Default: \code{lemur::data_sf}.
-#' @return A leaflet widget.
-#' @example inst/examples/plot_map.R
-
-
 # Leaflet 1.3.1 (the version bundled with the `leaflet` R package) closes a
 # feature's tooltip only from that feature's own `mouseout` event. When the
 # browser drops it -- fast pointer movement across 200+ polygons, a heavily
@@ -59,6 +50,15 @@ function(el, x) {
   el.addEventListener('mouseleave', closeAll);
 }
 "
+
+#' Plot an interactive map
+#' @param location Geographical location.
+#' @param zoom The zoom level.
+#' @param data An \code{sf} object with the map polygons.
+#' Default: \code{lemur::data_sf}.
+#' @return A leaflet widget.
+#' @example inst/examples/plot_map.R
+
 
 #' @export
 plot_map <- function(location,
@@ -458,8 +458,10 @@ plotly_cod <- function(cod,
     if (is.null(xlab)) xlab <- "Number of Deaths\n"
   }
 
-  # y axis order follows epidemiology_palette() so COD categories appear
-  # in their semantic-group order (cardiovascular, cancers, respiratory, ...).
+  # y axis order follows epidemiology_palette(), which carries the app's cause
+  # order (it runs down data_app_input$cause_name with the SDG-only causes
+  # slotted into their family), so figure 3 reads in the same order as the
+  # cause list in the sidebar.
   # Filter to names actually present in the data (palette may include
   # fine-grained SDG causes not in the current COD view).
   pal_order <- names(epidemiology_palette())
@@ -656,13 +658,10 @@ plotly_decompose <- function(object,
   # Figure 4 is built one bar trace per cause with barmode = "relative",
   # which stacks positive segments up (or right) from zero and negative
   # segments down (or left) from zero. Cause order follows
-  # epidemiology_palette() -- the same colour order as figure 3 -- NOT the COD
-  # factor levels, so reading either stack away from zero follows the palette:
-  # the cold respiratory group (Chronic Respiratory diseases first) on top, the
-  # warm maternal/neonatal group at the bottom. The positive bucket adds traces
-  # in REVERSE palette order (the last palette cause sits adjacent to zero, the
-  # first -- Chronic Respiratory diseases -- ends up at the top of the positive
-  # stack); the negative
+  # epidemiology_palette() -- the app's cause order, the same order as figure 3
+  # -- NOT the COD factor levels: the positive bucket adds traces in REVERSE
+  # palette order (the last palette cause sits adjacent to zero, the first --
+  # COVID-19 -- ends up at the top of the positive stack); the negative
   # bucket adds traces in FORWARD palette order so the cause adjacent to zero
   # is also the first palette cause, and reading down from the zero line
   # follows figure 3.
@@ -857,77 +856,82 @@ plotly_decompose <- function(object,
 #' respiratory blues, infectious blacks/grays, etc.). The named palette is
 #' matched by name in \pkg{plotly} \code{color}, ensuring that the same COD
 #' always receives the same colour regardless of factor-level reordering.
+#'
+#' The order encodes the app's cause order, it is not decoration: figures 3
+#' and 4 render causes in palette order, so the vector runs down
+#' \code{data_app_input$cause_name} with the causes that only the SDG list
+#' carries slotted next to their family. Restricting the palette to either
+#' list therefore reproduces that list's order exactly -- asserted by the
+#' tests, so adding a cause to the data without giving it a slot here fails
+#' the suite instead of silently reordering the figures.
 #' @keywords internal
 epidemiology_palette <- function() {
   c(
-    # ==================== COLD COLORS (TOP) ====================
-    
-    # --- GROUP 1: RESPIRATORY DISEASES (The Crisp Cyan/Ice Anchor) ---
-    # Association: Clean oxygen, crisp air, clinical lung ventilation.
-    "Chronic Respiratory diseases"                = "#00FFFF", # Blinding Cyan
+    # --- COVID-19 (the 2021 round split it out of the respiratory block) ----
     "COVID-19"                                    = "#00BFFF", # Deep Electric Blue
-    "Respiratory Infections (excl. COVID)"        = "#005F9E", # Cobalt Blue
-    "Respiratory Infections (excl. Tuberculosis)" = "#002F6C", # Deep Dark Navy (Fading into darks)
-    
-    # --- GROUP 2: STROKE & CANCERS (The Deep Brain/Oncology Blue-Purples) ---
-    # Association: Universally recognized oncology deep purples and brain perfusion violets.
-    "Stroke"                                      = "#651FFF", # Deep Electric Violet
-    "Neoplasms"                                   = "#311B92", # Midnight Royal Purple
-    "Lung Cancer"                                 = "#4A148C", # Dark Amethyst
-    "Colon and Rectum Cancer"                     = "#8E24AA", # Medium Magenta-Purple
-    "Other Neoplasms"                             = "#E1BEE7", # Soft Lavender (Fading out)
-    
-    # --- GROUP 3: COMMUNICABLE / INFECTIOUS (The Cold Pitch-Black Core) ---
-    # Association: Biological threats passing through a cold, stark dark-to-light slate scale.
-    "HIV/ AIDS / STD"                             = "#111111", # Absolute Pitch Black
-    "Infections (excl. Respiratory)"              = "#333333", # Dark Charcoal
+
+    # --- COMMUNICABLE / INFECTIOUS -----------------------------------------
+    # Cold, stark dark-to-light slate scale: biological threats.
     "Enteric Infections"                          = "#555555", # Medium Slate Gray
-    "Malaria"                                     = "#777777", # Cool Steel Gray
-    "Tuberculosis"                                = "#999999", # Muted Silver
     "Neglected Tropical Diseases (excl. Malaria)" = "#CCCCCC", # Pale Gray (Fading out)
+    "Malaria"                                     = "#777777", # Cool Steel Gray
+    "Infections (excl. Respiratory)"              = "#333333", # Dark Charcoal
     "Other Communicable"                          = "#EEEEEE", # Ghost White (Fading out)
-    
-    # ==================== MIDPOINT NEUTRALS ====================
-    
-    # --- GROUP 4: NEUROS & CATCH-ALLS (The Cool Slate Neutral Buffer) ---
-    # Association: Cool concrete tones to separate heavy infectious darks from burning warm tones.
-    "Other Non-Communicable"                      = "#B0BEC5", # Cool Concrete Gray
-    "Self-Harm and Violence"                      = "#795548", # Muted Soil Brown
-    "Self-harm"                                   = "#A1887F", # Light Earth Gray
-    "Interpersonal Violence"                      = "#D7CCC8", # Fading Warm Stone
-    
-    # ==================== WARM COLORS (BOTTOM) ====================
-    
-    # --- GROUP 5: CARDIOVASCULAR (The Vivid Lime-to-Forest Anchor) ---
-    # Association: Switched to bright green/lime to act as the primary bridge into warm colors.
+    "HIV/ AIDS / STD"                             = "#111111", # Absolute Pitch Black
+
+    # --- NEOPLASMS ---------------------------------------------------------
+    # Universally recognized oncology deep purples.
+    "Colon and Rectum Cancer"                     = "#8E24AA", # Medium Magenta-Purple
+    "Lung Cancer"                                 = "#4A148C", # Dark Amethyst
+    "Other Neoplasms"                             = "#E1BEE7", # Soft Lavender (Fading out)
+    "Neoplasms"                                   = "#311B92", # Midnight Royal Purple
+
+    # --- DIABETES & KIDNEY -------------------------------------------------
+    # Endocrine hot-pinks, highly distinct from the reds.
+    "Kidney disease (excl. Diabetes)"             = "#FF80BF", # Bubblegum Pink
+    "Diabetes mellitus"                           = "#FF409F", # Neon Rose
+    "Diabetes and Kidney Diseases"                = "#FF007F", # Blinding Hot Pink
+
+    # --- NEUROLOGICAL ------------------------------------------------------
+    # High-energy electrical impulses of the central nervous system.
+    "Neurological Disorders"                      = "#FFEA00", # Electric Neon Yellow
+
+    # --- CARDIOVASCULAR ----------------------------------------------------
+    # Blinding lime is the anchor; the violet Stroke keeps its brain colour.
     "Cardiovascular Diseases"                     = "#00FF00", # Blinding Lime Green
     "Ischemic Heart Disease"                      = "#00CC00", # Rich Vivid Green
+    "Stroke"                                      = "#651FFF", # Deep Electric Violet
     "Other Cardiovascular"                        = "#A9DFBF", # Soft Mint (Fading out)
-    
-    # --- GROUP 6: NEUROLOGICAL BUFFER (The Blinding Warning Yellow) ---
-    # Association: High-energy electrical impulses of the central nervous system.
-    "Neurological Disorders"                      = "#FFEA00", # Electric Neon Yellow
-    
-    # --- GROUP 7: INJURIES & EXTERNAL TRAUMA (The High-Visibility Safety Orange) ---
-    # Association: Emergency response, hazard warnings, and physical impact trauma.
-    "Injuries"                                    = "#FF5722", # High-Contrast Safety Orange
-    "Injuries (excl. Poisonings)"                 = "#E64A19", # Dark Trauma Rust
+
+    # --- RESPIRATORY -------------------------------------------------------
+    # Clean oxygen: navy infections fading into the blinding cyan anchor.
+    "Tuberculosis"                                = "#999999", # Muted Silver
+    "Respiratory Infections (excl. Tuberculosis)" = "#002F6C", # Deep Dark Navy
+    "Respiratory Infections (excl. COVID)"        = "#005F9E", # Cobalt Blue
+    "Chronic Respiratory diseases"                = "#00FFFF", # Blinding Cyan
+
+    # --- DIGESTIVE ---------------------------------------------------------
+    "Digestive Diseases"                          = "#FFB3D9", # Cotton Candy Pink
+
+    # --- MATERNAL & NEONATAL -----------------------------------------------
+    # Deep arterial red: vitality, uterine biology, newborn life.
+    "Maternal disorders"                          = "#FF1744", # Bright Torch Red
+    "Neonatal disorders"                          = "#FF8A80", # Soft Coral Pastel
+    "Maternal and Neonatal"                       = "#D50000", # Vivid Ruby Red
+
+    # --- CATCH-ALL ---------------------------------------------------------
+    "Other Non-Communicable"                      = "#B0BEC5", # Cool Concrete Gray
+
+    # --- INJURIES & EXTERNAL TRAUMA ----------------------------------------
+    # Emergency response, hazard warnings, physical impact trauma.
     "Transport Injuries"                          = "#FFA726", # Warning Amber
     "Poisonings"                                  = "#FFCC80", # Pale Toxic Apricot
-    "Exposure to forces of nature"                = "#FFF9C4", # Pale Desert Sand (Fading out)
-    
-    # --- GROUP 8: METABOLIC & ORGAN DISEASES (The Hot Neon Pink Anchor) ---
-    # Association: Endocrine systems, severe diabetes mellitus tracking. Highly distinct from reds.
-    "Diabetes and Kidney Diseases"                = "#FF007F", # Blinding Hot Pink
-    "Diabetes mellitus"                           = "#FF409F", # Neon Rose
-    "Kidney disease (excl. Diabetes)"             = "#FF80BF", # Bubblegum Pink
-    "Digestive Diseases"                          = "#FFB3D9", # Cotton Candy Pink (Fading out)
-    
-    # --- GROUP 9: MATERNAL & NEONATAL (The Burning Ruby Red Anchor) ---
-    # Association: Deep arterial red, vitality, uterine biology, and newborn life.
-    "Maternal and Neonatal"                       = "#D50000", # Vivid Ruby Red
-    "Maternal disorders"                          = "#FF1744", # Bright Torch Red
-    "Neonatal disorders"                          = "#FF8A80"  # Soft Coral Pastel (Fading out)
+    "Exposure to forces of nature"                = "#FFF9C4", # Pale Desert Sand
+    "Injuries (excl. Poisonings)"                 = "#E64A19", # Dark Trauma Rust
+    "Injuries"                                    = "#FF5722", # Safety Orange
+    "Interpersonal Violence"                      = "#D7CCC8", # Fading Warm Stone
+    "Self-harm"                                   = "#A1887F", # Light Earth Gray
+    "Self-Harm and Violence"                      = "#795548"  # Muted Soil Brown
   )
 }
 

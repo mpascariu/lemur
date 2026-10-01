@@ -42,6 +42,26 @@ test_that("epidemiology_palette returns a named colour palette", {
   expect_equal(length(unique(pal)), length(pal))
 })
 
+test_that("the palette order follows the app's cause lists", {
+  pal <- names(epidemiology_palette())
+
+  # Figures 3 and 4 render causes in palette order, so the palette order IS
+  # the display order: restricted to either cause list it must reproduce that
+  # list exactly. This keeps the order in the data (data_app_input) as the
+  # single source of truth -- changing a cause rank in the GBD hierarchy moves
+  # the figures, and a cause added to the data without a palette slot fails
+  # here instead of silently dropping out of the charts.
+  expect_identical(intersect(pal, levels(data_app_input$cause_name)),
+                   levels(data_app_input$cause_name))
+  expect_identical(intersect(pal, levels(data_app_input$cause_name_sdg)),
+                   levels(data_app_input$cause_name_sdg))
+
+  # every cause the app can plot has a colour; a missing one becomes an NA
+  # colour in the plotly traces
+  expect_true(all(c(levels(data_app_input$cause_name),
+                    levels(data_app_input$cause_name_sdg)) %in% pal))
+})
+
 test_that("check_null errors on NULL and passes otherwise", {
   expect_error(check_null(NULL, "map data"), "map data is NULL")
   expect_true(check_null(data.frame(x = 1), "data"))
