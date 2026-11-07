@@ -213,6 +213,14 @@ test_that("prepare_data handles all three comparison modes", {
   expect_false(isTRUE(all.equal(out50$cod_initial$deaths, out50$cod_final$deaths)))
   expect_gt(out50$lt_final$ex[1], out50$lt_initial$ex[1])
 
+  # -- comparison modes must apply the change once, not twice
+  outc50 <- prepare_data(D_cmp, L_cmp, "Romania", "Romania", "both", -50, mode = "cntr")
+  outs50 <- prepare_data(D_sex, L_sex, "Romania", "Romania", "both", -50, mode = "sex")
+  outf50 <- prepare_data(D_sex, L_sex, "Romania", "Romania", "female", -50, mode = "cod")
+
+  expect_equal(outc50$lt_final$ex, out50$lt_final$ex, tolerance = 1e-8)
+  expect_equal(outs50$lt_final$ex, outf50$lt_final$ex, tolerance = 1e-8)
+
   # -- country comparison: two regions, factor levels set
   outc <- prepare_data(D_cmp, L_cmp, "Romania", "Mexico", "both", 0, mode = "cntr")
   expect_equal(as.character(unique(outc$cod_initial$region)), "Romania")

@@ -84,11 +84,13 @@ prepare_data <- function(cod,
       X$c2 <- modify_cod_table(X$c1, cod_change)
       X$l2 <- modify_life_table(X$l1, X$c1, cod_change)
     } else {
-      # For country/sex comparison: modify both final tables
-      X$c1 <- modify_cod_table(X$c1, cod_change)
-      X$c2 <- modify_cod_table(X$c2, cod_change)
+      # For country/sex comparison: build the final life tables from the
+      # original COD tables, then modify the COD tables for display. Passing
+      # the modified tables to modify_life_table() applies the change twice.
       X$l1 <- modify_life_table(X$l1, X$c1, cod_change)
       X$l2 <- modify_life_table(X$l2, X$c2, cod_change)
+      X$c1 <- modify_cod_table(X$c1, cod_change)
+      X$c2 <- modify_cod_table(X$c2, cod_change)
     }
   } else {
     # If no changes, final tables equal initial tables

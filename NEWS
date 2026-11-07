@@ -1,3 +1,8 @@
+version 2.2.0 - "single pass"
+- Cause-of-death reductions in the sex-gap and between-country views are now
+  applied once, so the values shown there match the stated reduction.
+- The corrected values are used in the comparison tables and figures.
+
 version 2.1.6 - "double take"
 - The list of causes in the side panel returns to the order it had before
   version 2.1.5, and figures 3 and 4 now follow that same order.
