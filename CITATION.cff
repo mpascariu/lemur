@@ -28,6 +28,7 @@ keywords:
   - Shiny
   - R
 license: GPL-3.0-or-later
+doi: 10.5281/zenodo.24270033
 repository-code: "https://github.com/mpascariu/lemur"
 url: "https://life-expectancy.org/app"
 type: software

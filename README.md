@@ -7,6 +7,7 @@
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![version](https://img.shields.io/badge/version-2.2.1-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24270032.svg)](https://doi.org/10.5281/zenodo.24270032)
 [![issues](https://img.shields.io/github/issues-raw/mpascariu/lemur.svg)](https://github.com/mpascariu/lemur/issues)
 [![license](https://img.shields.io/badge/License-GNU%20GPLv3-blue.svg)](https://github.com/mpascariu/lemur/blob/master/LICENSE)
 
@@ -96,6 +97,18 @@ lemur::run_app()          # local data mode (bundled GBD data)
 Five analysis modes -- scenario analysis within a region, region
 comparisons, sex comparisons, and two SDG target modes -- plus a data tab,
 a methods tab and an interactive map, all rendered natively in plotly.
+
+## Citation
+
+If you use `lemur`, please cite the archived release:
+
+> Pascariu, M. D., Aburto, J. M., & Canudas-Romo, V. (2026). *lemur: Life
+> expectancy monitor upscaled in R* (Version 2.2.1) [Computer software].
+> Zenodo. <https://doi.org/10.5281/zenodo.24270033>
+
+That DOI refers to version 2.2.1; the concept DOI
+<https://doi.org/10.5281/zenodo.24270032> always resolves to the latest
+release. A machine-readable entry is provided in `CITATION.cff`.
 
 ## References
 
