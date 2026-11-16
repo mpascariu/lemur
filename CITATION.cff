@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "lemur: Life expectancy monitor upscaled in R"
+abstract: >-
+  lemur is an R package and Shiny application for scenario analysis of
+  mortality. Given the cause-of-death distribution of a population, it
+  answers what-if questions (what would life expectancy be if cardiovascular
+  mortality fell by 50%?), recomputes the life table, shows the gains and
+  losses at every age, and decomposes the change by age and cause of death.
+  It runs on the bundled Global Burden of Disease 2023 estimates from IHME.
+authors:
+  - family-names: Pascariu
+    given-names: Marius D.
+    orcid: "https://orcid.org/0000-0002-2568-6489"
+  - family-names: Aburto
+    given-names: Jose Manuel
+    orcid: "https://orcid.org/0000-0002-2926-6879"
+  - family-names: Canudas-Romo
+    given-names: Vladimir
+    orcid: "https://orcid.org/0000-0001-6532-0089"
+keywords:
+  - life expectancy
+  - mortality
+  - cause of death
+  - decomposition
+  - life tables
+  - Global Burden of Disease
+  - Shiny
+  - R
+license: GPL-3.0-or-later
+repository-code: "https://github.com/mpascariu/lemur"
+url: "https://life-expectancy.org/app"
+type: software
+version: 2.2.1
+date-released: 2026-11-16

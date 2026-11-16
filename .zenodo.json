@@ -1,0 +1,38 @@
+{
+  "title": "lemur: Life expectancy monitor upscaled in R",
+  "description": "<p>lemur is an R package and Shiny application for scenario analysis of mortality. Given the cause-of-death distribution of a population, it answers <em>what if?</em> questions such as: what would life expectancy be if cardiovascular mortality fell by 50%, or if infant mortality were eliminated? The package recomputes the life table, shows the gains and losses at every age, and decomposes the change by age and cause of death. It also compares cause-of-death profiles and life tables between regions, sexes and time periods.</p><p>Everything runs on the bundled Global Burden of Disease 2023 estimates from IHME: 216 regions, calendar years 1990-2023, three sex categories and 18 broad cause groups, arranged in abridged life tables of 22 age groups.</p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "GPL-3.0-or-later",
+  "creators": [
+    {
+      "name": "Pascariu, Marius D.",
+      "orcid": "0000-0002-2568-6489"
+    },
+    {
+      "name": "Aburto, Jose Manuel",
+      "orcid": "0000-0002-2926-6879"
+    },
+    {
+      "name": "Canudas-Romo, Vladimir",
+      "orcid": "0000-0001-6532-0089"
+    }
+  ],
+  "keywords": [
+    "life expectancy",
+    "mortality",
+    "cause of death",
+    "decomposition",
+    "life tables",
+    "Global Burden of Disease",
+    "Shiny",
+    "R"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/mpascariu/lemur",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
