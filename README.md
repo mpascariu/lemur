@@ -1,12 +1,12 @@
-# {lemur} - Life expectancy monitor upscaled in R
+# <picture><source media="(prefers-color-scheme: dark)" srcset="man/figures/hex-lemur-light.png"><img src="man/figures/hex-lemur-dark.png" align="right" width="175" height="202" alt="lemur hex logo"></picture> {lemur} - Life expectancy monitor upscaled in R
 
 ### R package and Shiny application
 
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
+[![version](https://img.shields.io/badge/version-2.2.1-blue.svg)](https://github.com/mpascariu/lemur/blob/main/DESCRIPTION)
 [![issues](https://img.shields.io/github/issues-raw/mpascariu/lemur.svg)](https://github.com/mpascariu/lemur/issues)
 [![license](https://img.shields.io/badge/License-GNU%20GPLv3-blue.svg)](https://github.com/mpascariu/lemur/blob/master/LICENSE)
 

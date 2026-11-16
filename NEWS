@@ -1,3 +1,7 @@
+version 2.2.1 - "hex appeal"
+- The project gets a hex sticker: a small dashboard with the lemur, a map,
+  the headline life expectancy and the years gained, plus a stable badge.
+
 version 2.2.0 - "single pass"
 - Cause-of-death reductions in the sex-gap and between-country views are now
   applied once, so the values shown there match the stated reduction.
